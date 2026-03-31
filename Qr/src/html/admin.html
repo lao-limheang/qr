@@ -3,276 +3,326 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Chafé — Admin</title>
+<title>Chafé Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#3c2a21;--sur:#523c2f;--sur2:#5f4536;--sur3:#6b4d3d;--bdr:#785745;--gold:#bf3c37;--gold2:#d14640;--txt:#faf6eb;--muted:#d0c1b5;--green:#48a863;--red:#bf3c37;--blue:#559bd6;--pending:#d99a36;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);}
-.serif{font-family:'Cormorant Garamond',serif;}
-.mono{font-family:'DM Mono',monospace;}
-::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--sur);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
-.nav-item{border-left:2px solid transparent;transition:all .15s;cursor:pointer;}
-.nav-item:hover{background:rgba(191,60,55,.07);color:var(--txt);}
-.nav-item.on{border-left-color:var(--gold);color:var(--gold);background:rgba(191,60,55,.15);}
-.field{background:var(--sur3);border:1px solid var(--bdr);color:var(--txt);font-family:'Outfit',sans-serif;transition:border .2s;}
-.field:focus{outline:none;border-color:var(--gold);}
-.field::placeholder{color:var(--muted);}
-.field option{background:var(--sur2);}
-.g-btn{background:var(--gold);color:#faf6eb;font-weight:700;cursor:pointer;border:none;transition:background .18s,transform .1s;font-family:'Outfit',sans-serif;}
-.g-btn:hover{background:var(--gold2);}
-.g-btn:active{transform:scale(.97);}
-.g-btn:disabled{opacity:0.7;cursor:not-allowed;}
-.r-btn{background:transparent;border:1px solid var(--red);color:var(--red);cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
-.r-btn:hover{background:var(--red);color:#faf6eb;}
-.b-btn{background:transparent;border:1px solid var(--blue);color:var(--blue);cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
-.b-btn:hover{background:var(--blue);color:#faf6eb;}
-.gr-btn{background:transparent;border:1px solid var(--green);color:var(--green);cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
-.gr-btn:hover{background:var(--green);color:#faf6eb;}
-.badge{font-size:9px;padding:2px 7px;border-radius:999px;font-weight:700;letter-spacing:.05em;}
-.badge-pending{background:rgba(217,154,54,.15);color:var(--pending);}
-.badge-done{background:rgba(72,168,99,.15);color:var(--green);}
-.badge-cancelled{background:rgba(191,60,55,.15);color:var(--red);}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.fade-up{animation:fadeUp .3s ease both;}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-.shimmer{background:linear-gradient(90deg,var(--sur) 25%,var(--sur2) 50%,var(--sur) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
-.stat-card{background:var(--sur2);border:1px solid var(--bdr);}
-.order-card{border-left:3px solid var(--gold);animation:fadeUp .3s ease;}
-.order-card.done{border-left-color:var(--green);opacity:.6;}
-.order-card.cancelled{border-left-color:var(--red);opacity:.5;}
-#editMenuModal,#editOrderModal{backdrop-filter:blur(8px);}
-#imgPreview{object-fit:cover;}
-.mob-tab{border-bottom:2px solid transparent;transition:all .2s;cursor:pointer;}
-.mob-tab.on{border-bottom-color:var(--gold);color:var(--gold);}
-.tg-btn{background:linear-gradient(135deg,#229ED9,#1a7db3);color:#faf6eb;font-weight:700;cursor:pointer;border:none;transition:transform .1s,opacity .2s;font-family:'Outfit',sans-serif;}
-.tg-btn:hover{opacity:.9;}
-.tg-btn:active{transform:scale(.97);}
+  body { font-family: 'Outfit', sans-serif; background-color: #3e2a24; color: #e6e0d8; margin: 0; min-height: 100vh; overflow-x: hidden; }
+  .serif { font-family: 'Cormorant Garamond', serif; }
+  .btn-primary { background: #d44e43; color: white; transition: background 0.2s; }
+  .btn-primary:hover { background: #b83f36; }
+  .btn-success { background: #5db85b; color: white; transition: background 0.2s; }
+  .btn-success:hover { background: #4cae4c; }
+  
+  input, select { background-color: #5c453b; border: 1px solid #5c453b; color: white; outline: none; border-radius: 6px; padding: 8px 12px; }
+  input:focus, select:focus { border-color: #d44e43; }
+  input::placeholder { color: #a3958f; }
 
-/* Stock toggle */
-.stock-toggle{position:relative;display:inline-flex;align-items:center;cursor:pointer;width:42px;height:22px;}
-.stock-toggle input{opacity:0;width:0;height:0;position:absolute;}
-.stock-slider{position:absolute;inset:0;border-radius:999px;transition:background .2s;background:var(--red);}
-.stock-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#faf6eb;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4);}
-.stock-toggle input:checked + .stock-slider{background:var(--green);}
-.stock-toggle input:checked + .stock-slider::before{transform:translateX(20px);}
+  /* Custom Scrollbar for inner elements */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #3a2a24; }
+  ::-webkit-scrollbar-thumb { background: #5c453b; border-radius: 4px; }
 </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="flex h-screen">
 
-<!-- LOGIN -->
-<div id="loginModal" class="fixed inset-0 z-[999] bg-[#3c2a21]/85 flex items-center justify-center" style="backdrop-filter:blur(12px)">
-  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-8 w-full max-w-sm shadow-2xl fade-up">
-    <p class="serif text-[var(--gold)] text-4xl text-center mb-1">Chafé</p>
-    <p class="text-center text-[var(--muted)] text-xs tracking-widest uppercase mb-7">Admin Dashboard</p>
-    <label class="text-xs text-[var(--muted)] block mb-1.5">Password</label>
-    <input id="passInput" type="password" placeholder="Enter password" class="field w-full rounded-xl px-4 py-3 mb-2 text-sm"/>
-    <p id="loginErr" class="text-[var(--red)] text-xs mb-3 hidden text-center">Incorrect password</p>
-    <button onclick="tryLogin()" class="g-btn w-full py-3 rounded-xl text-sm">Sign In</button>
-    <p class="text-center text-[10px] text-[var(--muted)] mt-4">Default: <span class="mono">admin123</span></p>
+<!-- SIDEBAR -->
+<div class="w-64 bg-[#3a2a24] border-r border-[#4a352a] flex flex-col shrink-0">
+  <div class="p-6 border-b border-[#4a352a]">
+    <h1 class="text-3xl font-serif text-[#d44e43] font-bold">Chafé</h1>
+    <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Admin Panel</p>
   </div>
+  <nav class="flex-1 p-4 space-y-2">
+    <button onclick="switchTab('stats')" id="tab-stats" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors bg-[#8a382f]/20 text-[#d44e43] font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Statistics
+    </button>
+    <button onclick="switchTab('orders')" id="tab-orders" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Live Orders <span id="pendingBadge" class="ml-auto bg-[#d44e43] text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
+    </button>
+    <button onclick="switchTab('history')" id="tab-history" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Order History
+    </button>
+    <button onclick="switchTab('menu')" id="tab-menu" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      Menu Manager
+    </button>
+  </nav>
 </div>
 
-<!-- EDIT MENU MODAL -->
-<div id="editMenuModal" class="fixed inset-0 z-[990] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
-  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl fade-up">
-    <h3 class="serif text-2xl text-[var(--gold)] mb-4">Edit Item</h3>
-    <input type="hidden" id="editMenuId"/>
-    <div class="space-y-3">
-      <div><label class="text-xs text-[var(--muted)] block mb-1">Name</label><input id="em-name" type="text" class="field w-full rounded-xl px-4 py-2.5 text-sm"/></div>
-      <div><label class="text-xs text-[var(--muted)] block mb-1">Price ($)</label><input id="em-price" type="number" step="0.01" class="field w-full rounded-xl px-4 py-2.5 text-sm"/></div>
-      <div><label class="text-xs text-[var(--muted)] block mb-1">Category</label>
-        <select id="em-cat" class="field w-full rounded-xl px-4 py-2.5 text-sm">
-          <option>milkTea</option><option>blackRice</option><option>coffee</option><option>cream</option>
-          <option>fruitTea</option><option>Matcha</option><option>nonCoffee</option><option>Soda</option><option>TaiwanTea</option>
-        </select>
+<!-- MAIN CONTENT -->
+<div class="flex-1 overflow-y-auto p-8 relative" id="main-area">
+
+  <!-- ================= TAB: STATISTICS ================= -->
+  <div id="view-stats" class="max-w-6xl mx-auto block">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-3xl serif">Statistics</h2>
+      <button onclick="sendStatsToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition shadow-sm text-sm">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Send to Telegram
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-4 gap-6 mb-8">
+      <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
+        <h3 class="text-sm text-gray-300 mb-2">All Orders</h3>
+        <p class="text-3xl font-bold text-[#d44e43]" id="stat-all">0</p>
       </div>
-      <div>
-        <label class="text-xs text-[var(--muted)] block mb-1">Update Image</label>
-        <div class="flex gap-2">
-          <input id="em-image" type="url" placeholder="URL or upload below" class="field flex-1 rounded-xl px-4 py-2.5 text-sm"/>
+      <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
+        <h3 class="text-sm text-gray-300 mb-2">Pending</h3>
+        <p class="text-3xl font-bold text-[#d1a14a]" id="stat-pending">0</p>
+      </div>
+      <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
+        <h3 class="text-sm text-gray-300 mb-2">Completed</h3>
+        <p class="text-3xl font-bold text-[#5db85b]" id="stat-completed">0</p>
+      </div>
+      <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
+        <h3 class="text-sm text-gray-300 mb-2">All Time Revenue</h3>
+        <p class="text-3xl font-bold text-[#d44e43]" id="stat-rev">$0.00</p>
+      </div>
+    </div>
+
+    <!-- Date Filter Card -->
+    <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] mb-8 shadow-sm">
+      <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4 font-bold border-b border-[#5c453b] pb-2">Period Calculation</h3>
+      <div class="grid grid-cols-4 gap-6 mb-6">
+        <div><label class="block text-xs text-gray-400 mb-2">Start Date</label><input type="date" id="statStartDate" onchange="calculateFilteredStats()" class="w-full"></div>
+        <div><label class="block text-xs text-gray-400 mb-2">End Date</label><input type="date" id="statEndDate" onchange="calculateFilteredStats()" class="w-full"></div>
+        <div><label class="block text-xs text-gray-400 mb-2">Subtract (%)</label><input type="number" id="statSubtract" oninput="calculateFilteredStats()" placeholder="0" class="w-full"></div>
+        <div><label class="block text-xs text-gray-400 mb-2">Note</label><input type="text" id="statNote" placeholder="Optional note..." class="w-full"></div>
+      </div>
+      <div class="grid grid-cols-4 gap-6 pt-4 border-t border-[#5c453b]">
+        <div><p class="text-xs text-gray-400 mb-1">Orders</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-orders">0</p></div>
+        <div><p class="text-xs text-gray-400 mb-1">Gross Total</p><p class="text-xl font-bold" id="stat-f-gross">$0.00</p></div>
+        <div><p class="text-xs text-gray-400 mb-1" id="stat-f-sub-lbl">Subtract (0%)</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-sub-amt">-$0.00</p></div>
+        <div><p class="text-xs text-gray-400 mb-1">Net Total</p><p class="text-xl font-bold text-[#5db85b]" id="stat-f-net">$0.00</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB: LIVE ORDERS ================= -->
+  <div id="view-orders" class="max-w-6xl mx-auto hidden">
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-3xl serif">Live Orders</h2>
+    </div>
+    <div id="ordersGrid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <!-- Injected by JS -->
+    </div>
+    <p id="noOrders" class="text-center text-gray-400 py-10 hidden">No active orders.</p>
+  </div>
+
+  <!-- ================= TAB: ORDER HISTORY ================= -->
+  <div id="view-history" class="max-w-6xl mx-auto hidden">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <h2 class="text-3xl serif">Order History</h2>
+      
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 bg-[#4e3b32] p-2 rounded-xl border border-[#5c453b]">
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 uppercase font-bold tracking-wide">From</span>
+            <input type="date" id="historyStartDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400 uppercase font-bold tracking-wide">To</span>
+            <input type="date" id="historyEndDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
+          </div>
         </div>
-        <div class="mt-2 flex items-center gap-2">
-          <label class="cursor-pointer b-btn text-xs px-3 py-1.5 rounded-full flex items-center gap-1">
-            📁 <span>Upload New Image</span>
-            <input id="em-imageFile" type="file" accept="image/*" class="hidden" onchange="handleEditImageFile(this)"/>
-          </label>
-          <span id="em-imgFileName" class="text-xs text-[var(--muted)] truncate max-w-[120px]"></span>
+        
+        <button onclick="sendHistoryToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition shadow-sm text-sm whitespace-nowrap">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Send List to Telegram
+        </button>
+      </div>
+    </div>
+    
+    <div class="bg-[#4e3b32] rounded-xl border border-[#5c453b] overflow-hidden">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-[#3a2a24] border-b border-[#5c453b]">
+          <tr>
+            <th class="p-4 font-medium text-gray-300">Order ID</th>
+            <th class="p-4 font-medium text-gray-300">Date/Time</th>
+            <th class="p-4 font-medium text-gray-300">Table</th>
+            <th class="p-4 font-medium text-gray-300">Items</th>
+            <th class="p-4 font-medium text-gray-300">Total</th>
+            <th class="p-4 font-medium text-[#d44e43]">Status</th>
+            <th class="p-4 font-medium text-gray-300 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <!-- Injected by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ================= TAB: MENU MANAGER ================= -->
+  <div id="view-menu" class="max-w-6xl mx-auto hidden space-y-10">
+    
+    <!-- Add New Drink Section (Redesigned UI) -->
+    <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
+      <h3 class="text-xl serif text-[#d44e43] mb-5 font-bold flex items-center gap-2 border-b border-[#5c453b] pb-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+        Create New Drink
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+        <div class="col-span-12 md:col-span-4">
+           <label class="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide">Name (EN)</label>
+           <input type="text" id="addName" placeholder="e.g. Matcha Latte" class="w-full bg-[#3a2a24]">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+           <label class="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide">Name (KH)</label>
+           <input type="text" id="addNameKh" placeholder="e.g. តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24]">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+           <label class="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide">Category</label>
+           <input type="text" id="addCat" placeholder="e.g. Coffee, Tea" class="w-full bg-[#3a2a24]">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+           <label class="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide">Base Price ($)</label>
+           <input type="number" id="addPrice" placeholder="2.50" step="0.01" class="w-full bg-[#3a2a24]">
+        </div>
+        <div class="col-span-12 md:col-span-8">
+           <label class="block text-xs text-gray-400 mb-1.5 uppercase tracking-wide">Image URL (Optional)</label>
+           <input type="text" id="addImage" placeholder="https://..." class="w-full bg-[#3a2a24]">
+        </div>
+        <div class="col-span-12 flex justify-end mt-2">
+           <button onclick="addMenuItem()" class="btn-primary px-8 py-2.5 rounded-lg font-bold text-sm shadow tracking-wide hover:-translate-y-0.5 transition-transform flex items-center gap-2">
+             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+             Add to Menu
+           </button>
         </div>
       </div>
     </div>
-    <div class="flex gap-3 mt-5">
-      <button onclick="closeEditMenu()" class="flex-1 py-3 rounded-xl border border-[var(--bdr)] text-[var(--muted)] hover:text-[var(--txt)] text-sm transition-colors cursor-pointer">Cancel</button>
-      <button onclick="saveEditMenu()" id="saveEditBtn" class="g-btn flex-1 py-3 rounded-xl text-sm">Save Changes</button>
+
+    <!-- Menu List -->
+    <div>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+        <h3 class="text-2xl serif">Current Menu & Discounts</h3>
+        
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <!-- Category Filter -->
+          <select id="menuCatFilter" onchange="filterMenu()" class="w-full md:w-40 bg-[#3a2a24] border border-[#5c453b] rounded-lg px-3 py-2 text-sm text-gray-300 outline-none focus:border-[#d44e43]">
+            <option value="All">All Categories</option>
+          </select>
+          
+          <!-- Bulk Discount Apply -->
+          <div class="flex items-center bg-[#3a2a24] rounded-lg border border-[#5c453b] overflow-hidden shrink-0">
+            <input type="number" id="bulkDiscountInput" placeholder="Discount %" class="w-24 bg-transparent border-none text-sm outline-none px-3 py-2 text-[#d44e43] font-bold">
+            <button onclick="applyBulkDiscount()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-3 py-2 text-xs font-bold transition whitespace-nowrap border-l border-[#5c453b]">Apply All</button>
+          </div>
+        </div>
+      </div>
+      <div class="bg-[#4e3b32] rounded-xl border border-[#5c453b] overflow-hidden">
+        <table class="w-full text-left">
+          <thead class="bg-[#3a2a24] border-b border-[#5c453b]">
+            <tr>
+              <th class="p-4 text-sm font-medium text-gray-300">Name & Image</th>
+              <th class="p-4 text-sm font-medium text-gray-300">Category</th>
+              <th class="p-4 text-sm font-medium text-gray-300">Base Price</th>
+              <th class="p-4 text-sm font-medium text-[#d44e43]">Discount (%)</th>
+              <th class="p-4 text-sm font-medium text-[#5db85b]">Final Price</th>
+              <th class="p-4 text-sm font-medium text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="menuTableBody">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Toppings Section -->
+    <div>
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl serif">Dynamic Toppings</h3>
+        <button onclick="openAddToppingModal()" class="btn-success px-4 py-2 rounded text-sm font-bold flex items-center gap-2">
+          <span>+</span> Add Topping
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4" id="toppingsGrid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Edit Menu Modal -->
+<div id="editMenuModal" class="fixed inset-0 bg-black/80 items-center justify-center hidden z-[999] backdrop-blur-sm">
+  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
+    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Edit Drink</h3>
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
+      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full"></div>
+      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Base Price ($)</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
+      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
+      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editImage" class="w-full"></div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeEditMenuModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
+      <button onclick="saveEditMenu()" class="flex-1 py-2 btn-success rounded font-bold">Save Changes</button>
     </div>
   </div>
 </div>
 
-<!-- EDIT ORDER MODAL -->
-<div id="editOrderModal" class="fixed inset-0 z-[990] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
-  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-sm mx-4 shadow-2xl fade-up">
-    <h3 class="serif text-2xl text-[var(--gold)] mb-4">Edit Order Status</h3>
-    <input type="hidden" id="editOrderId"/>
-    <label class="text-xs text-[var(--muted)] block mb-2">Status</label>
-    <select id="eo-status" class="field w-full rounded-xl px-4 py-2.5 text-sm mb-5">
+<!-- Add Topping Modal -->
+<div id="toppingModal" class="fixed inset-0 bg-black/80 items-center justify-center hidden z-[999] backdrop-blur-sm">
+  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-[350px] shadow-2xl">
+    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">New Topping</h3>
+    <div class="space-y-3 mb-6">
+      <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="topName" placeholder="e.g. Boba" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="topNameKh" placeholder="e.g. គុជ" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="topPrice" placeholder="0.50" step="0.01" class="w-full"></div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeAddToppingModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
+      <button onclick="saveTopping()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Topping Modal -->
+<div id="editToppingModal" class="fixed inset-0 bg-black/80 items-center justify-center hidden z-[999] backdrop-blur-sm">
+  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-[350px] shadow-2xl">
+    <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Topping</h3>
+    <div class="space-y-3 mb-6">
+      <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editTopName" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editTopNameKh" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="editTopPrice" step="0.01" class="w-full"></div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeEditToppingModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
+      <button onclick="saveEditTopping()" class="flex-1 py-2 btn-success rounded font-bold">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Order Status Modal -->
+<div id="editOrderModal" class="fixed inset-0 bg-black/80 items-center justify-center hidden z-[999] backdrop-blur-sm">
+  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-[300px] shadow-2xl text-center">
+    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Update Order Status</h3>
+    <select id="editOrderStatus" class="w-full mb-6 py-3 text-center font-bold">
       <option value="pending">Pending</option>
       <option value="completed">Completed</option>
       <option value="cancelled">Cancelled</option>
     </select>
     <div class="flex gap-3">
-      <button onclick="closeEditOrder()" class="flex-1 py-3 rounded-xl border border-[var(--bdr)] text-[var(--muted)] text-sm cursor-pointer">Cancel</button>
-      <button onclick="saveEditOrder()" class="g-btn flex-1 py-3 rounded-xl text-sm">Save</button>
+      <button onclick="closeEditOrderModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Close</button>
+      <button onclick="saveEditOrder()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
     </div>
   </div>
 </div>
 
-<!-- CONFIRM DELETE MODAL -->
-<div id="deleteModal" class="fixed inset-0 z-[990] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
-  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-sm mx-4 shadow-2xl fade-up">
-    <h3 class="serif text-2xl text-[var(--red)] mb-2">Confirm Delete</h3>
-    <p class="text-[var(--muted)] text-sm mb-6" id="deleteMsg">Are you sure?</p>
-    <div class="flex gap-3">
-      <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl border border-[var(--bdr)] text-[var(--muted)] text-sm cursor-pointer">Cancel</button>
-      <button onclick="confirmDelete()" class="flex-1 py-3 rounded-xl bg-[var(--red)] text-[#faf6eb] text-sm font-semibold hover:bg-[#a6332f] transition-colors cursor-pointer">Delete</button>
-    </div>
-  </div>
-</div>
 
-<!-- TOAST -->
-<div id="toast" class="fixed bottom-6 left-1/2 bg-[var(--sur2)] border border-[var(--bdr)] text-[var(--txt)] px-5 py-2.5 rounded-full text-xs shadow-2xl opacity-0 z-[9999] whitespace-nowrap pointer-events-none" style="transition:opacity .3s,transform .3s;transform:translateX(-50%) translateY(16px)"></div>
-
-<!-- SIDEBAR -->
-<aside class="w-52 bg-[var(--sur)] border-r border-[var(--bdr)] flex-col hidden sm:flex shrink-0">
-  <div class="px-5 py-5 border-b border-[var(--bdr)]">
-    <p class="serif text-[var(--gold)] text-2xl leading-none">Chafé</p>
-    <p class="text-[9px] text-[var(--muted)] tracking-widest uppercase mt-1">Admin Panel</p>
-  </div>
-  <nav class="flex-1 py-4 space-y-0.5 px-2">
-    <button onclick="sw('orders')" id="nav-orders" class="nav-item on w-full text-left px-3 py-2.5 rounded-r-xl text-sm flex items-center gap-2">
-      📋 <span>Live Orders</span>
-      <span id="pendingCount" class="ml-auto bg-[var(--pending)] text-[#3c2a21] text-[8px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-    </button>
-    <button onclick="sw('menu')" id="nav-menu" class="nav-item w-full text-left px-3 py-2.5 rounded-r-xl text-sm flex items-center gap-2 text-[var(--muted)]">🍵 Menu Manager</button>
-    <button onclick="sw('stats')" id="nav-stats" class="nav-item w-full text-left px-3 py-2.5 rounded-r-xl text-sm flex items-center gap-2 text-[var(--muted)]">📊 Statistics</button>
-  </nav>
-  <div class="px-5 py-4 border-t border-[var(--bdr)]">
-    <button onclick="logout()" class="text-xs text-[var(--muted)] hover:text-[var(--txt)] transition-colors cursor-pointer">← Logout</button>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<main class="flex-1 flex flex-col overflow-hidden">
-  <!-- Mobile tabs -->
-  <div class="sm:hidden bg-[var(--sur)] px-4 py-3 flex items-center justify-between border-b border-[var(--bdr)]">
-    <p class="serif text-[var(--gold)] text-lg">Chafé Admin</p>
-    <div class="flex gap-3 text-xs text-[var(--muted)]">
-      <button onclick="sw('orders')" id="mob-orders" class="mob-tab on pb-1">Orders</button>
-      <button onclick="sw('menu')"   id="mob-menu"   class="mob-tab pb-1">Menu</button>
-      <button onclick="sw('stats')"  id="mob-stats"  class="mob-tab pb-1">Stats</button>
-    </div>
-  </div>
-
-  <!-- ── ORDERS TAB ── -->
-  <div id="tab-orders" class="flex-1 overflow-y-auto p-4 sm:p-6">
-    <div class="flex items-center justify-between mb-5">
-      <div><h2 class="serif text-2xl">Live Orders</h2><p class="text-xs text-[var(--muted)]">Real-time updates</p></div>
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[var(--green)] animate-pulse"></span>
-        <span class="text-xs text-[var(--muted)]">Live</span>
-      </div>
-    </div>
-    <div class="flex gap-2 mb-5 flex-wrap">
-      <button onclick="setOF('all')"       id="of-all"       class="text-xs px-3 py-1.5 rounded-full border border-[var(--gold)]/50 text-[var(--gold)] cursor-pointer">All</button>
-      <button onclick="setOF('pending')"   id="of-pending"   class="text-xs px-3 py-1.5 rounded-full border border-[var(--bdr)] text-[var(--muted)] hover:text-[var(--txt)] cursor-pointer transition-colors">Pending</button>
-      <button onclick="setOF('completed')" id="of-completed" class="text-xs px-3 py-1.5 rounded-full border border-[var(--bdr)] text-[var(--muted)] hover:text-[var(--txt)] cursor-pointer transition-colors">Completed</button>
-      <button onclick="setOF('cancelled')" id="of-cancelled" class="text-xs px-3 py-1.5 rounded-full border border-[var(--bdr)] text-[var(--muted)] hover:text-[var(--txt)] cursor-pointer transition-colors">Cancelled</button>
-    </div>
-    <div id="ordersLoad" class="text-center py-14"><div class="inline-block w-7 h-7 border-4 border-[var(--gold)] border-t-transparent rounded-full" style="animation:spin .8s linear infinite"></div><p class="mt-3 text-xs text-[var(--muted)]">Listening…</p></div>
-    <div id="ordersGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
-  </div>
-
-  <!-- ── MENU TAB ── -->
-  <div id="tab-menu" class="flex-1 overflow-y-auto p-4 sm:p-6 hidden">
-    <h2 class="serif text-2xl mb-5">Menu Manager</h2>
-    <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl p-5 mb-6">
-      <h3 class="text-[var(--gold)] text-sm font-semibold mb-4 uppercase tracking-wider">Add New Item</h3>
-      <div class="grid sm:grid-cols-2 gap-3">
-        <div><label class="text-xs text-[var(--muted)] block mb-1">Name *</label><input id="f-name" type="text" placeholder="e.g. Matcha Latte" class="field w-full rounded-xl px-4 py-2.5 text-sm"/></div>
-        <div><label class="text-xs text-[var(--muted)] block mb-1">Price ($) *</label><input id="f-price" type="number" step="0.01" placeholder="3.50" class="field w-full rounded-xl px-4 py-2.5 text-sm"/></div>
-        <div><label class="text-xs text-[var(--muted)] block mb-1">Category *</label>
-          <select id="f-cat" class="field w-full rounded-xl px-4 py-2.5 text-sm">
-            <option value="">Select…</option>
-            <option>milkTea</option><option>blackRice</option><option>coffee</option><option>cream</option>
-            <option>fruitTea</option><option>Matcha</option><option>nonCoffee</option><option>Soda</option><option>TaiwanTea</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-xs text-[var(--muted)] block mb-1">Image</label>
-          <div class="flex gap-2">
-            <input id="f-imageUrl" type="url" placeholder="https://… or use file below" class="field flex-1 rounded-xl px-4 py-2.5 text-sm"/>
-          </div>
-          <div class="mt-2 flex items-center gap-2">
-            <label class="cursor-pointer b-btn text-xs px-3 py-1.5 rounded-full flex items-center gap-1">
-              📁 <span>Upload Image</span>
-              <input id="f-imageFile" type="file" accept="image/*" class="hidden" onchange="handleImageFile(this)"/>
-            </label>
-            <span id="imgFileName" class="text-xs text-[var(--muted)] truncate max-w-[120px]"></span>
-          </div>
-          <div id="imgPreviewWrap" class="mt-2 hidden">
-            <img id="imgPreview" class="w-20 h-20 rounded-xl object-cover border border-[var(--bdr)]"/>
-          </div>
-        </div>
-      </div>
-      <p id="formErr" class="text-[var(--red)] text-xs mt-2 hidden">Please fill in all required fields.</p>
-      <button id="addBtn" onclick="addMenuItem()" class="g-btn mt-4 px-6 py-2.5 rounded-xl text-sm">+ Add to Menu</button>
-</div>
-<div class="flex items-center justify-between mb-3">
-  <h3 class="text-sm text-[var(--muted)] uppercase tracking-wider">Current Menu</h3>
-  <div class="flex items-center gap-3">
-    <select id="adminMenuFilter" onchange="filterAdminMenu(this.value)" class="field text-xs rounded-lg px-2 py-1">
-      <option value="All">All Categories</option>
-    </select>
-    <button onclick="loadMenuItems()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] transition-colors cursor-pointer">↻ Refresh</button>
-  </div>
-</div>
-<div id="menuLoad" class="text-center py-10"><div class="inline-block w-6 h-6 border-4 border-[var(--gold)] border-t-transparent rounded-full" style="animation:spin .8s linear infinite"></div></div>
-    <div id="menuList" class="space-y-2 hidden"></div>
-  </div>
-
-  <!-- ── STATS TAB ── -->
-  <div id="tab-stats" class="flex-1 overflow-y-auto p-4 sm:p-6 hidden">
-    <h2 class="serif text-2xl mb-5">Statistics</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-      <div class="stat-card rounded-2xl p-4"><p class="text-xs text-[var(--muted)] mb-1">All Orders</p><p id="st-total" class="text-3xl font-bold text-[var(--gold)] serif">—</p></div>
-      <div class="stat-card rounded-2xl p-4"><p class="text-xs text-[var(--muted)] mb-1">Pending</p><p id="st-pending" class="text-3xl font-bold text-[var(--pending)] serif">—</p></div>
-      <div class="stat-card rounded-2xl p-4"><p class="text-xs text-[var(--muted)] mb-1">Completed</p><p id="st-done" class="text-3xl font-bold text-[var(--green)] serif">—</p></div>
-      <div class="stat-card rounded-2xl p-4"><p class="text-xs text-[var(--muted)] mb-1">Revenue</p><p id="st-rev" class="text-3xl font-bold text-[var(--gold2)] serif">—</p></div>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-      <div><label class="text-xs text-[var(--muted)] block mb-1">Start Date</label><input type="date" id="rep-start" class="field w-full rounded-lg px-3 py-2 text-xs" onchange="computeReport()"/></div>
-      <div><label class="text-xs text-[var(--muted)] block mb-1">End Date</label><input type="date" id="rep-end" class="field w-full rounded-lg px-3 py-2 text-xs" onchange="computeReport()"/></div>
-      <div><label class="text-xs text-[var(--muted)] block mb-1">Subtract (%)</label><input type="number" id="rep-discount" value="0" min="0" max="100" class="field w-full rounded-lg px-3 py-2 text-xs" onchange="computeReport()"/></div>
-      <div><label class="text-xs text-[var(--muted)] block mb-1">Note for Customer</label><input type="text" id="rep-note" placeholder="Optional note..." class="field w-full rounded-lg px-3 py-2 text-xs"/></div>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm bg-[var(--sur3)] p-4 rounded-xl border border-[var(--bdr)]">
-      <div><span class="text-[var(--muted)] text-xs">Orders</span><p id="wk-orders" class="font-bold text-[var(--gold)]">—</p></div>
-      <div><span class="text-[var(--muted)] text-xs">Gross Total</span><p id="wk-gross" class="font-bold text-[var(--txt)]">—</p></div>
-      <div><span class="text-[var(--muted)] text-xs" id="wk-discount-lbl">Subtract (0%)</span><p id="wk-discount" class="font-bold text-[var(--red)]">—</p></div>
-      <div><span class="text-[var(--muted)] text-xs">Net Total</span><p id="wk-net" class="font-bold text-[var(--green)] text-lg">—</p></div>
-    </div>
-  </div>
-</div>
-<div class="stat-card rounded-2xl p-5">
-  <h3 class="text-sm text-[var(--muted)] uppercase tracking-wider mb-3">Top Items</h3>
-      <div id="topItems" class="space-y-2 text-sm text-[var(--muted)]">Loading…</div>
-    </div>
-  </div>
-</main>
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 left-1/2 bg-[#5db85b] text-white px-5 py-2.5 rounded shadow-xl opacity-0 transition-opacity pointer-events-none transform -translate-x-1/2 font-medium z-[9999]">Success!</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, serverTimestamp, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const FB = {
   apiKey: "AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
@@ -284,454 +334,623 @@ const FB = {
   measurementId: "G-MCXY0YL7PX"
 };
 
-let db, storage;
-try {
-  const app = initializeApp(FB);
-  db = getFirestore(app);
-  storage = getStorage(app); // Initialize Storage
-} catch(e) { console.error("Firebase init failed:", e); }
-
-const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
-const TG_CHAT = "8374277640";
-async function tg(msg) { try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" }) }); } catch (e) { console.warn("TG", e); } }
-
-// Auth
-const PASS = "admin123";
-window.tryLogin = function() {
-  if (document.getElementById("passInput").value === PASS) {
-    document.getElementById("loginModal").classList.add("hidden");
-    initApp();
-  } else { document.getElementById("loginErr").classList.remove("hidden"); }
-};
-document.getElementById("passInput").addEventListener("keydown", e => { if (e.key === "Enter") window.tryLogin(); });
-window.logout = function() { document.getElementById("loginModal").classList.remove("hidden"); };
-
-// Tabs
-window.sw = function(tab) {
-  ["orders","menu","stats"].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tab);
-    const n = document.getElementById(`nav-${t}`);
-    if(n) { n.classList.toggle("on", t === tab); if(t !== tab) n.classList.add("text-[var(--muted)]"); else n.classList.remove("text-[var(--muted)]"); }
-    const m = document.getElementById(`mob-${t}`);
-    if(m) m.classList.toggle("on", t === tab);
-  });
-  if (tab === "stats") computeStats();
-  if (tab === "menu") loadMenuItems();
-};
-
-// State
-let allOrders = []; let orderFilter = "all";
-let deleteTarget = { type: "", id: "" };
-
-let selectedAddImageFile = null;  // Stores file to upload for "Add"
-let selectedEditImageFile = null; // Stores file to upload for "Edit"
-
-// Orders (realtime)
-function initApp() {
-  if(!db) { document.getElementById("ordersLoad").innerHTML = "<p class='text-red-400'>Database Offline</p>"; return; }
-  const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-  onSnapshot(q, snap => {
-    allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    document.getElementById("ordersLoad").classList.add("hidden");
-    renderOrders(); updatePendingBadge();
-  }, err => {
-    document.getElementById("ordersLoad").innerHTML = "<p class='text-[var(--red)]'>Error connecting to Database.</p>";
-  });
-}
-
-window.setOF = function(f) {
-  orderFilter = f;
-  ["all","pending","completed","cancelled"].forEach(x => {
-    const el = document.getElementById(`of-${x}`);
-    el.classList.toggle("text-[var(--gold)]", x === f); el.classList.toggle("border-[var(--gold)]/50", x === f);
-    el.classList.toggle("text-[var(--muted)]", x !== f); el.classList.toggle("border-[var(--bdr)]", x !== f);
-  });
-  renderOrders();
-};
-
-function renderOrders() {
-  const grid = document.getElementById("ordersGrid");
-  let list = allOrders;
-  if (orderFilter !== "all") list = allOrders.filter(o => o.status === orderFilter);
-  if (!list.length) { grid.innerHTML = `<p class="col-span-3 text-center py-10 text-[var(--muted)] text-sm">No orders.</p>`; return; }
-  grid.innerHTML = list.map(o => {
-    const done = o.status === "completed"; const cancelled = o.status === "cancelled";
-    const ts = o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString([], { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" }) : "—";
-    const badge = done ? `<span class="badge badge-done">✓ Done</span>` : cancelled ? `<span class="badge badge-cancelled">✗ Cancelled</span>` : `<span class="badge badge-pending">⏳ Pending</span>`;
-    return `<div class="order-card ${done ? "done" : cancelled ? "cancelled" : ""} bg-[var(--sur)] rounded-2xl p-4 border-l-[3px]">
-      <div class="flex items-start justify-between mb-2">
-        <div><p class="font-semibold text-base">Table <span class="text-[var(--gold)]">${o.tableNumber}</span></p><p class="text-xs text-[var(--muted)] mono">${ts}</p></div>
-        ${badge}
-      </div>
-      <ul class="text-sm space-y-0.5 mb-3 text-[var(--muted)]">
-        ${(o.items || []).map(i => `<li class="flex justify-between"><span>${i.name} ×${i.qty}</span><span class="mono text-xs">$${(i.price * i.qty).toFixed(2)}</span></li>`).join("")}
-      </ul>
-      ${o.note ? `<div class="mb-3 p-2 rounded-lg bg-[var(--gold)]/10 border border-[var(--gold)]/20"><p class="text-xs text-[var(--gold2)]"><b>Note:</b> ${o.note}</p></div>` : ""}
-      <div class="flex items-center justify-between border-t border-[var(--bdr)] pt-3">
-        <span class="text-[var(--gold)] font-bold mono">$${Number(o.total).toFixed(2)}</span>
-        <div class="flex gap-1.5">
-          ${!done && !cancelled ? `<button onclick="completeOrder('${o.id}')" class="gr-btn text-xs px-3 py-1.5 rounded-full">✓ Complete</button>` : ""}
-          <button onclick="openEditOrder('${o.id}','${o.status}')" class="b-btn text-xs px-2.5 py-1.5 rounded-full">✏️</button>
-          <button onclick="openDeleteModal('order','${o.id}')" class="r-btn text-xs px-2.5 py-1.5 rounded-full">🗑</button>
-        </div>
-      </div>
-    </div>`;
-  }).join("");
-}
-
-window.completeOrder = async function(id) { await updateDoc(doc(db, "orders", id), { status: "completed" }); showToast("Order completed ✓"); };
-
-function updatePendingBadge() {
-  const n = allOrders.filter(o => o.status === "pending").length;
-  const b = document.getElementById("pendingCount"); b.textContent = n;
-  n ? b.classList.remove("hidden") : b.classList.add("hidden");
-}
-
-// Edit order
-window.openEditOrder = function(id, status) {
-  document.getElementById("editOrderId").value = id; document.getElementById("eo-status").value = status;
-  const m = document.getElementById("editOrderModal"); m.classList.remove("hidden"); m.style.display = "flex";
-};
-window.closeEditOrder = function() { const m = document.getElementById("editOrderModal"); m.classList.add("hidden"); m.style.display = "none"; };
-window.saveEditOrder = async function() {
-  const id = document.getElementById("editOrderId").value; const status = document.getElementById("eo-status").value;
-  await updateDoc(doc(db, "orders", id), { status });
-  closeEditOrder(); showToast("Order updated.");
-};
-
-// Delete modal
-window.openDeleteModal = function(type, id) {
-  deleteTarget = { type, id };
-  document.getElementById("deleteMsg").textContent = `Delete this ${type}? This cannot be undone.`;
-  const m = document.getElementById("deleteModal"); m.classList.remove("hidden"); m.style.display = "flex";
-};
-window.closeDeleteModal = function() { const m = document.getElementById("deleteModal"); m.classList.add("hidden"); m.style.display = "none"; };
-window.confirmDelete = async function() {
-  const { type, id } = deleteTarget;
-  if (type === "order") await deleteDoc(doc(db, "orders", id));
-  else if (type === "menu") { await deleteDoc(doc(db, "menu", id)); loadMenuItems(); }
-  closeDeleteModal(); showToast("Deleted.");
-};
-
-
-// ==========================================
-// Firebase Storage Image Handling
-// ==========================================
-
-// Preview & store file object for Add Item
-window.handleImageFile = function(input) {
-  const file = input.files[0]; if (!file) return;
-  selectedAddImageFile = file; // Store the actual file for upload
-  document.getElementById("imgFileName").textContent = file.name;
-  
-  // Show quick preview
-  const reader = new FileReader();
-  reader.onload = e => {
-    document.getElementById("imgPreview").src = e.target.result;
-    document.getElementById("imgPreviewWrap").classList.remove("hidden");
-  };
-  reader.readAsDataURL(file);
-};
-
-// Store file object for Edit Item
-window.handleEditImageFile = function(input) {
-  const file = input.files[0]; if (!file) return;
-  selectedEditImageFile = file;
-  document.getElementById("em-imgFileName").textContent = file.name;
-};
-
-// Add Menu Item to Database + Storage
-window.addMenuItem = async function() {
-  const name = document.getElementById("f-name").value.trim();
-  const price = parseFloat(document.getElementById("f-price").value);
-  const cat = document.getElementById("f-cat").value;
-  const urlInput = document.getElementById("f-imageUrl").value.trim();
-  const err = document.getElementById("formErr");
-  const btn = document.getElementById("addBtn");
-
-  if (!name || isNaN(price) || !cat) { err.classList.remove("hidden"); return; }
-  err.classList.add("hidden");
-  
-  btn.disabled = true;
-  btn.textContent = "Uploading image...";
-
-  try {
-    let finalImageUrl = urlInput; // Fallback to whatever is typed in the box
-
-    // 1. Upload to Firebase Storage if a file was selected
-    if (selectedAddImageFile && storage) {
-      // Create a unique name to prevent overwriting
-      const fileName = `${Date.now()}_${selectedAddImageFile.name}`;
-      const storageRef = ref(storage, `menu_images/${fileName}`);
-      
-      const uploadTask = await uploadBytesResumable(storageRef, selectedAddImageFile);
-      
-      // 2. Get the official download URL
-      finalImageUrl = await getDownloadURL(uploadTask.ref);
-    }
-
-    // 3. Save to Firestore database
-    await addDoc(collection(db, "menu"), { 
-      name, 
-      price, 
-      category: cat, 
-      imageUrl: finalImageUrl || "", 
-      inStock: true, 
-      createdAt: serverTimestamp() 
-    });
-
-    // Reset UI
-    ["f-name", "f-price", "f-imageUrl"].forEach(id => document.getElementById(id).value = "");
-    document.getElementById("f-cat").value = ""; 
-    document.getElementById("f-imageFile").value = "";
-    document.getElementById("imgFileName").textContent = ""; 
-    document.getElementById("imgPreviewWrap").classList.add("hidden");
-    selectedAddImageFile = null; 
-    
-    loadMenuItems(); 
-    showToast(`"${name}" added ✓`);
-    
-  } catch(e) {
-    console.error("Upload failed", e);
-    showToast("❌ Upload Error. Check Storage Rules.");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "+ Add to Menu";
-  }
-};
+const app = initializeApp(FB);
+const db = getFirestore(app);
 
 let menuItems = [];
-let adminCurrentCat = "All";
+let toppings = [];
+let orders = [];
+let currentMenuCat = 'All';
+let editingMenuId = null;
+let editingToppingId = null;
+let editingOrderId = null;
 
-window.filterAdminMenu = function(cat) {
-  adminCurrentCat = cat;
-  renderAdminMenu();
+// ==========================================
+// TABS LOGIC
+// ==========================================
+window.switchTab = function(tab) {
+  ['stats', 'orders', 'history', 'menu'].forEach(t => {
+    const view = document.getElementById(`view-${t}`);
+    if(view) view.classList.add('hidden');
+    const btn = document.getElementById(`tab-${t}`);
+    if(btn) {
+      btn.classList.remove('bg-[#8a382f]/20', 'text-[#d44e43]');
+      btn.classList.add('text-gray-400');
+    }
+  });
+  
+  const activeView = document.getElementById(`view-${tab}`);
+  if(activeView) activeView.classList.remove('hidden');
+  const activeBtn = document.getElementById(`tab-${tab}`);
+  if(activeBtn) {
+    activeBtn.classList.remove('text-gray-400');
+    activeBtn.classList.add('bg-[#8a382f]/20', 'text-[#d44e43]');
+  }
 };
 
-window.loadMenuItems = async function() {
-  const load = document.getElementById("menuLoad"), list = document.getElementById("menuList");
-  if(!db) {
-     load.classList.add("hidden"); list.innerHTML = `<p class="text-red-500 text-center py-4">Database not connected.</p>`; list.classList.remove("hidden");
-     return;
-  }
+function showToast(msg, isErr=false) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.backgroundColor = isErr ? "#d44e43" : "#5db85b";
+  t.style.opacity = "1";
+  setTimeout(() => t.style.opacity = "0", 3000);
+}
+
+// ==========================================
+// FETCH DATA
+// ==========================================
+async function fetchData() {
+  // Menu Listener
+  onSnapshot(collection(db, "menu"), (snap) => {
+    menuItems = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    updateCategoryDropdown();
+    renderMenuTable();
+  });
+
+  // Toppings Listener
+  onSnapshot(collection(db, "toppings"), (snap) => {
+    toppings = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderToppings();
+  });
+
+  // Orders Listener
+  const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snap) => {
+    orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderOrders();
+    renderHistory();
+    updateStats();
+    calculateFilteredStats(); // Update filtered stats if viewing
+  });
+}
+
+// ==========================================
+// STATISTICS & TELEGRAM
+// ==========================================
+function updateStats() {
+  const pending = orders.filter(o => o.status === 'pending');
+  const completed = orders.filter(o => o.status === 'completed');
+  const rev = completed.reduce((sum, o) => sum + Number(o.total), 0);
+
+  document.getElementById('stat-all').textContent = orders.length;
+  document.getElementById('stat-pending').textContent = pending.length;
+  document.getElementById('stat-completed').textContent = completed.length;
+  document.getElementById('stat-rev').textContent = `$${rev.toFixed(2)}`;
+
+  const badge = document.getElementById("pendingBadge");
+  if(pending.length > 0) {
+    badge.textContent = pending.length; badge.classList.remove("hidden");
+  } else { badge.classList.add("hidden"); }
+}
+
+window.calculateFilteredStats = function() {
+  const startDate = document.getElementById('statStartDate').value;
+  const endDate = document.getElementById('statEndDate').value;
+  const subPct = parseFloat(document.getElementById('statSubtract').value) || 0;
   
-  load.classList.remove("hidden"); list.classList.add("hidden");
+  let filtered = orders.filter(o => o.status === 'completed'); // Base calculation on completed orders
+  
+  if(startDate || endDate) {
+    filtered = filtered.filter(o => {
+      if(!o.createdAt) return false;
+      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
+      const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+      if(startDate && iso < startDate) return false;
+      if(endDate && iso > endDate) return false;
+      return true;
+    });
+  }
+
+  const gross = filtered.reduce((sum, o) => sum + Number(o.total), 0);
+  const subAmt = gross * (subPct / 100);
+  const net = gross - subAmt;
+
+  document.getElementById('stat-f-orders').textContent = filtered.length;
+  document.getElementById('stat-f-gross').textContent = `$${gross.toFixed(2)}`;
+  document.getElementById('stat-f-sub-lbl').textContent = `Subtract (${subPct}%)`;
+  document.getElementById('stat-f-sub-amt').textContent = `-$${subAmt.toFixed(2)}`;
+  document.getElementById('stat-f-net').textContent = `$${net.toFixed(2)}`;
+}
+
+window.sendStatsToTelegram = async function() {
+  const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
+  const TG_CHAT = "-1003706744326";
+  
+  // Get Filtered Data
+  const startDate = document.getElementById('statStartDate').value;
+  const endDate = document.getElementById('statEndDate').value;
+  const subPct = parseFloat(document.getElementById('statSubtract').value) || 0;
+  const note = document.getElementById('statNote').value.trim() || 'None';
+  
+  const fOrders = document.getElementById('stat-f-orders').textContent;
+  const fGross = document.getElementById('stat-f-gross').textContent;
+  const fSubAmt = document.getElementById('stat-f-sub-amt').textContent;
+  const fNet = document.getElementById('stat-f-net').textContent;
+
+  let periodStr = "All Time";
+  if (startDate && endDate) periodStr = `${startDate} to ${endDate}`;
+  else if (startDate) periodStr = `From ${startDate}`;
+  else if (endDate) periodStr = `Until ${endDate}`;
+
+  const msg = `📊 <b>Chafé Revenue Report</b>\n\n📅 <b>Period:</b> ${periodStr}\n📝 <b>Note:</b> ${note}\n\n📦 <b>Completed Orders:</b> ${fOrders}\n💵 <b>Gross Total:</b> ${fGross}\n📉 <b>Subtract (${subPct}%):</b> ${fSubAmt}\n💰 <b>Net Total:</b> ${fNet}\n\n<i>Generated from Admin Panel</i>`;
   
   try {
-    const snap = await getDocs(collection(db, "menu"));
-    menuItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    
-    // Update Filter Dropdown
-    const cats = ["All", ...new Set(menuItems.map(i => i.category || "Other"))];
-    const sel = document.getElementById("adminMenuFilter");
-    if(sel) {
-      sel.innerHTML = cats.map(c => `<option value="${c}">${c === "All" ? "All Categories" : c}</option>`).join("");
-      if (cats.includes(adminCurrentCat)) sel.value = adminCurrentCat; else { adminCurrentCat = "All"; sel.value = "All"; }
-    }
-
-    renderAdminMenu();
-  } catch (err) {
-    console.error("Menu load error", err);
-    list.innerHTML = `<p class="text-[var(--red)] text-center py-4">Error loading menu data.</p>`;
-  } finally {
-    load.classList.add("hidden"); list.classList.remove("hidden");
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
+    });
+    showToast("Statistics sent to Telegram!");
+  } catch (e) {
+    showToast("Error sending to Telegram", true);
   }
 };
 
-function renderAdminMenu() {
-  const list = document.getElementById("menuList");
-  let itemsToRender = adminCurrentCat === "All" ? menuItems : menuItems.filter(i => i.category === adminCurrentCat);
 
-  if (!itemsToRender.length) { list.innerHTML = `<p class="text-center py-6 text-[var(--muted)] text-sm">No items in this category.</p>`; return; }
-  list.innerHTML = itemsToRender.map(i => {
-    const inStock = i.inStock !== false;
-    return `<div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-xl p-3 flex items-center gap-3 ${!inStock ? "opacity-60" : ""}">
-      <img src="${i.imageUrl || 'https://placehold.co/48/523c2f/faf6eb?text=☕'}" class="w-12 h-12 rounded-lg object-cover shrink-0" onerror="this.src='https://placehold.co/48/523c2f/faf6eb?text=☕'"/>
-      <div class="flex-1 min-w-0">
-        <p class="font-medium text-sm truncate">${i.name}</p>
-        <p class="text-xs text-[var(--muted)]">${i.category} · <span class="text-[var(--gold)]">$${Number(i.price).toFixed(2)}</span></p>
+// ==========================================
+// LIVE ORDERS & HISTORY
+// ==========================================
+function renderOrders() {
+  const grid = document.getElementById('ordersGrid');
+  const noOrd = document.getElementById('noOrders');
+  const activeOrders = orders.filter(o => o.status === 'pending');
+  
+  if (activeOrders.length === 0) {
+    grid.innerHTML = ''; noOrd.classList.remove('hidden'); return;
+  }
+  noOrd.classList.add('hidden');
+
+  grid.innerHTML = activeOrders.map(o => {
+    const time = o.createdAt ? new Date(o.createdAt.toDate ? o.createdAt.toDate() : o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '';
+    
+    return `
+    <div class="bg-[#4e3b32] rounded-xl border border-[#d44e43]/40 overflow-hidden shadow-lg flex flex-col">
+      <div class="bg-[#d44e43]/20 p-3 border-b border-[#d44e43]/30 flex justify-between items-center">
+        <span class="font-bold text-[#d44e43]">Table ${o.tableNumber}</span>
+        <span class="text-xs text-gray-300">#${o.id.slice(-5).toUpperCase()} · ${time}</span>
       </div>
-      <div class="flex items-center gap-1.5 shrink-0 mr-1">
-        <span class="text-[9px] font-bold uppercase tracking-wide ${inStock ? "text-[var(--green)]" : "text-[var(--red)]"}">${inStock ? "In Stock" : "Out"}</span>
-        <label class="stock-toggle">
-          <input type="checkbox" ${inStock ? "checked" : ""} onchange="toggleStock('${i.id}',this.checked)"/>
-          <span class="stock-slider"></span>
-        </label>
+      <div class="p-4 flex-1 flex flex-col gap-3">
+        ${(o.items||[]).map(i => {
+           let opts = `S: ${i.sugar} | I: ${i.ice}`;
+           if(i.toppingsData?.length) opts += ` | +${i.toppingsData.length} Tops`;
+           return `
+           <div class="border-b border-[#5c453b] pb-2 last:border-0 last:pb-0">
+             <div class="flex justify-between text-sm">
+               <span class="font-bold">${i.qty}x ${i.name}</span>
+               <span>$${(i.price*i.qty).toFixed(2)}</span>
+             </div>
+             <p class="text-xs text-gray-400 mt-0.5">${opts}</p>
+           </div>`
+        }).join('')}
+        ${o.note ? `<div class="mt-2 p-2 bg-[#3a2a24] rounded border border-[#5c453b] text-xs text-gray-300">📝 ${o.note}</div>` : ''}
       </div>
-      <div class="flex gap-1.5 shrink-0">
-        <button onclick="openEditMenu('${i.id}')" class="b-btn text-xs px-2.5 py-1.5 rounded-full">✏️ Edit</button>
-        <button onclick="openDeleteModal('menu','${i.id}')" class="r-btn text-xs px-2.5 py-1.5 rounded-full">🗑</button>
+      <div class="bg-[#3a2a24] p-4 border-t border-[#5c453b] flex items-center justify-between mt-auto">
+        <span class="font-bold text-lg text-[#5db85b]">$${Number(o.total).toFixed(2)}</span>
+        <button onclick="completeOrder('${o.id}')" class="btn-success px-4 py-2 rounded font-bold text-sm shadow">Complete ✓</button>
       </div>
     </div>`;
-  }).join("");
+  }).join('');
 }
 
-window.toggleStock = async function(id, inStock) {
-  try { await updateDoc(doc(db, "menu", id), { inStock }); showToast(inStock ? "✅ Item marked available" : "🚫 Item marked out of stock"); loadMenuItems(); }
-  catch(e) { showToast("❌ Error updating stock"); console.error(e); }
+window.completeOrder = async function(id) {
+  try {
+    await updateDoc(doc(db, "orders", id), { status: "completed" });
+    showToast("Order Completed!");
+  } catch (e) { showToast("Error updating order", true); }
+}
+
+// Global variable to keep track of currently filtered orders for Telegram
+let currentHistoryFilteredOrders = []; 
+
+window.renderHistory = function() {
+  const startDate = document.getElementById('historyStartDate').value;
+  const endDate = document.getElementById('historyEndDate').value;
+  const tbody = document.getElementById('historyTableBody');
+  let filtered = orders;
+  
+  if(startDate || endDate) {
+    filtered = orders.filter(o => {
+      if(!o.createdAt) return false;
+      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
+      // adjust for local timezone to match date picker format YYYY-MM-DD
+      const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+      
+      if(startDate && iso < startDate) return false;
+      if(endDate && iso > endDate) return false;
+      return true;
+    });
+  }
+
+  currentHistoryFilteredOrders = filtered;
+
+  if(filtered.length === 0) {
+     tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">No orders found for this date range.</td></tr>`;
+     return;
+  }
+
+  tbody.innerHTML = filtered.map(o => {
+    const time = o.createdAt ? new Date(o.createdAt.toDate ? o.createdAt.toDate() : o.createdAt).toLocaleString() : '';
+    const itemsTxt = (o.items||[]).map(i => `${i.qty}x ${i.name}`).join(', ');
+    const statColor = o.status === 'completed' ? 'text-[#5db85b]' : o.status === 'cancelled' ? 'text-red-500' : 'text-[#d1a14a]';
+    
+    return `
+    <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
+      <td class="p-4">#${o.id.slice(-6).toUpperCase()}</td>
+      <td class="p-4 text-xs text-gray-400">${time}</td>
+      <td class="p-4">Table ${o.tableNumber}</td>
+      <td class="p-4 text-xs max-w-[200px] truncate" title="${itemsTxt}">${itemsTxt}</td>
+      <td class="p-4 font-bold">$${Number(o.total).toFixed(2)}</td>
+      <td class="p-4 font-bold ${statColor} uppercase text-xs">${o.status}</td>
+      <td class="p-4 text-right flex items-center justify-end gap-3 h-full pt-6">
+        <button onclick="sendSingleOrderToTelegram('${o.id}')" class="text-blue-400 hover:text-blue-300 transition" title="Send to Telegram">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+        </button>
+        <button onclick="openEditOrderModal('${o.id}')" class="text-gray-400 hover:text-[#5db85b] transition" title="Edit Status">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+        <button onclick="deleteOrderHistory('${o.id}')" class="text-gray-400 hover:text-[#d44e43] transition" title="Delete Order">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
 };
 
-// Edit Menu Item
-window.openEditMenu = function(id) {
-  const item = menuItems.find(m => m.id === id); if (!item) return;
-  document.getElementById("editMenuId").value = id; document.getElementById("em-name").value = item.name || "";
-  document.getElementById("em-price").value = item.price || ""; document.getElementById("em-cat").value = item.category || "";
-  document.getElementById("em-image").value = item.imageUrl || "";
+window.sendHistoryToTelegram = async function() {
+  if (currentHistoryFilteredOrders.length === 0) {
+    return showToast("No orders in the current list to send.", true);
+  }
+
+  const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
+  const TG_CHAT = "-1003706744326";
+
+  const startDate = document.getElementById('historyStartDate').value;
+  const endDate = document.getElementById('historyEndDate').value;
+  let periodStr = "All Time History";
+  if (startDate && endDate) periodStr = `${startDate} to ${endDate}`;
+  else if (startDate) periodStr = `From ${startDate}`;
+  else if (endDate) periodStr = `Until ${endDate}`;
+
+  let listTxt = "";
+  let listTotal = 0;
   
-  // reset file input
-  selectedEditImageFile = null;
-  document.getElementById("em-imageFile").value = "";
-  document.getElementById("em-imgFileName").textContent = "";
+  currentHistoryFilteredOrders.forEach(o => {
+    const time = o.createdAt ? new Date(o.createdAt.toDate ? o.createdAt.toDate() : o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '';
+    listTxt += `• <b>#${o.id.slice(-6).toUpperCase()}</b> (${time}) - $${Number(o.total).toFixed(2)} [${o.status.toUpperCase()}]\n`;
+    if(o.status === 'completed') listTotal += Number(o.total);
+  });
+
+  const msg = `📋 <b>Order List Export</b>\n\n📅 <b>Period:</b> ${periodStr}\n📦 <b>Total Orders:</b> ${currentHistoryFilteredOrders.length}\n💰 <b>Completed Sum:</b> $${listTotal.toFixed(2)}\n\n<b>Order Breakdown:</b>\n${listTxt}`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
+    });
+    showToast("List sent to Telegram!");
+  } catch (e) {
+    showToast("Failed to send list.", true);
+  }
+}
+
+window.sendSingleOrderToTelegram = async function(id) {
+  const o = orders.find(x => x.id === id);
+  if(!o) return;
+  const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
+  const TG_CHAT = "-1003706744326";
+
+  const itemLines = (o.items||[]).map(i => `  • ${i.qty}x ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join("\n");
+  const msg = `🧾 <b>Order Receipt Update</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n📌 Status: <b>${o.status.toUpperCase()}</b>\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`;
   
-  const m = document.getElementById("editMenuModal"); m.classList.remove("hidden"); m.style.display = "flex";
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
+    });
+    showToast("Order sent to Telegram!");
+  } catch (e) {
+    showToast("Failed to send order.", true);
+  }
 };
-window.closeEditMenu = function() { const m = document.getElementById("editMenuModal"); m.classList.add("hidden"); m.style.display = "none"; };
+
+window.deleteOrderHistory = async function(id) {
+  if(confirm("Permanently delete this order from history? This cannot be undone.")) {
+    try {
+      await deleteDoc(doc(db, "orders", id));
+      showToast("Order deleted.");
+    } catch(e) {
+      showToast("Error deleting order.", true);
+    }
+  }
+}
+
+window.openEditOrderModal = function(id) {
+  editingOrderId = id;
+  const o = orders.find(x => x.id === id);
+  if(!o) return;
+  document.getElementById('editOrderStatus').value = o.status || 'pending';
+  document.getElementById('editOrderModal').classList.remove('hidden');
+  document.getElementById('editOrderModal').style.display = 'flex';
+}
+window.closeEditOrderModal = function() {
+  editingOrderId = null;
+  document.getElementById('editOrderModal').classList.add('hidden');
+  document.getElementById('editOrderModal').style.display = 'none';
+}
+window.saveEditOrder = async function() {
+  if(!editingOrderId) return;
+  const status = document.getElementById('editOrderStatus').value;
+  try {
+    await updateDoc(doc(db, "orders", editingOrderId), { status });
+    closeEditOrderModal();
+    showToast("Status updated.");
+  } catch(e) { showToast("Error updating status.", true); }
+}
+
+// ==========================================
+// MENU MANAGER
+// ==========================================
+window.addMenuItem = async function() {
+  const name = document.getElementById("addName").value.trim();
+  const nameKh = document.getElementById("addNameKh").value.trim();
+  const price = parseFloat(document.getElementById("addPrice").value);
+  const cat = document.getElementById("addCat").value.trim();
+  const img = document.getElementById("addImage").value.trim();
+
+  if(!name || isNaN(price)) { showToast("Name and Price required", true); return; }
+
+  try {
+    await addDoc(collection(db, "menu"), {
+      name, nameKh, price, category: cat || 'Other', imageUrl: img, discount: 0, inStock: true
+    });
+    document.getElementById("addName").value = '';
+    document.getElementById("addNameKh").value = '';
+    document.getElementById("addPrice").value = '';
+    document.getElementById("addCat").value = '';
+    document.getElementById("addImage").value = '';
+    
+    // Force switch filter back to "All" to immediately see the newly added item
+    currentMenuCat = 'All';
+    const filterEl = document.getElementById('menuCatFilter');
+    if(filterEl) filterEl.value = 'All';
+    
+    showToast("Item added!");
+  } catch(e) { showToast("Error adding item", true); }
+}
+
+window.applyBulkDiscount = async function() {
+  const pctInput = document.getElementById("bulkDiscountInput").value;
+  const pct = parseInt(pctInput);
+  
+  if(pctInput === "" || isNaN(pct) || pct < 0 || pct > 100) {
+    return showToast("Enter a valid discount % (0-100)", true);
+  }
+
+  const itemsToUpdate = currentMenuCat === 'All' 
+    ? menuItems 
+    : menuItems.filter(m => (m.category || 'Other') === currentMenuCat);
+
+  if(itemsToUpdate.length === 0) return showToast("No items found to discount", true);
+
+  const confirmMsg = currentMenuCat === 'All' 
+    ? `Apply ${pct}% discount to ALL items on the menu?` 
+    : `Apply ${pct}% discount to all ${itemsToUpdate.length} items in '${currentMenuCat}'?`;
+
+  if(!confirm(confirmMsg)) return;
+
+  try {
+    const promises = itemsToUpdate.map(m => updateDoc(doc(db, "menu", m.id), { discount: pct }));
+    await Promise.all(promises);
+    document.getElementById("bulkDiscountInput").value = '';
+    showToast(`Bulk discount of ${pct}% applied!`);
+  } catch(e) {
+    showToast("Error applying bulk discount", true);
+  }
+}
+
+window.updateDiscount = async function(id, val) {
+  const discount = parseInt(val) || 0;
+  try { await updateDoc(doc(db, "menu", id), { discount }); } 
+  catch(e) { showToast("Error updating discount", true); }
+}
+
+window.deleteMenuItem = async function(id) {
+  if(!confirm("Delete this drink from the menu?")) return;
+  try { await deleteDoc(doc(db, "menu", id)); showToast("Deleted."); } 
+  catch(e) { showToast("Error deleting", true); }
+}
+
+window.openEditMenuModal = function(id) {
+  const item = menuItems.find(m => m.id === id);
+  if(!item) return;
+  editingMenuId = id;
+  document.getElementById('editName').value = item.name || '';
+  document.getElementById('editNameKh').value = item.nameKh || '';
+  document.getElementById('editPrice').value = item.price || 0;
+  document.getElementById('editCat').value = item.category || '';
+  document.getElementById('editImage').value = item.imageUrl || '';
+  
+  const m = document.getElementById("editMenuModal");
+  m.classList.remove("hidden");
+  m.style.display = "flex";
+};
+
+window.closeEditMenuModal = function() {
+  editingMenuId = null;
+  const m = document.getElementById("editMenuModal");
+  m.classList.add("hidden");
+  m.style.display = "none";
+};
 
 window.saveEditMenu = async function() {
-  const id = document.getElementById("editMenuId").value; 
-  const name = document.getElementById("em-name").value.trim();
-  const price = parseFloat(document.getElementById("em-price").value); 
-  const category = document.getElementById("em-cat").value;
-  let finalImageUrl = document.getElementById("em-image").value.trim();
-  const btn = document.getElementById("saveEditBtn");
-  
-  if (!name || isNaN(price) || !category) return;
-  
-  btn.disabled = true;
-  btn.textContent = "Saving...";
+  if(!editingMenuId) return;
+  const name = document.getElementById("editName").value.trim();
+  const nameKh = document.getElementById("editNameKh").value.trim();
+  const price = parseFloat(document.getElementById("editPrice").value);
+  const category = document.getElementById("editCat").value.trim() || 'Other';
+  const imageUrl = document.getElementById("editImage").value.trim();
+
+  if(!name || isNaN(price)) { showToast("Name and Price required", true); return; }
 
   try {
-    // If user selected a new file during edit, upload it first
-    if (selectedEditImageFile && storage) {
-      const fileName = `${Date.now()}_${selectedEditImageFile.name}`;
-      const storageRef = ref(storage, `menu_images/${fileName}`);
-      const uploadTask = await uploadBytesResumable(storageRef, selectedEditImageFile);
-      finalImageUrl = await getDownloadURL(uploadTask.ref);
-    }
-    
-    await updateDoc(doc(db, "menu", id), { name, price, category, imageUrl: finalImageUrl });
-    
-    closeEditMenu(); 
-    loadMenuItems(); 
-    showToast("Item updated ✓");
+    await updateDoc(doc(db, "menu", editingMenuId), {
+      name, nameKh, price, category, imageUrl
+    });
+    closeEditMenuModal();
+    showToast("Drink updated!");
   } catch(e) {
-    console.error(e); showToast("❌ Error updating item");
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Save Changes";
+    console.error(e);
+    showToast("Error updating drink", true);
   }
 };
 
-// Stats + Weekly
-function computeStats() {
-  const total = allOrders.length; const pending = allOrders.filter(o => o.status === "pending").length;
-  const done = allOrders.filter(o => o.status === "completed").length; const rev = allOrders.reduce((s, o) => s + Number(o.total || 0), 0);
-  document.getElementById("st-total").textContent = total; document.getElementById("st-pending").textContent = pending;
-  document.getElementById("st-done").textContent = done; document.getElementById("st-rev").textContent = `$${rev.toFixed(2)}`;
-  
-  const counts = {}; allOrders.forEach(o => (o.items || []).forEach(i => { counts[i.name] = (counts[i.name] || 0) + i.qty; }));
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  const topEl = document.getElementById("topItems");
-  if (!sorted.length) { topEl.innerHTML = "<p>No data yet.</p>"; }
-  else {
-    topEl.innerHTML = sorted.map(([name, qty], idx) => `
-      <div class="flex items-center gap-3">
-        <span class="text-xs w-4 text-center text-[var(--muted)]">${idx + 1}</span>
-        <div class="flex-1 bg-[#faf6eb]/10 rounded-full h-1.5"><div class="bg-[var(--gold)] h-1.5 rounded-full" style="width:${(qty / sorted[0][1] * 100).toFixed(0)}%"></div></div>
-        <span class="text-xs w-24 truncate text-[var(--txt)]">${name}</span>
-        <span class="mono text-xs text-[var(--gold)]">×${qty}</span>
-      </div>`).join("");
-  }
+window.filterMenu = function() {
+  currentMenuCat = document.getElementById('menuCatFilter').value;
+  renderMenuTable();
+};
 
-  const startEl = document.getElementById("rep-start");
-  const endEl = document.getElementById("rep-end");
-  if (!startEl.value) {
-    const now = new Date();
-    const sun = new Date(now); sun.setDate(now.getDate() - now.getDay());
-    const fmt = d => { const m = d.getMonth() + 1, D = d.getDate(); return `${d.getFullYear()}-${m < 10 ? '0' + m : m}-${D < 10 ? '0' + D : D}`; };
-    startEl.value = fmt(sun);
-    endEl.value = fmt(now);
-  }
-  computeReport();
+function updateCategoryDropdown() {
+  const select = document.getElementById('menuCatFilter');
+  if (!select) return;
+  const cats = [...new Set(menuItems.map(m => m.category || 'Other'))];
+  let html = `<option value="All">All Categories</option>`;
+  cats.forEach(c => {
+    html += `<option value="${c}" ${currentMenuCat === c ? 'selected' : ''}>${c}</option>`;
+  });
+  select.innerHTML = html;
 }
 
-window.computeReport = function() {
-  const startStr = document.getElementById("rep-start").value;
-  const endStr = document.getElementById("rep-end").value;
-  const subPct = parseFloat(document.getElementById("rep-discount").value) || 0;
+function renderMenuTable() {
+  const tbody = document.getElementById("menuTableBody");
+  const filtered = currentMenuCat === 'All' ? menuItems : menuItems.filter(m => (m.category || 'Other') === currentMenuCat);
   
-  if(!startStr || !endStr) return;
-  
-  const start = new Date(startStr); start.setHours(0, 0, 0, 0);
-  const end = new Date(endStr); end.setHours(23, 59, 59, 999);
-  
-  const repOrders = allOrders.filter(o => { 
-    if (!o.createdAt?.toDate) return false; 
-    const d = o.createdAt.toDate(); 
-    return d >= start && d <= end; 
-  });
-  
-  const gross = repOrders.reduce((s, o) => s + Number(o.total || 0), 0);
-  const discount = gross * (subPct / 100); 
-  const net = gross - discount;
-  
-  document.getElementById("wk-orders").textContent = repOrders.length; 
-  document.getElementById("wk-gross").textContent = `$${gross.toFixed(2)}`;
-  document.getElementById("wk-discount-lbl").textContent = `Subtract (${subPct}%)`;
-  document.getElementById("wk-discount").textContent = `-$${discount.toFixed(2)}`; 
-  document.getElementById("wk-net").textContent = `$${net.toFixed(2)}`;
+  tbody.innerHTML = filtered.map(m => {
+    const finalPrice = m.price * (1 - (m.discount||0)/100);
+    return `
+    <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
+      <td class="p-4 flex items-center gap-3">
+        <img src="${m.imageUrl || 'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-10 h-10 rounded shadow object-cover border border-[#5c453b]" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'">
+        <div>
+          <div class="font-medium">${m.name}</div>
+          <div class="text-xs text-gray-400">${m.nameKh || ''}</div>
+        </div>
+      </td>
+      <td class="p-4"><span class="bg-[#3a2a24] border border-[#5c453b] px-2 py-1 rounded text-xs">${m.category}</span></td>
+      <td class="p-4">$${Number(m.price).toFixed(2)}</td>
+      <td class="p-4">
+        <div class="flex items-center gap-1 bg-[#3a2a24] border border-[#5c453b] rounded p-1 w-[80px]">
+          <input type="number" min="0" max="100" value="${m.discount||0}" onchange="updateDiscount('${m.id}', this.value)" class="w-full bg-transparent text-center border-none p-0 text-[#d44e43] font-bold focus:ring-0">
+          <span class="pr-2 text-gray-400 text-xs">%</span>
+        </div>
+      </td>
+      <td class="p-4 text-[#5db85b] font-bold">$${finalPrice.toFixed(2)}</td>
+      <td class="p-4 text-right">
+        <button onclick="openEditMenuModal('${m.id}')" class="text-gray-400 hover:text-[#5db85b] transition mr-2" title="Edit">
+          <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+        <button onclick="deleteMenuItem('${m.id}')" class="text-gray-400 hover:text-[#d44e43] transition" title="Delete">
+          <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ==========================================
+// TOPPINGS MANAGER
+// ==========================================
+window.openAddToppingModal = () => {
+  const m = document.getElementById("toppingModal");
+  m.classList.remove("hidden");
+  m.style.display = "flex";
 };
+window.closeAddToppingModal = () => {
+  const m = document.getElementById("toppingModal");
+  m.classList.add("hidden");
+  m.style.display = "none";
+};
+window.saveTopping = async function() {
+  const name = document.getElementById("topName").value.trim();
+  const nameKh = document.getElementById("topNameKh").value.trim();
+  const price = parseFloat(document.getElementById("topPrice").value);
+  
+  if(!name) { showToast("Topping name is required!", true); return; }
+  if(isNaN(price) || price < 0) { showToast("Valid price is required!", true); return; }
 
-window.sendWeeklyReport = async function() {
-  const startStr = document.getElementById("rep-start").value;
-  const endStr = document.getElementById("rep-end").value;
-  const subPct = parseFloat(document.getElementById("rep-discount").value) || 0;
-  const note = document.getElementById("rep-note").value.trim();
-
-  const start = new Date(startStr); start.setHours(0, 0, 0, 0);
-  const end = new Date(endStr); end.setHours(23, 59, 59, 999);
-  
-  const repOrders = allOrders.filter(o => { 
-    if (!o.createdAt?.toDate) return false; 
-    const d = o.createdAt.toDate(); 
-    return d >= start && d <= end; 
-  });
-  
-  const gross = repOrders.reduce((s, o) => s + Number(o.total || 0), 0);
-  const discount = gross * (subPct / 100); 
-  const net = gross - discount;
-  
-  const fmt = d => d.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
-  const orderLines = repOrders.map(o => `  • Table ${o.tableNumber} — $${Number(o.total).toFixed(2)} [${o.status}]`).join("\n") || "  No orders this period.";
-  
-  let msg = `📊 <b>Custom Report</b>\n📅 ${fmt(start)} – ${fmt(end)}\n\n`;
-  msg += `📦 Total Orders: <b>${repOrders.length}</b>\n`;
-  msg += `💰 Gross Total: <b>$${gross.toFixed(2)}</b>\n`;
-  if(subPct > 0) msg += `🏷 Subtract (${subPct}%): <b>-$${discount.toFixed(2)}</b>\n`;
-  msg += `✅ <b>Net Total: $${net.toFixed(2)}</b>\n\n`;
-  if(note) msg += `📝 <b>Note for Customer:</b>\n${note}\n\n`;
-  msg += `<b>Orders:</b>\n${orderLines}`;
-  
-  const btn = document.querySelector('button[onclick="sendWeeklyReport()"]');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = "Sending...";
-  btn.disabled = true;
   try {
-    await tg(msg); 
-    showToast("✅ Report sent to Telegram!");
-  } finally {
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-  }
+    await addDoc(collection(db, "toppings"), { name, nameKh, price });
+    closeAddToppingModal();
+    document.getElementById("topName").value = '';
+    document.getElementById("topNameKh").value = '';
+    document.getElementById("topPrice").value = '';
+    showToast("Topping added!");
+  } catch(e) { showToast("Error: " + e.message, true); }
+}
+
+window.deleteTopping = async function(id) {
+  if(!confirm("Remove this topping?")) return;
+  try { await deleteDoc(doc(db, "toppings", id)); } catch(e) {}
+}
+
+window.openEditToppingModal = function(id) {
+  const t = toppings.find(x => x.id === id);
+  if(!t) return;
+  editingToppingId = id;
+  document.getElementById("editTopName").value = t.name || '';
+  document.getElementById("editTopNameKh").value = t.nameKh || '';
+  document.getElementById("editTopPrice").value = t.price || 0;
+  
+  const m = document.getElementById("editToppingModal");
+  m.classList.remove("hidden");
+  m.style.display = "flex";
 };
 
-// Helpers
-function showToast(msg) {
-  const el = document.getElementById("toast"); el.textContent = msg; el.style.opacity = "1"; el.style.transform = "translateX(-50%) translateY(0)";
-  clearTimeout(el._t); el._t = setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(-50%) translateY(12px)"; }, 2800);
+window.closeEditToppingModal = function() {
+  editingToppingId = null;
+  const m = document.getElementById("editToppingModal");
+  m.classList.add("hidden");
+  m.style.display = "none";
 }
-window.showToast = showToast;
-const style = document.createElement("style"); style.textContent = "@keyframes spin{to{transform:rotate(360deg)}}"; document.head.appendChild(style);
+
+window.saveEditTopping = async function() {
+  if(!editingToppingId) return;
+  const name = document.getElementById("editTopName").value.trim();
+  const nameKh = document.getElementById("editTopNameKh").value.trim();
+  const price = parseFloat(document.getElementById("editTopPrice").value);
+  
+  if(!name) { showToast("Topping name is required!", true); return; }
+  if(isNaN(price) || price < 0) { showToast("Valid price is required!", true); return; }
+
+  try {
+    await updateDoc(doc(db, "toppings", editingToppingId), { name, nameKh, price });
+    closeEditToppingModal();
+    showToast("Topping updated!");
+  } catch(e) { showToast("Error updating topping", true); }
+}
+
+function renderToppings() {
+  const grid = document.getElementById("toppingsGrid");
+  grid.innerHTML = toppings.map(t => `
+    <div class="bg-[#4e3b32] border border-[#5c453b] p-4 rounded-xl flex justify-between items-center shadow-sm">
+      <div>
+        <p class="font-bold text-sm">${t.name}</p>
+        <p class="text-[10px] text-gray-400 mb-1">${t.nameKh || ''}</p>
+        <p class="text-[#5db85b] font-semibold text-sm">+$${Number(t.price).toFixed(2)}</p>
+      </div>
+      <div class="flex gap-1">
+        <button onclick="openEditToppingModal('${t.id}')" class="text-gray-400 hover:text-[#5db85b] p-2 transition">
+           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+        <button onclick="deleteTopping('${t.id}')" class="text-gray-400 hover:text-[#d44e43] p-2 transition">
+           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Init
+fetchData();
+
 </script>
 </body>
 </html>

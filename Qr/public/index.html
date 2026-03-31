@@ -45,6 +45,10 @@ select option{background:var(--sur);}
 .lang-opt{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;cursor:pointer;transition:background .15s;}
 .lang-opt:hover{background:var(--sur2);}
 .lang-opt.active{color:var(--gold);}
+
+/* Customizer styles */
+.opt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
+.top-box.active{border-color:var(--green);background:rgba(72,168,99,0.05);}
 </style>
 </head>
 <body>
@@ -123,30 +127,89 @@ select option{background:var(--sur);}
     <p class="text-xs text-[var(--muted)]" id="c-sub">Review before placing</p></div>
     <button onclick="closeCart()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl w-8 h-8 flex items-center justify-center cursor-pointer">×</button>
   </div>
-  <div class="px-5 py-3 border-b border-[var(--bdr)] bg-[var(--sur2)]">
-    <label class="text-xs text-[var(--muted)] block mb-1.5" id="c-table-lbl">Table Number</label>
-    <select id="cartTable" class="w-full rounded-xl px-4 py-2.5 text-sm transition-colors mb-3">
-      <option value="" id="c-table-ph">— Select your table —</option>
-    </select>
-    <label class="text-xs text-[var(--muted)] block mb-1.5">Special Instructions</label>
-    <textarea id="cartNote" rows="2" placeholder="e.g. Less sweet, no ice..." class="w-full rounded-xl px-4 py-2.5 text-sm transition-colors bg-[var(--bg)] border border-[var(--bdr)] text-[var(--txt)] focus:outline-none focus:border-[var(--gold)]"></textarea>
-  </div>
-  <div id="cartItems" class="flex-1 overflow-y-auto px-5 py-4 space-y-2.5"></div>
-  <div id="cartEmpty" class="flex-1 items-center justify-center flex-col gap-3 hidden">
+  
+  <!-- CART ITEMS -->
+  <div id="cartItems" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
+  <div id="cartEmpty" class="flex-1 items-center justify-center flex-col gap-3 hidden bg-[var(--bg)]">
     <div class="w-16 h-16 rounded-full border border-[var(--bdr)] flex items-center justify-center opacity-25">
       <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
     </div>
     <p class="text-[var(--muted)] text-sm" id="c-empty">Your cart is empty</p>
   </div>
-  <div class="border-t border-[var(--bdr)] px-5 py-4 bg-[var(--sur2)]">
-    <div class="flex justify-between items-center mb-4">
-      <span class="text-[var(--muted)] text-sm" id="c-total-lbl">Total</span>
-      <span id="cartTotal" class="text-2xl serif text-[var(--gold)]">$0.00</span>
+
+  <!-- BOTTOM UI: Table, Note & Total -->
+  <div class="border-t border-[var(--bdr)] bg-[var(--sur2)]">
+    <!-- Table & Note Row -->
+    <div class="px-5 py-4 border-b border-[var(--bdr)] flex gap-4">
+      <div class="w-1/3">
+        <label class="text-[10px] text-[var(--muted)] uppercase font-semibold tracking-wide block mb-1" id="c-table-lbl">Table No.</label>
+        <select id="cartTable" class="w-full bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-2 py-2 text-sm font-bold text-center text-[var(--gold)] focus:border-[var(--gold)] outline-none shadow-sm transition">
+          <option value="" id="c-table-ph">—</option>
+        </select>
+      </div>
+      <div class="flex-1">
+        <label class="text-[10px] text-[var(--muted)] uppercase font-semibold tracking-wide block mb-1" id="c-note-lbl">Note</label>
+        <input type="text" id="cartNote" placeholder="Any special requests?" class="w-full bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-3 py-2 text-sm focus:border-[var(--gold)] outline-none shadow-sm transition" />
+      </div>
     </div>
-    <button onclick="placeOrder()" id="placeBtn" class="g-btn w-full py-3.5 rounded-2xl text-sm tracking-wide">Place Order</button>
-    <button onclick="clearCart()" class="mt-2 w-full py-2 text-xs text-[var(--muted)] hover:text-[var(--gold)] transition-colors cursor-pointer" id="c-clear">Clear cart</button>
+    
+    <!-- Total Row -->
+    <div class="px-5 py-4">
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-[var(--muted)] text-sm font-semibold" id="c-total-lbl">Total</span>
+        <span id="cartTotal" class="text-3xl serif font-bold text-[var(--gold)]">$0.00</span>
+      </div>
+      <button onclick="placeOrder()" id="placeBtn" class="g-btn w-full py-4 rounded-xl text-sm tracking-wide font-bold shadow-lg shadow-red-900/10">Place Order</button>
+      <button onclick="clearCart()" class="mt-3 w-full py-1 text-xs text-[var(--muted)] hover:text-[var(--gold)] transition-colors cursor-pointer" id="c-clear">Clear cart</button>
+    </div>
   </div>
 </aside>
+
+<!-- CUSTOMIZE MODAL -->
+<div id="customModal" class="fixed inset-0 z-[998] bg-black/60 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-5 w-full max-w-sm mx-4 shadow-2xl fade-up flex flex-col max-h-[85vh]">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="serif text-2xl text-[var(--gold)]" id="cm-title">Drink Name</h3>
+      <button onclick="closeCustomModal()" class="text-2xl text-[var(--muted)] hover:text-[var(--txt)]">&times;</button>
+    </div>
+    
+    <div class="overflow-y-auto flex-1 no-scrollbar space-y-5 pb-4">
+      <!-- Sugar -->
+      <div>
+        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
+        <div class="flex gap-2">
+          <button onclick="setSugar('0%')" id="sug-0" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">0%</button>
+          <button onclick="setSugar('25%')" id="sug-25" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">25%</button>
+          <button onclick="setSugar('50%')" id="sug-50" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">50%</button>
+          <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">100%</button>
+        </div>
+      </div>
+      <!-- Ice -->
+      <div>
+        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
+        <div class="flex gap-2">
+          <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">0%</button>
+          <button onclick="setIce('50%')" id="ice-50" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">50%</button>
+          <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">100%</button>
+        </div>
+      </div>
+      <!-- Toppings -->
+      <div>
+        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-top-lbl">Toppings</label>
+        <div class="space-y-2" id="cm-top-list">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-[var(--bdr)] mt-auto">
+      <button onclick="saveCustomization()" class="g-btn w-full py-3.5 rounded-2xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/10">
+        <span id="cm-add-btn-txt">Save Changes</span>
+        <span class="font-bold text-lg" id="cm-price">$0.00</span>
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- MY ORDERS OVERLAY & PANEL -->
 <div id="myOrdersOverlay" onclick="closeMyOrders()" class="fixed inset-0 bg-black/60 z-50 hidden" style="backdrop-filter:blur(4px)"></div>
@@ -191,7 +254,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ==========================================
-// 1. SAFE STORAGE (Prevents app crashes in Incognito/In-App Browsers)
+// 1. SAFE STORAGE
 // ==========================================
 const safeStorage = {
   get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
@@ -217,17 +280,23 @@ try {
   db = getFirestore(app);
 } catch (err) {
   console.error("Firebase Initialization Failed:", err);
-  // App will survive and use fallback data if this happens
 }
 
 const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
-const TG_CHAT = "-1003706744326"; // CHANGE THIS TO YOUR GROUP ID e.g., "-100123456789"
+const TG_CHAT = "-1003706744326"; 
 
 async function sendTelegramAlert(order, orderId) {
   try {
-    const itemLines = order.items.map(i => `  • ${i.name} ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})`).join("\n");
+    const itemLines = order.items.map(i => {
+      let opts = `S: ${i.sugar} | I: ${i.ice}`;
+      if(i.toppingsData && i.toppingsData.length) {
+        opts += ` | T: ${i.toppingsData.map(t=> lang==='kh' && t.nameKh ? t.nameKh : t.name).join(', ')}`;
+      }
+      return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i style="color:gray;font-size:12px">[${opts}]</i>`;
+    }).join("\n");
+
     const noteText = order.note ? `\n📝 <b>Note:</b> ${order.note}\n` : "";
-    const msg = `🔔 <b>New Order!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
+    const msg = `🛍️ <b>New Order (ការបញ្ជាទិញថ្មី)!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
@@ -241,25 +310,27 @@ async function sendTelegramAlert(order, orderId) {
 const T = {
   en: {
     sub:"Order", welcome:"Welcome to", tagline:"Freshly brewed · Crafted with care", cart:"Cart", myorders:"My Orders",
-    tableLbl:"Table Number", tablePH:"— Select your table —", cartTitle:"Your Order", cartSub:"Review before placing",
+    tableLbl:"Table No.", tablePH:"—", cartTitle:"Your Order", cartSub:"Review before placing",
     totalLbl:"Total", place:"Place Order", clear:"Clear cart", emptyCart:"Your cart is empty",
     confirmTitle:"Order Placed! 🎉", confirmMsg:"We're preparing your order.", confirmBtn:"Done",
     cancelTitle:"Cancel Order?", cancelMsg:"This will remove your order from the queue.", cancelNo:"No, keep it", cancelYes:"Cancel Order",
     moTitle:"My Orders", status:{pending:"Pending ⏳", completed:"Completed ✓", cancelled:"Cancelled ✗"},
-    addedToast:"added to cart", cancelToast:"Order cancelled.", noItems:"No items in this category.", tableFor:"Table", outOfStock:"Out of Stock"
+    addedToast:"added to cart", cancelToast:"Order cancelled.", noItems:"No items in this category.", tableFor:"Table", outOfStock:"Out of Stock",
+    sugar: "Sugar Level", ice: "Ice Level", toppings: "Toppings", saveChanges: "Save Changes", customize: "Customize", note: "Note"
   },
   kh: {
     sub:"បញ្ជាទិញ", welcome:"សូមស្វាគមន៍", tagline:"ភេសជ្ជៈស្រស់ · ផលិតដោយចិត្ត", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
-    tableLbl:"លេខតុ", tablePH:"— ជ្រើសតុ —", cartTitle:"ការបញ្ជាទិញ", cartSub:"ពិនិត្យមុនបញ្ជា",
+    tableLbl:"លេខតុ", tablePH:"—", cartTitle:"ការបញ្ជាទិញ", cartSub:"ពិនិត្យមុនបញ្ជា",
     totalLbl:"សរុប", place:"ដាក់ការបញ្ជា", clear:"លុបកន្ត្រក", emptyCart:"កន្ត្រករបស់អ្នកទទេ",
     confirmTitle:"បានជោគជ័យ! 🎉", confirmMsg:"យើងកំពុងរៀបចំ។", confirmBtn:"រួចរាល់",
     cancelTitle:"លុបការបញ្ជា?", cancelMsg:"ការបញ្ជារបស់អ្នកនឹងត្រូវដក។", cancelNo:"ទេ", cancelYes:"លុបចោល",
     moTitle:"ការបញ្ជារបស់ខ្ញុំ", status:{pending:"រង់ចាំ ⏳", completed:"បានបញ្ចប់ ✓", cancelled:"បានលុប ✗"},
-    addedToast:"បានបន្ថែម", cancelToast:"បានលុបការបញ្ជា", noItems:"មិនមានទំនិញ", tableFor:"តុ", outOfStock:"អស់ស្តុក"
+    addedToast:"បានបន្ថែម", cancelToast:"បានលុបការបញ្ជា", noItems:"មិនមានទំនិញ", tableFor:"តុ", outOfStock:"អស់ស្តុក",
+    sugar: "កម្រិតស្ករ", ice: "កម្រិតទឹកកក", toppings: "ថែម (Toppings)", saveChanges: "រក្សាទុក", customize: "កែតម្រូវ", note: "ចំណាំ"
   }
 };
 
-let lang = safeStorage.get("chafe_lang") || "en";
+let lang = safeStorage.get("chafe_lang") || "kh"; 
 let cancelTargetId = null;
 
 window.setLang = function(l) {
@@ -293,62 +364,60 @@ function applyLang() {
   set("conf-btn", tx.confirmBtn); set("can-title", tx.cancelTitle); set("can-msg", tx.cancelMsg);
   set("can-no", tx.cancelNo); set("can-yes", tx.cancelYes); set("mo-title", tx.moTitle);
   set("c-table-ph", tx.tablePH); set("emptyMenu", tx.noItems);
+  
+  set("cm-sugar-lbl", tx.sugar); set("cm-ice-lbl", tx.ice); set("cm-top-lbl", tx.toppings);
+  set("cm-add-btn-txt", tx.saveChanges); set("c-note-lbl", tx.note);
+
   if(currentItems.length > 0) renderMenu(currentItems);
   renderCart();
   renderMyOrders();
 }
 
-// Initial Language Setup
-document.getElementById("langFlag").textContent = lang === "kh" ? "🇰🇭" : "🇬🇧";
-document.getElementById("langLabel").textContent = lang === "kh" ? "KH" : "EN";
-document.querySelectorAll(".lang-opt")[lang === "en" ? 0 : 1]?.classList.add("active");
-
 // ==========================================
-// 4. TABLES & MENU LOGIC
+// 4. DATA & MENU LOGIC
 // ==========================================
 function buildTableOptions() {
   const sel = document.getElementById("cartTable");
   const tx = t();
-  sel.innerHTML = `<option value="">${tx.tablePH}</option>`;
-  for (let i = 1; i <= 20; i++) sel.innerHTML += `<option value="${i}">${tx.tableFor} ${i}</option>`;
+  sel.innerHTML = `<option value="" disabled selected id="c-table-ph">${tx.tablePH}</option>`;
+  for (let i = 1; i <= 20; i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
   const saved = safeStorage.get("chafe_table");
   if (saved) sel.value = saved;
 }
 document.getElementById("cartTable").addEventListener("change", e => safeStorage.set("chafe_table", e.target.value));
 
-let allItems = [], currentItems = [], currentCat = "All", cart = [];
+let allItems = [], currentItems = [], currentCat = "All", cart = [], allToppings = [];
 
-// Bulletproof Load Menu
-async function loadMenu() {
+async function loadData() {
   try {
     if (!db) throw new Error("Firebase DB not initialized.");
-    
-    // Strict 8-second timeout. If it hangs, it catches.
+    try {
+       const tSnap = await getDocs(collection(db, "toppings"));
+       allToppings = tSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) { console.warn("Could not load toppings from DB"); }
+
     const snap = await Promise.race([
       getDocs(collection(db, "menu")),
       new Promise((_, reject) => setTimeout(() => reject(new Error("Firebase Timeout")), 8000))
     ]);
-    
     allItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
   } catch (error) {
-    console.error("Menu Load Error:", error.message);
-    // FALLBACK DATA: Guaranteed to render even if Firebase is fully down.
-    allItems = [
-      { id: "1", name: "Thai Milk Tea", price: 4.50, category: "Milk Tea", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Thai+Tea", inStock: true },
-      { id: "2", name: "Iced Coffee", price: 3.50, category: "Coffee", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Coffee", inStock: true },
-      { id: "3", name: "Matcha Latte", price: 5.00, category: "Matcha", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Matcha", inStock: true },
-      { id: "4", name: "Strawberry Soda", price: 3.00, category: "Soda", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Strawberry", inStock: true }
+    console.warn("Using Fallback Mock Data");
+    allToppings = [
+      { id: "t1", name: "Boba", nameKh: "គុជ", price: 0.50 },
+      { id: "t2", name: "Coffee Jelly", nameKh: "ចាហួយកាហ្វេ", price: 0.50 },
+      { id: "t3", name: "Cheese Foam", nameKh: "ហ្វូមឈីស", price: 0.75 }
     ];
-    showToast("⚠️ Operating in Offline Mode");
+    allItems = [
+      { id: "1", name: "Thai Milk Tea", nameKh: "តែទឹកដោះគោថៃ", price: 4.50, category: "Milk Tea", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Thai+Tea", inStock: true, discount: 10 },
+      { id: "2", name: "Iced Coffee", nameKh: "កាហ្វេទឹកកក", price: 3.50, category: "Coffee", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Coffee", inStock: true },
+      { id: "3", name: "Matcha Latte", nameKh: "តែបៃតងទឹកដោះគោ", price: 5.00, category: "Matcha", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Matcha", inStock: true, discount: 15 }
+    ];
   } finally {
-    // This MUST run to clear the skeletons
-    try {
-      buildCats();
-      filterByCat("All");
-      document.getElementById("menuSkeleton").classList.add("hidden");
-    } catch (e) {
-      console.error("Error rendering menu interface:", e);
-    }
+    buildCats();
+    filterByCat("All");
+    document.getElementById("menuSkeleton").classList.add("hidden");
   }
 }
 
@@ -369,28 +438,35 @@ window.filterByCat = function(cat) {
 function renderMenu(items) {
   const grid = document.getElementById("menuGrid");
   const empty = document.getElementById("emptyMenu");
-  if (!items || !items.length) {
-    grid.classList.add("hidden");
-    empty.classList.remove("hidden");
-    return;
-  }
-  empty.classList.add("hidden");
-  grid.classList.remove("hidden");
+  if (!items || !items.length) { grid.classList.add("hidden"); empty.classList.remove("hidden"); return; }
+  empty.classList.add("hidden"); grid.classList.remove("hidden");
+  
   const tx = t();
   grid.innerHTML = items.map((item, idx) => {
     const outOfStock = item.inStock === false;
+    const dName = lang === 'kh' && item.nameKh ? item.nameKh : item.name;
+    const discount = item.discount || 0;
+    const calcPrice = discount > 0 ? item.price * (1 - discount/100) : item.price;
+    
+    const priceHTML = discount > 0 
+      ? `<div class="flex flex-col items-end leading-none"><span class="text-[10px] text-[var(--muted)] line-through">$${Number(item.price).toFixed(2)}</span><span class="text-[var(--gold)] font-semibold text-sm">$${calcPrice.toFixed(2)}</span></div>`
+      : `<span class="text-[var(--gold)] font-semibold text-sm">$${Number(item.price).toFixed(2)}</span>`;
+
+    const badgeHTML = discount > 0 ? `<span class="absolute top-2 left-2 bg-[var(--red)] text-[#faf6eb] text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">-${discount}%</span>` : ``;
+
     return `<div class="m-card${outOfStock ? " out-stock" : ""} rounded-2xl overflow-hidden flex flex-col fade-up" style="animation-delay:${idx*35}ms">
       <div class="relative h-36 bg-[var(--sur2)] overflow-hidden">
         <img src="${item.imageUrl || 'https://placehold.co/300x200/f5ece3/3c2a21?text=☕'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/f5ece3/3c2a21?text=☕'"/>
         <div class="absolute inset-0 bg-gradient-to-t from-[#3c2a21]/60 to-transparent"></div>
+        ${badgeHTML}
         <span class="absolute top-2 right-2 bg-[#3c2a21]/80 text-[#faf6eb] text-[9px] px-2 py-0.5 rounded-full border border-[var(--gold)]/50 uppercase tracking-wide" style="backdrop-filter:blur(4px)">${item.category || ""}</span>
         ${outOfStock ? `<div class="out-stock-badge"><span class="text-white text-xs font-bold tracking-wide uppercase bg-black/70 px-3 py-1 rounded-full">${tx.outOfStock}</span></div>` : ""}
       </div>
       <div class="p-3 flex flex-col flex-1">
-        <h3 class="text-sm font-medium leading-snug flex-1 mb-2">${item.name}</h3>
+        <h3 class="text-sm font-medium leading-snug flex-1 mb-2">${dName}</h3>
         <div class="flex items-center justify-between">
-          <span class="text-[var(--gold)] font-semibold text-sm">$${Number(item.price).toFixed(2)}</span>
-          ${outOfStock ? `<span class="text-xs text-[var(--muted)] border border-[var(--bdr)] px-2 py-1 rounded-full">${tx.outOfStock}</span>` : `<button class="add-btn px-3 py-1.5 rounded-full" onclick='addToCart(${JSON.stringify(item).replace(/'/g,"&#39;").replace(/"/g,"&quot;")})'>+ Add</button>`}
+          ${priceHTML}
+          ${outOfStock ? `<span class="text-xs text-[var(--muted)] border border-[var(--bdr)] px-2 py-1 rounded-full">${tx.outOfStock}</span>` : `<button class="add-btn px-4 py-1.5 rounded-full font-bold shadow-sm" onclick='quickAddToCart(${JSON.stringify(item).replace(/'/g,"&#39;").replace(/"/g,"&quot;")})'>+ Add</button>`}
         </div>
       </div>
     </div>`;
@@ -398,24 +474,129 @@ function renderMenu(items) {
 }
 
 // ==========================================
-// 5. CART LOGIC
+// 5. CART & CUSTOMIZE LOGIC (NEW SIMPLE ADD)
 // ==========================================
-window.addToCart = function(item) {
-  if (item.inStock === false) return;
-  const ex = cart.find(c => c.id === item.id);
-  if (ex) ex.qty++; else cart.push({ ...item, qty: 1 });
-  renderCart();
-  showToast(`✓ ${item.name} ${t().addedToast}`);
-  const b = document.getElementById("cartBadge");
-  b.classList.add("pop-anim");
-  setTimeout(() => b.classList.remove("pop-anim"), 300);
+window.quickAddToCart = function(itemStr) {
+   const item = typeof itemStr === 'string' ? JSON.parse(itemStr) : itemStr;
+   const discount = item.discount || 0;
+   const basePrice = discount > 0 ? item.price * (1 - discount/100) : item.price;
+   
+   cart.push({
+      cartId: 'cart_' + Date.now() + Math.random().toString(36).substr(2, 5),
+      id: item.id,
+      name: item.name,
+      nameKh: item.nameKh,
+      imageUrl: item.imageUrl,
+      basePrice: basePrice, // Store original base price without toppings
+      price: basePrice,     // Current final price
+      qty: 1,
+      sugar: "100%",
+      ice: "100%",
+      toppingsData: []
+   });
+   
+   renderCart();
+   const dName = lang === 'kh' && item.nameKh ? item.nameKh : item.name;
+   showToast(`✓ ${dName} ${t().addedToast}`);
+   const b = document.getElementById("cartBadge");
+   b.classList.add("pop-anim"); setTimeout(() => b.classList.remove("pop-anim"), 300);
 };
 
-window.changeQty = function(id, d) {
-  const item = cart.find(c => c.id === id);
+let editingCartId = null;
+let customItem = null;
+let selectedSugar = "100%";
+let selectedIce = "100%";
+let selectedTops = [];
+
+window.editCartItem = function(cartId) {
+   editingCartId = cartId;
+   const cartItem = cart.find(c => c.cartId === cartId);
+   if(!cartItem) return;
+   
+   customItem = cartItem;
+   selectedSugar = cartItem.sugar;
+   selectedIce = cartItem.ice;
+   selectedTops = cartItem.toppingsData.map(t => t.id);
+
+   const dName = lang === 'kh' && cartItem.nameKh ? cartItem.nameKh : cartItem.name;
+   document.getElementById("cm-title").textContent = dName;
+   
+   // Render toppings list
+   document.getElementById("cm-top-list").innerHTML = allToppings.map(t => {
+     const tName = lang === 'kh' && t.nameKh ? t.nameKh : t.name;
+     const isAct = selectedTops.includes(t.id) ? "active" : "";
+     return `
+     <div onclick="toggleTop('${t.id}')" id="top-${t.id}" class="top-box ${isAct} flex justify-between items-center p-3 border border-[var(--bdr)] rounded-xl cursor-pointer hover:border-[var(--gold)] transition-colors">
+       <span class="text-sm">${tName}</span>
+       <span class="text-xs text-[var(--gold)] font-medium">+$${Number(t.price).toFixed(2)}</span>
+     </div>`;
+   }).join('');
+
+   setSugar(selectedSugar);
+   setIce(selectedIce);
+   updateCustomPrice();
+
+   const m = document.getElementById("customModal");
+   m.classList.remove("hidden"); m.style.display = "flex";
+};
+
+window.closeCustomModal = function() {
+  editingCartId = null;
+  const m = document.getElementById("customModal");
+  m.classList.add("hidden"); m.style.display = "none";
+};
+
+window.setSugar = function(lvl) {
+  selectedSugar = lvl;
+  ['0', '25', '50', '100'].forEach(val => {
+     const el = document.getElementById(`sug-${val}`);
+     if(el) {
+       if(val+'%' === lvl) { el.classList.add('active'); el.classList.remove('text-[var(--muted)]'); }
+       else { el.classList.remove('active'); el.classList.add('text-[var(--muted)]'); }
+     }
+  });
+};
+window.setIce = function(lvl) {
+  selectedIce = lvl;
+  ['0', '50', '100'].forEach(val => {
+     const el = document.getElementById(`ice-${val}`);
+     if(el) {
+       if(val+'%' === lvl) { el.classList.add('active'); el.classList.remove('text-[var(--muted)]'); }
+       else { el.classList.remove('active'); el.classList.add('text-[var(--muted)]'); }
+     }
+  });
+};
+window.toggleTop = function(tid) {
+  const el = document.getElementById(`top-${tid}`);
+  if(selectedTops.includes(tid)) { selectedTops = selectedTops.filter(id => id !== tid); el.classList.remove('active'); } 
+  else { selectedTops.push(tid); el.classList.add('active'); }
+  updateCustomPrice();
+};
+
+function updateCustomPrice() {
+  const topPrice = selectedTops.reduce((sum, tid) => sum + (allToppings.find(t=>t.id===tid)?.price||0), 0);
+  document.getElementById("cm-price").textContent = "$" + (customItem.basePrice + topPrice).toFixed(2);
+}
+
+window.saveCustomization = function() {
+   if(!editingCartId) return;
+   const cartItem = cart.find(c => c.cartId === editingCartId);
+   
+   const topPrice = selectedTops.reduce((sum, tid) => sum + (allToppings.find(t=>t.id===tid)?.price||0), 0);
+   cartItem.sugar = selectedSugar;
+   cartItem.ice = selectedIce;
+   cartItem.toppingsData = selectedTops.map(tid => allToppings.find(t=>t.id===tid));
+   cartItem.price = cartItem.basePrice + topPrice;
+   
+   renderCart();
+   closeCustomModal();
+};
+
+window.changeQty = function(cId, d) {
+  const item = cart.find(c => c.cartId === cId);
   if (!item) return;
   item.qty += d;
-  if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+  if (item.qty <= 0) cart = cart.filter(c => c.cartId !== cId);
   renderCart();
 };
 window.clearCart = function() { cart = []; renderCart(); };
@@ -426,111 +607,107 @@ function renderCart() {
   const badge = document.getElementById("cartBadge");
   const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
   const count = cart.reduce((s, c) => s + c.qty, 0);
+  const tx = t();
   
   document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
   badge.textContent = count;
   count ? badge.classList.remove("hidden") : badge.classList.add("hidden");
   
-  if (!cart.length) {
-    el.innerHTML = "";
-    empty.classList.remove("hidden");
-    empty.style.display = "flex";
-    return;
-  }
+  if (!cart.length) { el.innerHTML = ""; empty.classList.remove("hidden"); empty.style.display = "flex"; return; }
   
-  empty.classList.add("hidden");
-  empty.style.display = "none";
-  el.innerHTML = cart.map(c => `
-    <div class="bg-[var(--sur2)] rounded-xl p-3 flex items-center gap-3 border border-[var(--bdr)]">
-      <img src="${c.imageUrl || 'https://placehold.co/48/f5ece3/3c2a21?text=☕'}" class="w-12 h-12 rounded-lg object-cover shrink-0" onerror="this.src='https://placehold.co/48/f5ece3/3c2a21?text=☕'"/>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium truncate">${c.name}</p>
-        <p class="text-[var(--gold)] text-xs mt-0.5">$${(c.price * c.qty).toFixed(2)}</p>
+  empty.classList.add("hidden"); empty.style.display = "none";
+  el.innerHTML = cart.map(c => {
+    const dName = lang === 'kh' && c.nameKh ? c.nameKh : c.name;
+    let opts = `S: ${c.sugar} | I: ${c.ice}`;
+    if(c.toppingsData && c.toppingsData.length > 0) {
+       opts += ` | +${c.toppingsData.length} ${tx.toppings}`;
+    }
+
+    return `
+    <div class="bg-[var(--sur)] rounded-2xl p-3 flex flex-col gap-3 shadow-sm border border-[var(--bdr)]">
+      <div class="flex items-center gap-3">
+        <img src="${c.imageUrl || 'https://placehold.co/48/f5ece3/3c2a21?text=☕'}" class="w-14 h-14 rounded-xl object-cover shrink-0" onerror="this.src='https://placehold.co/48/f5ece3/3c2a21?text=☕'"/>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold truncate text-[var(--txt)]">${dName}</p>
+          <p class="text-[11px] text-[var(--muted)] mt-1 break-words leading-tight bg-[var(--sur2)] p-1.5 rounded-lg border border-[var(--bdr)]">${opts}</p>
+        </div>
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          <p class="text-[var(--gold)] font-bold text-sm">$${(c.price * c.qty).toFixed(2)}</p>
+        </div>
       </div>
-      <div class="flex items-center gap-1 shrink-0">
-        <button onclick="changeQty('${c.id}',-1)" class="w-7 h-7 rounded-full bg-[var(--bg)] border border-[var(--bdr)] text-sm flex items-center justify-center hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors cursor-pointer">−</button>
-        <span class="w-5 text-center text-sm">${c.qty}</span>
-        <button onclick="changeQty('${c.id}',1)" class="w-7 h-7 rounded-full bg-[var(--bg)] border border-[var(--bdr)] text-sm flex items-center justify-center hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors cursor-pointer">+</button>
+      
+      <div class="flex items-center justify-between border-t border-[var(--sur2)] pt-2 mt-1">
+        <button onclick="editCartItem('${c.cartId}')" class="text-xs text-[var(--gold)] font-medium flex items-center gap-1 hover:underline">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          ${tx.customize}
+        </button>
+        <div class="flex items-center gap-2 bg-[var(--sur2)] rounded-full border border-[var(--bdr)] p-0.5">
+          <button onclick="changeQty('${c.cartId}',-1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)] hover:text-[var(--txt)]">−</button>
+          <span class="w-4 text-center text-sm font-semibold">${c.qty}</span>
+          <button onclick="changeQty('${c.cartId}',1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)] hover:text-[var(--txt)]">+</button>
+        </div>
       </div>
-    </div>`).join("");
+    </div>`
+  }).join("");
 }
 
 // ==========================================
-// 6. ORDER PLACEMENT
+// 7. ORDER PLACEMENT
 // ==========================================
 window.placeOrder = async function() {
   const table = document.getElementById("cartTable").value;
   const note = document.getElementById("cartNote").value.trim();
   const tx = t();
-  if (!table) { showToast("⚠️ " + tx.tableLbl + "!"); return; }
+  if (!table) { showToast("⚠️ " + tx.tableLbl + " Required!"); return; }
   if (!cart.length) { showToast("⚠️ " + tx.emptyCart); return; }
   
   const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const items = cart.map(c => ({ id: c.id, name: c.name, price: c.price, qty: c.qty, imageUrl: c.imageUrl || "" }));
+  const items = cart.map(c => ({ 
+    id: c.id, name: c.name, price: c.price, qty: c.qty, imageUrl: c.imageUrl || "", 
+    sugar: c.sugar, ice: c.ice, toppingsData: c.toppingsData 
+  }));
   
   const btn = document.getElementById("placeBtn");
-  btn.disabled = true;
-  btn.textContent = "…";
+  btn.disabled = true; btn.textContent = "…";
   
   try {
-    const orderData = { tableNumber: table, items, total, note: note, status: "pending", lang: lang || "en", createdAt: serverTimestamp ? serverTimestamp() : new Date() };
-    
+    const orderData = { tableNumber: table, items, total, note: note, status: "pending", lang: lang || "kh", createdAt: serverTimestamp ? serverTimestamp() : new Date() };
     let orderId = "OFFLINE-" + Math.floor(Math.random() * 100000);
-    
-    // Only attempt Firestore if we are connected
     if (db) {
       const ref = await addDoc(collection(db, "orders"), orderData);
       orderId = ref.id;
       listenOrderStatus(orderId);
     }
-    
-    // Telegram is sent regardless
     await sendTelegramAlert({ tableNumber: table, items, total, note: note }, orderId);
     
-    // Save locally
     let orders = [];
     try { orders = JSON.parse(safeStorage.get("chafe_orders") || "[]"); } catch (e) {}
     orders.push({ id: orderId, tableNumber: table, items, total, note: note, status: "pending", createdAt: new Date().toISOString() });
     safeStorage.set("chafe_orders", JSON.stringify(orders));
     
-    // Reset Cart
-    cart = [];
-    document.getElementById("cartNote").value = "";
-    renderCart();
-    closeCart();
-    
+    cart = []; document.getElementById("cartNote").value = "";
+    renderCart(); closeCart();
     document.getElementById("conf-id").textContent = `#${orderId.slice(-8).toUpperCase()}`;
     showConfirm();
   } catch (e) {
-    console.error(e);
     showToast("❌ Error placing order. Please try again.");
   }
-  btn.disabled = false;
-  btn.textContent = tx.place;
+  btn.disabled = false; btn.textContent = tx.place;
 };
 
 // ==========================================
-// 7. MY ORDERS & CANCELLATION
+// 8. MY ORDERS & UI HELPERS
 // ==========================================
-function loadMyOrders() {
-  try { return JSON.parse(safeStorage.get("chafe_orders") || "[]"); } 
-  catch (e) { return []; }
-}
-
+function loadMyOrders() { try { return JSON.parse(safeStorage.get("chafe_orders") || "[]"); } catch (e) { return []; } }
 window.openMyOrders = function() {
   renderMyOrders();
   document.getElementById("myOrdersOverlay").classList.remove("hidden");
-  document.getElementById("myOrdersPanel").style.transform = "translateY(0)";
-  document.getElementById("myOrdersPanel").classList.add("show");
-  if (db) {
-    loadMyOrders().forEach(o => { if (o.status === "pending" && !o.id.startsWith("OFFLINE")) listenOrderStatus(o.id); });
-  }
+  document.getElementById("myOrdersPanel").style.transform = "translateY(0)"; document.getElementById("myOrdersPanel").classList.add("show");
+  if (db) { loadMyOrders().forEach(o => { if (o.status === "pending" && !o.id.startsWith("OFFLINE")) listenOrderStatus(o.id); }); }
 };
-
 window.closeMyOrders = function() {
   document.getElementById("myOrdersOverlay").classList.add("hidden");
-  document.getElementById("myOrdersPanel").style.transform = "translateY(100%)";
-  document.getElementById("myOrdersPanel").classList.remove("show");
+  document.getElementById("myOrdersPanel").style.transform = "translateY(100%)"; document.getElementById("myOrdersPanel").classList.remove("show");
 };
 
 function renderMyOrders() {
@@ -548,7 +725,10 @@ function renderMyOrders() {
         <div><p class="font-semibold text-sm">${tx.tableFor} ${o.tableNumber}</p><p class="text-[var(--muted)] text-xs">${ts} · #${o.id.slice(-6).toUpperCase()}</p></div>
         <span class="text-xs font-semibold ${sc}">${st}</span>
       </div>
-      <ul class="text-xs text-[var(--muted)] space-y-0.5 mb-2">${(o.items || []).map(i => `<li>• ${i.name} ×${i.qty}</li>`).join("")}</ul>
+      <ul class="text-xs text-[var(--muted)] space-y-0.5 mb-2">${(o.items || []).map(i => {
+         const dName = lang === 'kh' && i.nameKh ? i.nameKh : i.name;
+         return `<li>• ${dName} ×${i.qty}</li>`;
+      }).join("")}</ul>
       ${o.note ? `<p class="text-xs text-[var(--txt)] bg-[var(--sur)] p-2 rounded-lg mb-3 border border-[var(--bdr)]">📝 ${o.note}</p>` : `<div class="mb-3"></div>`}
       <div class="flex items-center justify-between border-t border-[var(--bdr)] pt-3 mt-1">
         <span class="text-[var(--gold)] font-semibold text-sm">$${Number(o.total).toFixed(2)}</span>
@@ -564,42 +744,27 @@ function listenOrderStatus(orderId) {
   try {
     statusUnsubs[orderId] = onSnapshot(doc(db, "orders", orderId), snap => {
       if (!snap.exists()) return;
-      let orders = loadMyOrders();
-      const idx = orders.findIndex(o => o.id === orderId);
+      let orders = loadMyOrders(); const idx = orders.findIndex(o => o.id === orderId);
       if (idx < 0) return;
       orders[idx].status = snap.data().status;
-      safeStorage.set("chafe_orders", JSON.stringify(orders));
-      renderMyOrders();
-    }, error => { console.warn("Listener error (Normal if permissions restrict read):", error.message); });
+      safeStorage.set("chafe_orders", JSON.stringify(orders)); renderMyOrders();
+    }, error => { console.warn("Listener error:", error.message); });
   } catch(e) { console.warn(e); }
 }
 
 window.showCancelModal = function(id) { cancelTargetId = id; const m = document.getElementById("cancelModal"); m.classList.remove("hidden"); m.style.display = "flex"; };
 window.closeCancelModal = function() { cancelTargetId = null; const m = document.getElementById("cancelModal"); m.classList.add("hidden"); m.style.display = "none"; };
-
 window.confirmCancel = async function() {
   if (!cancelTargetId) return;
   try {
-    if (db && !cancelTargetId.startsWith("OFFLINE")) {
-      await updateDoc(doc(db, "orders", cancelTargetId), { status: "cancelled" });
-    }
-    let orders = loadMyOrders();
-    const idx = orders.findIndex(o => o.id === cancelTargetId);
-    if (idx >= 0) { 
-      orders[idx].status = "cancelled"; 
-      safeStorage.set("chafe_orders", JSON.stringify(orders)); 
-    }
-    renderMyOrders();
-    showToast(t().cancelToast);
-  } catch (e) {
-    showToast("❌ Error cancelling order. Talk to staff.");
-  }
+    if (db && !cancelTargetId.startsWith("OFFLINE")) { await updateDoc(doc(db, "orders", cancelTargetId), { status: "cancelled" }); }
+    let orders = loadMyOrders(); const idx = orders.findIndex(o => o.id === cancelTargetId);
+    if (idx >= 0) { orders[idx].status = "cancelled"; safeStorage.set("chafe_orders", JSON.stringify(orders)); }
+    renderMyOrders(); showToast(t().cancelToast);
+  } catch (e) { showToast("❌ Error cancelling order."); }
   closeCancelModal();
 };
 
-// ==========================================
-// 8. UI HELPERS & BOOTSTRAP
-// ==========================================
 window.openCart = function() { document.getElementById("cartPanel").classList.add("show"); document.getElementById("cartOverlay").classList.remove("hidden"); buildTableOptions(); };
 window.closeCart = function() { document.getElementById("cartPanel").classList.remove("show"); document.getElementById("cartOverlay").classList.add("hidden"); };
 function showConfirm() { const m = document.getElementById("confirmModal"); m.classList.remove("hidden"); m.style.display = "flex"; }
@@ -609,22 +774,11 @@ function showToast(msg) {
   clearTimeout(el._t); el._t = setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(-50%) translateY(12px)"; }, 2800);
 }
 
-// ------------------------------------------
-// BOOTSTRAP THE APP
-// ------------------------------------------
+// BOOTSTRAP
 try {
-  applyLang();
-  buildTableOptions();
-  loadMenu(); // Starts fetching data (or runs fallback)
-  if (db) {
-    loadMyOrders().forEach(o => { if (o.status === "pending") listenOrderStatus(o.id); });
-  }
-} catch (e) {
-  console.error("Critical Bootstrap Error:", e);
-  // Failsafe to hide skeletons if everything completely dies
-  document.getElementById("menuSkeleton").classList.add("hidden");
-}
-
+  applyLang(); buildTableOptions(); loadData(); 
+  if (db) { loadMyOrders().forEach(o => { if (o.status === "pending") listenOrderStatus(o.id); }); }
+} catch (e) { document.getElementById("menuSkeleton").classList.add("hidden"); }
 </script>
 </body>
 </html>

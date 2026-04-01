@@ -9,7 +9,7 @@
 <style>
 :root{--bg:#faf6eb;--sur:#ffffff;--sur2:#f5ece3;--bdr:#e6d6c8;--gold:#bf3c37;--gold2:#a6332f;--txt:#3c2a21;--muted:#8c6b5d;--green:#48a863;--red:#bf3c37;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;padding-bottom:70px;}
 .serif{font-family:'Cormorant Garamond',serif;}
 ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--sur);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.4;}
@@ -17,7 +17,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .cat-pill:hover{border-color:var(--gold);color:var(--gold);}
 .cat-pill.on{background:var(--gold);color:#faf6eb;border-color:var(--gold);font-weight:600;}
 .m-card{background:var(--sur);border:1px solid var(--bdr);transition:border-color .2s,transform .2s,box-shadow .2s;}
-.m-card:hover{border-color:rgba(191,60,55,.4);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.m-card:hover{border-color:rgba(191,60,55,.4);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.1);}
 .m-card.out-stock{opacity:.5;pointer-events:none;}
 .out-stock-badge{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;border-radius:inherit;}
 .add-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);transition:all .18s;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;}
@@ -41,32 +41,45 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 select,input,textarea{background:var(--bg);border:1px solid var(--bdr);color:var(--txt);font-family:'Outfit',sans-serif;}
 select:focus,input:focus,textarea:focus{outline:none;border-color:var(--gold);}
 select option{background:var(--sur);}
-.lang-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--sur);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;min-width:130px;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:999;}
+.lang-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--sur);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;min-width:130px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;}
 .lang-opt{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;cursor:pointer;transition:background .15s;}
 .lang-opt:hover{background:var(--sur2);}
 .lang-opt.active{color:var(--gold);}
-
-/* Customizer styles */
 .opt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
 .top-box.active{border-color:var(--green);background:rgba(72,168,99,0.05);}
-
-/* ── SLIDESHOW ── */
+/* SLIDESHOW */
 #slideshow-section{position:relative;overflow:hidden;}
-.slide{display:none;position:absolute;inset:0;transition:opacity .5s ease;}
-.slide.active{display:flex;position:relative;}
+.slide{display:none;}
+.slide.active{display:flex;}
 .slide-dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);cursor:pointer;transition:all .2s;}
 .slide-dot.on{background:var(--gold);width:20px;border-radius:4px;}
-@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
-.slide.active{animation:slideIn .4s ease;}
-
-/* Step number badge */
-.step-badge{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#faf6eb;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.slide.active{animation:slideIn .35s ease;}
+.step-badge{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#faf6eb;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+/* POPULAR BADGE */
+.popular-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;box-shadow:0 2px 8px rgba(239,68,68,.4);}
+/* TEMP BADGE */
+.temp-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600;letter-spacing:.3px;}
+.temp-ice{background:#dbeafe;color:#1d4ed8;}
+.temp-hot{background:#fee2e2;color:#b91c1c;}
+.temp-frappe{background:#e0e7ff;color:#4338ca;}
+/* SOCIAL BAR */
+#socialBar{position:fixed;bottom:24px;right:24px;z-index:45;background:transparent;border:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;}
+#socialBar.hidden-bar{display:none;}
+.social-link{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;pointer-events:auto;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.social-fb{background:#1877f2;color:#fff;}
+.social-fb:hover{background:#166fe5;transform:translateY(-2px) scale(1.05);}
+.social-tiktok{background:#000;color:#fff;}
+.social-tiktok:hover{background:#111;transform:translateY(-2px) scale(1.05);}
+/* TEMP SELECTOR IN CART */
+.temp-btn{flex:1;padding:6px;font-size:11px;border-radius:10px;border:1px solid var(--bdr);color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:'Outfit',sans-serif;}
+.temp-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(191,60,55,.07);font-weight:700;}
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
-<header class="sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md" style="box-shadow:0 1px 0 var(--bdr),0 4px 40px rgba(0,0,0,.6)">
+<header class="sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md" style="box-shadow:0 1px 0 var(--bdr),0 4px 20px rgba(0,0,0,.06)">
   <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
     <div class="flex items-center gap-3">
       <p class="serif text-[var(--gold)] text-2xl leading-none">Chafé</p>
@@ -92,15 +105,15 @@ select option{background:var(--sur);}
       <button onclick="openCart()" class="relative g-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
         <span id="h-cart" class="hidden sm:inline">Cart</span>
-        <span id="cartBadge" class="absolute -top-1 -right-1 bg-[var(--gold)] text-[#faf6eb] text-[9px] font-bold w-4 h-4 rounded-full items-center justify-center hidden shadow-md">0</span>
+        <span id="cartBadge" class="absolute -top-1 -right-1 bg-white text-[var(--gold)] text-[9px] font-bold w-4 h-4 rounded-full items-center justify-center hidden shadow-md border border-[var(--gold)]">0</span>
       </button>
     </div>
   </div>
 </header>
 
 <!-- HERO -->
-<div class="relative overflow-hidden py-14 text-center flex flex-col items-center" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(191,60,55,.15) 0%,transparent 70%)">
-  <img src="../src/img/logo/Icon.png" alt="Chafé Logo" class="h-28 w-auto object-contain drop-shadow-sm mb-3" onerror="this.src='https://placehold.co/300x120/faf6eb/bf3c37?text=Chaf%C3%A9+Logo'"/>
+<div class="relative overflow-hidden py-14 text-center flex flex-col items-center" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(191,60,55,.12) 0%,transparent 70%)">
+  <img src="../src/img/logo/Icon.png" alt="Chafé Logo" class="h-28 w-auto object-contain drop-shadow-sm mb-3" onerror="this.src='https://placehold.co/300x120/faf6eb/bf3c37?text=Chaf%C3%A9'"/>
   <div class="mt-4 flex justify-center gap-2 items-center">
     <div class="w-10 h-px bg-[var(--gold)] opacity-30"></div>
     <div class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] opacity-60"></div>
@@ -108,28 +121,21 @@ select option{background:var(--sur);}
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     HOW TO ORDER SLIDESHOW
-══════════════════════════════════════ -->
+<!-- ══════════════════════ HOW TO ORDER SLIDESHOW ══════════════════════ -->
 <div id="slideshow-section" class="hidden max-w-4xl mx-auto px-4 mb-6">
   <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden shadow-sm">
-    <!-- Header -->
     <div class="px-5 pt-4 pb-3 border-b border-[var(--bdr)] flex items-center justify-between">
       <h2 class="serif text-lg text-[var(--gold)] font-bold" id="slideshow-title">How to Order</h2>
       <div class="flex items-center gap-1.5" id="slide-dots"></div>
     </div>
-    <!-- Slides Container -->
-    <div id="slides-container" class="relative min-h-[200px]">
-      <!-- Injected by JS -->
-    </div>
-    <!-- Nav -->
-    <div class="px-5 py-3 flex items-center justify-between border-t border-[var(--bdr)]">
-      <button onclick="prevSlide()" id="slide-prev" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30">
+    <div id="slides-container" class="relative min-h-[160px]"></div>
+    <div class="px-5 py-3 flex items-center justify-between border-t border-[var(--bdr)] bg-[var(--bg)]/50">
+      <button onclick="prevSlide()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         <span id="slide-prev-lbl">Prev</span>
       </button>
-      <p class="text-xs text-[var(--muted)]" id="slide-counter">1 / 1</p>
-      <button onclick="nextSlide()" id="slide-next" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
+      <p class="text-xs font-bold text-[var(--muted)]" id="slide-counter">1 / 1</p>
+      <button onclick="nextSlide()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
         <span id="slide-next-lbl">Next</span>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
@@ -139,15 +145,23 @@ select option{background:var(--sur);}
 
 <!-- CATS -->
 <div class="sticky top-[57px] z-30 bg-[var(--bg)]/90 backdrop-blur-sm border-b border-[var(--bdr)]">
-  <div class="max-w-4xl mx-auto px-4 py-2.5 overflow-x-auto no-scrollbar">
+  <div class="max-w-4xl mx-auto px-4 py-2.5 overflow-x-auto" style="scrollbar-width:none">
     <div id="catRow" class="flex gap-2 min-w-max">
       <div class="shimmer w-14 h-8 rounded-full"></div>
       <div class="shimmer w-20 h-8 rounded-full"></div>
       <div class="shimmer w-16 h-8 rounded-full"></div>
-      <div class="shimmer w-18 h-8 rounded-full"></div>
     </div>
   </div>
 </div>
+
+<!-- POPULAR SECTION -->
+<section id="popularSection" class="hidden max-w-4xl mx-auto px-4 pt-6">
+  <div class="flex items-center gap-2 mb-3">
+    <span class="text-lg">🔥</span>
+    <h2 class="serif text-xl text-[var(--gold)] font-bold" id="popular-title">Popular</h2>
+  </div>
+  <div id="popularGrid" class="flex gap-3 overflow-x-auto pb-2" style="scrollbar-width:none"></div>
+</section>
 
 <!-- MENU -->
 <main class="max-w-4xl mx-auto px-4 py-6">
@@ -167,8 +181,6 @@ select option{background:var(--sur);}
     <p class="text-xs text-[var(--muted)]" id="c-sub">Review before placing</p></div>
     <button onclick="closeCart()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl w-8 h-8 flex items-center justify-center cursor-pointer">×</button>
   </div>
-  
-  <!-- CART ITEMS -->
   <div id="cartItems" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
   <div id="cartEmpty" class="flex-1 items-center justify-center flex-col gap-3 hidden bg-[var(--bg)]">
     <div class="w-16 h-16 rounded-full border border-[var(--bdr)] flex items-center justify-center opacity-25">
@@ -176,24 +188,19 @@ select option{background:var(--sur);}
     </div>
     <p class="text-[var(--muted)] text-sm" id="c-empty">Your cart is empty</p>
   </div>
-
-  <!-- BOTTOM UI: Table, Note & Total -->
   <div class="border-t border-[var(--bdr)] bg-[var(--sur2)]">
-    <!-- Table & Note Row -->
     <div class="px-5 py-4 border-b border-[var(--bdr)] flex gap-4">
       <div class="w-1/3">
         <label class="text-[10px] text-[var(--muted)] uppercase font-semibold tracking-wide block mb-1" id="c-table-lbl">Table No.</label>
         <select id="cartTable" class="w-full bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-2 py-2 text-sm font-bold text-center text-[var(--gold)] focus:border-[var(--gold)] outline-none shadow-sm transition">
-          <option value="" id="c-table-ph">—</option>
+          <option value="">—</option>
         </select>
       </div>
       <div class="flex-1">
         <label class="text-[10px] text-[var(--muted)] uppercase font-semibold tracking-wide block mb-1" id="c-note-lbl">Note</label>
-        <input type="text" id="cartNote" placeholder="Any special requests?" class="w-full bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-3 py-2 text-sm focus:border-[var(--gold)] outline-none shadow-sm transition" />
+        <input type="text" id="cartNote" placeholder="Any special requests?" class="w-full bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-3 py-2 text-sm focus:border-[var(--gold)] outline-none shadow-sm transition"/>
       </div>
     </div>
-    
-    <!-- Total Row -->
     <div class="px-5 py-4">
       <div class="flex justify-between items-center mb-4">
         <span class="text-[var(--muted)] text-sm font-semibold" id="c-total-lbl">Total</span>
@@ -205,11 +212,9 @@ select option{background:var(--sur);}
   </div>
 </aside>
 
-<!-- ══════════════════════════════════════
-     ADD TOPPING MODAL (replaces customize)
-══════════════════════════════════════ -->
+<!-- CUSTOMIZE MODAL -->
 <div id="customModal" class="fixed inset-0 z-[998] bg-black/60 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
-  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-5 w-full max-w-sm mx-4 shadow-2xl fade-up flex flex-col max-h-[85vh]">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-5 w-full max-w-sm mx-4 shadow-2xl fade-up flex flex-col max-h-[90vh]">
     <div class="flex justify-between items-center mb-4">
       <div>
         <h3 class="serif text-2xl text-[var(--gold)]" id="cm-title">Drink Name</h3>
@@ -217,8 +222,16 @@ select option{background:var(--sur);}
       </div>
       <button onclick="closeCustomModal()" class="text-2xl text-[var(--muted)] hover:text-[var(--txt)]">&times;</button>
     </div>
-    
-    <div class="overflow-y-auto flex-1 no-scrollbar space-y-5 pb-4">
+    <div class="overflow-y-auto flex-1 space-y-5 pb-4" style="scrollbar-width:none">
+      <!-- Temperature -->
+      <div id="cm-temp-wrap">
+        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-temp-lbl">Temperature</label>
+        <div class="flex gap-2">
+          <button onclick="setTemp('ice')" id="temp-ice" class="temp-btn flex-1 hidden">🧊 <span id="temp-ice-lbl">Iced</span></button>
+          <button onclick="setTemp('hot')" id="temp-hot" class="temp-btn flex-1 hidden">☕ <span id="temp-hot-lbl">Hot</span></button>
+          <button onclick="setTemp('frappe')" id="temp-frappe" class="temp-btn flex-1 hidden">🥤 <span id="temp-frappe-lbl">Frappe</span></button>
+        </div>
+      </div>
       <!-- Sugar -->
       <div>
         <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
@@ -229,8 +242,8 @@ select option{background:var(--sur);}
           <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">100%</button>
         </div>
       </div>
-      <!-- Ice -->
-      <div>
+      <!-- Ice Level (only shown when temp=ice) -->
+      <div id="cm-ice-section">
         <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
         <div class="flex gap-2">
           <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">0%</button>
@@ -238,15 +251,12 @@ select option{background:var(--sur);}
           <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">100%</button>
         </div>
       </div>
-      <!-- Toppings with images -->
+      <!-- Toppings -->
       <div>
         <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
-        <div class="space-y-2" id="cm-top-list">
-          <!-- Injected by JS -->
-        </div>
+        <div class="space-y-2" id="cm-top-list"></div>
       </div>
     </div>
-
     <div class="pt-4 border-t border-[var(--bdr)] mt-auto">
       <button onclick="saveCustomization()" class="g-btn w-full py-3.5 rounded-2xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/10">
         <span id="cm-add-btn-txt">Save Changes</span>
@@ -256,7 +266,7 @@ select option{background:var(--sur);}
   </div>
 </div>
 
-<!-- MY ORDERS OVERLAY & PANEL -->
+<!-- MY ORDERS PANEL -->
 <div id="myOrdersOverlay" onclick="closeMyOrders()" class="fixed inset-0 bg-black/60 z-50 hidden" style="backdrop-filter:blur(4px)"></div>
 <aside id="myOrdersPanel" class="fixed bottom-0 left-0 right-0 sm:top-0 sm:left-auto sm:right-0 sm:h-full sm:w-[400px] bg-[var(--sur)] z-50 flex flex-col shadow-2xl border-t sm:border-t-0 sm:border-l border-[var(--bdr)] rounded-t-3xl sm:rounded-none max-h-[85vh] sm:max-h-full" style="transform:translateY(100%)">
   <div class="px-5 py-4 border-b border-[var(--bdr)] flex items-center justify-between">
@@ -291,6 +301,11 @@ select option{background:var(--sur);}
   </div>
 </div>
 
+<!-- SOCIAL BAR -->
+<div id="socialBar" class="hidden-bar">
+  <!-- Injected by JS -->
+</div>
+
 <!-- TOAST -->
 <div id="toast" class="fixed bottom-6 left-1/2 bg-[var(--sur2)] border border-[var(--bdr)] text-[var(--txt)] px-5 py-2.5 rounded-full text-xs shadow-2xl opacity-0 z-[9999] whitespace-nowrap pointer-events-none" style="transform:translateX(-50%) translateY(16px)"></div>
 
@@ -298,386 +313,426 @@ select option{background:var(--sur);}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ==========================================
-// 1. SAFE STORAGE
-// ==========================================
 const safeStorage = {
   get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
-  set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) { console.warn("Storage disabled"); } }
+  set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} }
 };
 
-// ==========================================
-// 2. FIREBASE SETUP & TELEGRAM CONFIG
-// ==========================================
 const FB = {
   apiKey: "AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
   authDomain: "lortcha.firebaseapp.com",
   projectId: "lortcha",
   storageBucket: "lortcha.firebasestorage.app",
   messagingSenderId: "51187909854",
-  appId: "1:51187909854:web:f4d7ace62c0a367a192e4f",
-  measurementId: "G-MCXY0YL7PX"
+  appId: "1:51187909854:web:f4d7ace62c0a367a192e4f"
 };
 
 let db;
-try {
-  const app = initializeApp(FB);
-  db = getFirestore(app);
-} catch (err) {
-  console.error("Firebase Initialization Failed:", err);
-}
+try { const app = initializeApp(FB); db = getFirestore(app); } catch(e) {}
 
 const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
-const TG_CHAT = "-1003706744326"; 
+const TG_CHAT = "-1003706744326";
 
 async function sendTelegramAlert(order, orderId) {
   try {
     const itemLines = order.items.map(i => {
-      let opts = `Sugar: ${i.sugar} | Ice: ${i.ice}`;
-      if(i.toppingsData && i.toppingsData.length) {
-        opts += ` | Tops: ${i.toppingsData.map(t=> lang==='kh' && t.nameKh ? t.nameKh : t.name).join(', ')}`;
-      }
+      let opts = `Temp: ${i.temperature === 'hot' ? '☕ Hot' : i.temperature === 'frappe' ? '🥤 Frappe' : '🧊 Iced'} | Sugar: ${i.sugar} | Ice: ${i.ice}`;
+      if(i.toppingsData?.length) opts += ` | Tops: ${i.toppingsData.map(t=> lang==='kh'&&t.nameKh?t.nameKh:t.name).join(', ')}`;
       return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i>[${opts}]</i>`;
     }).join("\n");
-
     const noteText = order.note ? `\n📝 <b>Note:</b> ${order.note}\n` : "";
-    const msg = `🛍️ <b>New Order (ការបញ្ជាទិញថ្មី)!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
-    });
-  } catch (e) { console.warn("TG alert failed", e); }
+    const msg = `🛍️ <b>New Order!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`;
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
+  } catch(e) {}
 }
 
-// ==========================================
-// 3. I18N (Translations)
-// ==========================================
+// ── I18N ──
 const T = {
   en: {
-    sub:"Order", welcome:"Welcome to", tagline:"Freshly brewed · Crafted with care", cart:"Cart", myorders:"My Orders",
-    tableLbl:"Table No.", tablePH:"—", cartTitle:"Your Order", cartSub:"Review before placing",
+    sub:"Order", cart:"Cart", myorders:"My Orders",
+    tableLbl:"Table No.", cartTitle:"Your Order", cartSub:"Review before placing",
     totalLbl:"Total", place:"Place Order", clear:"Clear cart", emptyCart:"Your cart is empty",
     confirmTitle:"Order Placed! 🎉", confirmMsg:"We're preparing your order.", confirmBtn:"Done",
     cancelTitle:"Cancel Order?", cancelMsg:"This will remove your order from the queue.", cancelNo:"No, keep it", cancelYes:"Cancel Order",
     moTitle:"My Orders", status:{pending:"Pending ⏳", completed:"Completed ✓", cancelled:"Cancelled ✗"},
-    addedToast:"added to cart", cancelToast:"Order cancelled.", noItems:"No items in this category.", tableFor:"Table", outOfStock:"Out of Stock",
-    sugar: "Sugar Level", ice: "Ice Level", toppings: "Add Toppings", saveChanges: "Save Changes", addTopping: "Add Topping", note: "Note",
-    howToOrder: "How to Order", prev: "Prev", next: "Next"
+    addedToast:"added to cart", cancelToast:"Order cancelled.", noItems:"No items in this category.",
+    tableFor:"Table", outOfStock:"Out of Stock", sugar:"Sugar Level", ice:"Ice Level",
+    toppings:"Add Toppings", saveChanges:"Save Changes", addTopping:"Customize", note:"Note",
+    howToOrder:"How to Order", prev:"Prev", next:"Next", popular:"Popular",
+    tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe"
   },
   kh: {
-    sub:"បញ្ជាទិញ", welcome:"សូមស្វាគមន៍", tagline:"ភេសជ្ជៈស្រស់ · ផលិតដោយចិត្ត", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
-    tableLbl:"លេខតុ", tablePH:"—", cartTitle:"ការបញ្ជាទិញ", cartSub:"ពិនិត្យមុនបញ្ជា",
+    sub:"បញ្ជាទិញ", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
+    tableLbl:"លេខតុ", cartTitle:"ការបញ្ជាទិញ", cartSub:"ពិនិត្យមុនបញ្ជា",
     totalLbl:"សរុប", place:"ដាក់ការបញ្ជា", clear:"លុបកន្ត្រក", emptyCart:"កន្ត្រករបស់អ្នកទទេ",
     confirmTitle:"បានជោគជ័យ! 🎉", confirmMsg:"យើងកំពុងរៀបចំ។", confirmBtn:"រួចរាល់",
     cancelTitle:"លុបការបញ្ជា?", cancelMsg:"ការបញ្ជារបស់អ្នកនឹងត្រូវដក។", cancelNo:"ទេ", cancelYes:"លុបចោល",
     moTitle:"ការបញ្ជារបស់ខ្ញុំ", status:{pending:"រង់ចាំ ⏳", completed:"បានបញ្ចប់ ✓", cancelled:"បានលុប ✗"},
-    addedToast:"បានបន្ថែម", cancelToast:"បានលុបការបញ្ជា", noItems:"មិនមានទំនិញ", tableFor:"តុ", outOfStock:"អស់ស្តុក",
-    sugar: "កម្រិតស្ករ", ice: "កម្រិតទឹកកក", toppings: "បន្ថែម Toppings", saveChanges: "រក្សាទុក", addTopping: "បន្ថែម Topping", note: "ចំណាំ",
-    howToOrder: "របៀបបញ្ជាទិញ", prev: "ថយក្រោយ", next: "បន្ត"
+    addedToast:"បានបន្ថែម", cancelToast:"បានលុបការបញ្ជា", noItems:"មិនមានទំនិញ",
+    tableFor:"តុ", outOfStock:"អស់ស្តុក", sugar:"កម្រិតស្ករ", ice:"កម្រិតទឹកកក",
+    toppings:"បន្ថែម Toppings", saveChanges:"រក្សាទុក", addTopping:"កំណត់ Toppings", note:"ចំណាំ",
+    howToOrder:"របៀបបញ្ជាទិញ", prev:"ថយក្រោយ", next:"បន្ត", popular:"ពេញនិយម",
+    tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ"
   }
 };
 
-let lang = safeStorage.get("chafe_lang") || "kh"; 
+let lang = safeStorage.get("chafe_lang") || "kh";
 let cancelTargetId = null;
 
 window.setLang = function(l) {
-  lang = l; 
+  lang = l;
   safeStorage.set("chafe_lang", l);
-  document.getElementById("langFlag").textContent = l === "kh" ? "🇰🇭" : "🇬🇧";
-  document.getElementById("langLabel").textContent = l === "kh" ? "KH" : "EN";
+  document.getElementById("langFlag").textContent = l==="kh"?"🇰🇭":"🇬🇧";
+  document.getElementById("langLabel").textContent = l==="kh"?"KH":"EN";
   document.getElementById("langDropdown").classList.add("hidden");
-  document.querySelectorAll(".lang-opt").forEach(el => el.classList.remove("active"));
-  document.querySelectorAll(".lang-opt")[l === "en" ? 0 : 1].classList.add("active");
   applyLang();
   buildTableOptions();
+  if(slides.length > 0) renderSlideshow();
 };
 
 window.toggleLangDropdown = () => document.getElementById("langDropdown").classList.toggle("hidden");
 document.addEventListener("click", e => {
   const wrap = document.getElementById("langWrap");
-  if (!wrap.contains(e.target)) document.getElementById("langDropdown").classList.add("hidden");
+  if(!wrap.contains(e.target)) document.getElementById("langDropdown").classList.add("hidden");
 });
 
-function t() { return T[lang || "en"]; }
+function t() { return T[lang||"en"]; }
 
 function applyLang() {
   const tx = t();
-  const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-  set("h-sub", tx.sub);
-  set("h-cart", tx.cart); set("h-myorders", tx.myorders);
-  set("c-table-lbl", tx.tableLbl); set("c-title", tx.cartTitle); set("c-sub", tx.cartSub);
-  set("c-total-lbl", tx.totalLbl); set("placeBtn", tx.place); set("c-clear", tx.clear);
-  set("c-empty", tx.emptyCart); set("conf-title", tx.confirmTitle); set("conf-msg", tx.confirmMsg);
-  set("conf-btn", tx.confirmBtn); set("can-title", tx.cancelTitle); set("can-msg", tx.cancelMsg);
-  set("can-no", tx.cancelNo); set("can-yes", tx.cancelYes); set("mo-title", tx.moTitle);
-  set("c-table-ph", tx.tablePH); set("emptyMenu", tx.noItems);
-  set("cm-sugar-lbl", tx.sugar); set("cm-ice-lbl", tx.ice); set("cm-top-lbl", tx.toppings);
-  set("cm-add-btn-txt", tx.saveChanges); set("c-note-lbl", tx.note);
-  set("slideshow-title", tx.howToOrder);
-  set("slide-prev-lbl", tx.prev); set("slide-next-lbl", tx.next);
-
-  if(currentItems.length > 0) renderMenu(currentItems);
-  renderCart();
-  renderMyOrders();
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set("h-sub",tx.sub); set("h-cart",tx.cart); set("h-myorders",tx.myorders);
+  set("c-table-lbl",tx.tableLbl); set("c-title",tx.cartTitle); set("c-sub",tx.cartSub);
+  set("c-total-lbl",tx.totalLbl); set("placeBtn",tx.place); set("c-clear",tx.clear);
+  set("c-empty",tx.emptyCart); set("conf-title",tx.confirmTitle); set("conf-msg",tx.confirmMsg);
+  set("conf-btn",tx.confirmBtn); set("can-title",tx.cancelTitle); set("can-msg",tx.cancelMsg);
+  set("can-no",tx.cancelNo); set("can-yes",tx.cancelYes); set("mo-title",tx.moTitle);
+  set("emptyMenu",tx.noItems); set("cm-sugar-lbl",tx.sugar); set("cm-ice-lbl",tx.ice);
+  set("cm-top-lbl",tx.toppings); set("cm-add-btn-txt",tx.saveChanges);
+  set("c-note-lbl",tx.note); set("slideshow-title",tx.howToOrder);
+  set("slide-prev-lbl",tx.prev); set("slide-next-lbl",tx.next);
+  set("popular-title",tx.popular); set("cm-temp-lbl",tx.tempLbl);
+  set("temp-ice-lbl",tx.tempIce); set("temp-hot-lbl",tx.tempHot); set("temp-frappe-lbl",tx.tempFrappe);
+  if(currentItems.length > 0) { renderMenu(currentItems); renderPopular(); }
+  renderCart(); renderMyOrders();
 }
 
-// ==========================================
-// 4. DATA & MENU LOGIC
-// ==========================================
+// ── TABLES ──
 function buildTableOptions() {
   const sel = document.getElementById("cartTable");
-  const tx = t();
-  sel.innerHTML = `<option value="" disabled selected id="c-table-ph">${tx.tablePH}</option>`;
-  for (let i = 1; i <= 20; i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
+  sel.innerHTML = `<option value="" disabled selected>—</option>`;
+  for(let i=1;i<=20;i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
   const saved = safeStorage.get("chafe_table");
-  if (saved) sel.value = saved;
+  if(saved) sel.value = saved;
 }
 document.getElementById("cartTable").addEventListener("change", e => safeStorage.set("chafe_table", e.target.value));
 
-let allItems = [], currentItems = [], currentCat = "All", cart = [], allToppings = [];
+// ── DATA ──
+let allItems=[], currentItems=[], currentCat="All", cart=[], allToppings=[], slides=[], currentSlide=0;
 
 async function loadData() {
   try {
-    if (!db) throw new Error("Firebase DB not initialized.");
+    if(!db) throw new Error("No DB");
     try {
-       const tSnap = await getDocs(collection(db, "toppings"));
-       allToppings = tSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-    } catch(e) { console.warn("Could not load toppings from DB"); }
+      const tSnap = await getDocs(collection(db,"toppings"));
+      allToppings = tSnap.docs.map(d=>({id:d.id,...d.data()}));
+    } catch(e) {}
 
     const snap = await Promise.race([
-      getDocs(collection(db, "menu")),
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Firebase Timeout")), 8000))
+      getDocs(collection(db,"menu")),
+      new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),8000))
     ]);
-    allItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allItems = snap.docs.map(d=>({id:d.id,...d.data()}));
 
+    // Load social links
+    await loadSocialLinks();
     // Load slideshow
     await loadSlideshow();
 
-  } catch (error) {
-    console.warn("Using Fallback Mock Data");
+  } catch(e) {
     allToppings = [
-      { id: "t1", name: "Boba", nameKh: "គុជ", price: 0.50 },
-      { id: "t2", name: "Coffee Jelly", nameKh: "ចាហួយកាហ្វេ", price: 0.50 },
-      { id: "t3", name: "Cheese Foam", nameKh: "ហ្វូមឈីស", price: 0.75 }
+      {id:"t1",name:"Boba",nameKh:"គុជ",price:0.50},
+      {id:"t2",name:"Coffee Jelly",nameKh:"ចាហួយកាហ្វេ",price:0.50},
+      {id:"t3",name:"Cheese Foam",nameKh:"ហ្វូមឈីស",price:0.75}
     ];
     allItems = [
-      { id: "1", name: "Thai Milk Tea", nameKh: "តែទឹកដោះគោថៃ", price: 4.50, category: "Milk Tea", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Thai+Tea", inStock: true, discount: 10 },
-      { id: "2", name: "Iced Coffee", nameKh: "កាហ្វេទឹកកក", price: 3.50, category: "Coffee", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Coffee", inStock: true },
-      { id: "3", name: "Matcha Latte", nameKh: "តែបៃតងទឹកដោះគោ", price: 5.00, category: "Matcha", imageUrl: "https://placehold.co/300x200/f5ece3/3c2a21?text=Matcha", inStock: true, discount: 15 }
+      {id:"1",name:"Thai Milk Tea",nameKh:"តែទឹកដោះគោថៃ",price:4.50,category:"Milk Tea",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Thai+Tea",inStock:true,discount:10,popular:true,temperature:"both"},
+      {id:"2",name:"Iced Coffee",nameKh:"កាហ្វេទឹកកក",price:3.50,category:"Coffee",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Coffee",inStock:true,temperature:"ice"},
+      {id:"3",name:"Matcha Latte",nameKh:"តែបៃតងទឹកដោះគោ",price:5.00,category:"Matcha",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Matcha",inStock:true,discount:15,popular:true,temperature:"both"}
     ];
   } finally {
     buildCats();
     filterByCat("All");
+    renderPopular();
     document.getElementById("menuSkeleton").classList.add("hidden");
   }
 }
 
-// ==========================================
-// SLIDESHOW LOGIC
-// ==========================================
-let slides = [];
-let currentSlide = 0;
+// ── SOCIAL LINKS ──
+async function loadSocialLinks() {
+  try {
+    const snap = await getDocs(collection(db,"settings"));
+    const settings = {};
+    snap.docs.forEach(d => Object.assign(settings, d.data()));
+    renderSocialBar(settings.facebookUrl, settings.tiktokUrl);
+  } catch(e) {}
+}
+
+function renderSocialBar(fbUrl, ttUrl) {
+  const bar = document.getElementById("socialBar");
+  if(!fbUrl && !ttUrl) { bar.classList.add("hidden-bar"); return; }
+  bar.classList.remove("hidden-bar");
+  let html = '';
+  if(fbUrl) html += `<a href="${fbUrl}" target="_blank" rel="noopener" class="social-link social-fb">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+  </a>`;
+  if(ttUrl) html += `<a href="${ttUrl}" target="_blank" rel="noopener" class="social-link social-tiktok">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+  </a>`;
+  bar.innerHTML = html;
+}
+
+// ── SLIDESHOW ──
+let _slideshowTimer;
 
 async function loadSlideshow() {
   try {
-    const snap = await getDocs(collection(db, "slideshow"));
-    slides = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
-    if (slides.length > 0) {
+    const snap = await getDocs(collection(db,"slideshow"));
+    slides = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+    if(slides.length > 0) {
       renderSlideshow();
       document.getElementById("slideshow-section").classList.remove("hidden");
+      startSlideshow();
     }
-  } catch(e) {
-    console.warn("No slideshow data");
-  }
+  } catch(e) {}
+}
+
+function startSlideshow() {
+  clearInterval(_slideshowTimer);
+  _slideshowTimer = setInterval(() => {
+    if(slides.length>1) { currentSlide=(currentSlide+1)%slides.length; updateSlideCounter(); }
+  }, 5000);
 }
 
 function renderSlideshow() {
   const container = document.getElementById("slides-container");
   const dotsEl = document.getElementById("slide-dots");
-  
-  container.innerHTML = slides.map((slide, i) => `
-    <div class="slide ${i === 0 ? 'active' : ''} flex flex-col sm:flex-row items-center gap-4 p-5">
-      ${slide.imageUrl ? `
-        <div class="w-full sm:w-48 flex-shrink-0 rounded-xl overflow-hidden border border-[var(--bdr)] bg-[var(--sur2)]" style="aspect-ratio:4/3">
-          <img src="${slide.imageUrl}" alt="Step ${i+1}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/>
+  if(!container || !slides.length) return;
+
+  container.innerHTML = slides.map((slide,i) => `
+    <div class="slide ${i===currentSlide?'active':''} flex flex-col items-center text-center sm:text-left sm:flex-row gap-4 p-5">
+      <div class="w-full sm:w-48 flex-shrink-0 rounded-xl overflow-hidden border border-[var(--bdr)] bg-[var(--sur2)] relative" style="aspect-ratio:4/3">
+        ${slide.imageUrl 
+          ? `<img src="${slide.imageUrl}" alt="Step ${slide.step||(i+1)}" class="w-full h-full object-cover"/>` 
+          : `<div class="absolute inset-0 flex items-center justify-center text-4xl opacity-20">🖼️</div>`}
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
+          <div class="step-badge">${slide.step||(i+1)}!</div>
+          <h3 class="font-bold text-[var(--txt)] text-lg">${lang==='kh'&&slide.titleKh ? slide.titleKh : (slide.title||'')}</h3>
         </div>
-      ` : ''}
-      <div class="flex-1 text-left">
-        <div class="flex items-center gap-2 mb-2">
-          <div class="step-badge">${slide.step || (i+1)}</div>
-          <h3 class="font-semibold text-[var(--txt)] text-sm">${lang === 'kh' && slide.titleKh ? slide.titleKh : (slide.title || '')}</h3>
-        </div>
-        <p class="text-xs text-[var(--muted)] leading-relaxed">${lang === 'kh' && slide.descKh ? slide.descKh : (slide.description || '')}</p>
+        <p class="text-sm text-[var(--muted)] leading-relaxed">${lang==='kh'&&slide.descKh ? slide.descKh : (slide.description||'')}</p>
       </div>
     </div>
   `).join('');
 
-  dotsEl.innerHTML = slides.map((_, i) => `
-    <div class="slide-dot ${i === 0 ? 'on' : ''}" onclick="goToSlide(${i})"></div>
-  `).join('');
+  dotsEl.innerHTML = slides.map((_,i) =>
+    `<div class="slide-dot ${i===currentSlide?'on':''}" onclick="goToSlide(${i})"></div>`
+  ).join('');
 
   updateSlideCounter();
 }
 
 function updateSlideCounter() {
-  document.getElementById("slide-counter").textContent = `${currentSlide + 1} / ${slides.length}`;
-  const allSlides = document.querySelectorAll('.slide');
-  const dots = document.querySelectorAll('.slide-dot');
-  allSlides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
-  dots.forEach((d, i) => d.classList.toggle('on', i === currentSlide));
+  document.getElementById("slide-counter").textContent = `${currentSlide+1} / ${slides.length}`;
+  document.querySelectorAll('.slide').forEach((s,i) => s.classList.toggle('active', i===currentSlide));
+  document.querySelectorAll('.slide-dot').forEach((d,i) => d.classList.toggle('on', i===currentSlide));
 }
 
-window.goToSlide = function(i) {
-  currentSlide = i;
-  updateSlideCounter();
-};
-window.nextSlide = function() {
-  if (currentSlide < slides.length - 1) { currentSlide++; updateSlideCounter(); }
-};
-window.prevSlide = function() {
-  if (currentSlide > 0) { currentSlide--; updateSlideCounter(); }
-};
+window.goToSlide = i => { currentSlide=i; updateSlideCounter(); startSlideshow(); };
+window.nextSlide = () => { if(currentSlide<slides.length-1){currentSlide++;updateSlideCounter();startSlideshow();} };
+window.prevSlide = () => { if(currentSlide>0){currentSlide--;updateSlideCounter();startSlideshow();} };
 
-// Auto-advance slideshow every 5s
-setInterval(() => {
-  if (slides.length > 1) {
-    currentSlide = (currentSlide + 1) % slides.length;
-    updateSlideCounter();
-  }
-}, 5000);
-
-// ==========================================
-// MENU
-// ==========================================
+// ── MENU ──
 function buildCats() {
-  const cats = ["All", ...new Set(allItems.map(i => i.category || "Other"))];
-  document.getElementById("catRow").innerHTML = cats.map(c => 
-    `<button class="cat-pill${c === currentCat ? " on" : ""} px-4 py-1.5 rounded-full text-xs font-medium" onclick="filterByCat('${c}')">${c}</button>`
+  const cats = ["All", ...new Set(allItems.map(i=>i.category||"Other"))];
+  document.getElementById("catRow").innerHTML = cats.map(c =>
+    `<button class="cat-pill${c===currentCat?" on":""} px-4 py-1.5 rounded-full text-xs font-medium" onclick="filterByCat('${c}')">${c}</button>`
   ).join("");
 }
 
 window.filterByCat = function(cat) {
   currentCat = cat;
   buildCats();
-  currentItems = cat === "All" ? allItems : allItems.filter(i => i.category === cat);
+  currentItems = cat==="All" ? allItems : allItems.filter(i=>i.category===cat);
   renderMenu(currentItems);
 };
+
+function getTempBadgeHTML(temperature) {
+  if(temperature==='ice') return `<span class="temp-badge temp-ice">🧊 Iced</span>`;
+  if(temperature==='hot') return `<span class="temp-badge temp-hot">☕ Hot</span>`;
+  if(temperature==='frappe') return `<span class="temp-badge temp-frappe">🥤 Frappe</span>`;
+  if(temperature==='both') return `<span class="temp-badge" style="background:linear-gradient(90deg,#dbeafe 50%,#fee2e2 50%);color:#374151">🧊☕</span>`;
+  return '';
+}
 
 function renderMenu(items) {
   const grid = document.getElementById("menuGrid");
   const empty = document.getElementById("emptyMenu");
-  if (!items || !items.length) { grid.classList.add("hidden"); empty.classList.remove("hidden"); return; }
+  if(!items?.length) { grid.classList.add("hidden"); empty.classList.remove("hidden"); return; }
   empty.classList.add("hidden"); grid.classList.remove("hidden");
-  
   const tx = t();
-  grid.innerHTML = items.map((item, idx) => {
-    const outOfStock = item.inStock === false;
-    const dName = lang === 'kh' && item.nameKh ? item.nameKh : item.name;
-    const discount = item.discount || 0;
-    const calcPrice = discount > 0 ? item.price * (1 - discount/100) : item.price;
-    
-    const priceHTML = discount > 0 
+
+  grid.innerHTML = items.map((item,idx) => {
+    const outOfStock = item.inStock===false;
+    const dName = lang==='kh'&&item.nameKh ? item.nameKh : item.name;
+    const discount = item.discount||0;
+    const calcPrice = discount>0 ? item.price*(1-discount/100) : item.price;
+    const priceHTML = discount>0
       ? `<div class="flex flex-col items-end leading-none"><span class="text-[10px] text-[var(--muted)] line-through">$${Number(item.price).toFixed(2)}</span><span class="text-[var(--gold)] font-semibold text-sm">$${calcPrice.toFixed(2)}</span></div>`
       : `<span class="text-[var(--gold)] font-semibold text-sm">$${Number(item.price).toFixed(2)}</span>`;
+    const tempBadge = getTempBadgeHTML(item.temperature);
 
-    const badgeHTML = discount > 0 ? `<span class="absolute top-2 left-2 bg-[var(--red)] text-[#faf6eb] text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">-${discount}%</span>` : ``;
-
-    return `<div class="m-card${outOfStock ? " out-stock" : ""} rounded-2xl overflow-hidden flex flex-col fade-up" style="animation-delay:${idx*35}ms">
+    return `<div class="m-card${outOfStock?" out-stock":""} rounded-2xl overflow-hidden flex flex-col fade-up" style="animation-delay:${idx*35}ms">
       <div class="relative h-36 bg-[var(--sur2)] overflow-hidden">
-        <img src="${item.imageUrl || 'https://placehold.co/300x200/f5ece3/3c2a21?text=☕'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/f5ece3/3c2a21?text=☕'"/>
+        <img src="${item.imageUrl||'https://placehold.co/300x200/f5ece3/3c2a21?text=☕'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/f5ece3/3c2a21?text=☕'"/>
         <div class="absolute inset-0 bg-gradient-to-t from-[#3c2a21]/60 to-transparent"></div>
-        ${badgeHTML}
-        <span class="absolute top-2 right-2 bg-[#3c2a21]/80 text-[#faf6eb] text-[9px] px-2 py-0.5 rounded-full border border-[var(--gold)]/50 uppercase tracking-wide" style="backdrop-filter:blur(4px)">${item.category || ""}</span>
-        ${outOfStock ? `<div class="out-stock-badge"><span class="text-white text-xs font-bold tracking-wide uppercase bg-black/70 px-3 py-1 rounded-full">${tx.outOfStock}</span></div>` : ""}
+        ${discount>0?`<span class="absolute top-2 left-2 bg-[var(--red)] text-[#faf6eb] text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">-${discount}%</span>`:''}
+        ${item.popular?`<span class="popular-badge">🔥 Hot</span>`:''}
+        <span class="absolute top-2 right-2 bg-[#3c2a21]/80 text-[#faf6eb] text-[9px] px-2 py-0.5 rounded-full border border-[var(--gold)]/50 uppercase tracking-wide" style="backdrop-filter:blur(4px)">${item.category||""}</span>
+        ${outOfStock?`<div class="out-stock-badge"><span class="text-white text-xs font-bold tracking-wide uppercase bg-black/70 px-3 py-1 rounded-full">${tx.outOfStock}</span></div>`:""}
       </div>
       <div class="p-3 flex flex-col flex-1">
-        <h3 class="text-sm font-medium leading-snug flex-1 mb-2">${dName}</h3>
+        <h3 class="text-sm font-medium leading-snug flex-1 mb-1">${dName}</h3>
+        ${tempBadge ? `<div class="mb-2">${tempBadge}</div>` : '<div class="mb-2"></div>'}
         <div class="flex items-center justify-between">
           ${priceHTML}
-          ${outOfStock ? `<span class="text-xs text-[var(--muted)] border border-[var(--bdr)] px-2 py-1 rounded-full">${tx.outOfStock}</span>` : `<button class="add-btn px-4 py-1.5 rounded-full font-bold shadow-sm" onclick='quickAddToCart(${JSON.stringify(item).replace(/'/g,"&#39;").replace(/"/g,"&quot;")})'>+ Add</button>`}
+          ${outOfStock
+            ? `<span class="text-xs text-[var(--muted)] border border-[var(--bdr)] px-2 py-1 rounded-full">${tx.outOfStock}</span>`
+            : `<button class="add-btn px-4 py-1.5 rounded-full font-bold shadow-sm" onclick='openCustomize(${JSON.stringify({
+                id:item.id, name:item.name, nameKh:item.nameKh||'',
+                imageUrl:item.imageUrl||'', price:item.price, discount:item.discount||0,
+                temperature:item.temperature||'both'
+              }).replace(/'/g,"&#39;")})'>+ Add</button>`}
         </div>
       </div>
     </div>`;
   }).join("");
 }
 
-// ==========================================
-// 5. CART & CUSTOMIZE LOGIC
-// ==========================================
-window.quickAddToCart = function(itemStr) {
-   const item = typeof itemStr === 'string' ? JSON.parse(itemStr) : itemStr;
-   const discount = item.discount || 0;
-   const basePrice = discount > 0 ? item.price * (1 - discount/100) : item.price;
-   
-   cart.push({
-      cartId: 'cart_' + Date.now() + Math.random().toString(36).substr(2, 5),
-      id: item.id,
-      name: item.name,
-      nameKh: item.nameKh,
-      imageUrl: item.imageUrl,
-      basePrice: basePrice,
-      price: basePrice,
-      qty: 1,
-      sugar: "100%",
-      ice: "100%",
-      toppingsData: []
-   });
-   
-   renderCart();
-   const dName = lang === 'kh' && item.nameKh ? item.nameKh : item.name;
-   showToast(`✓ ${dName} ${t().addedToast}`);
-   const b = document.getElementById("cartBadge");
-   b.classList.add("pop-anim"); setTimeout(() => b.classList.remove("pop-anim"), 300);
-};
+function renderPopular() {
+  const popularItems = allItems.filter(i => i.popular && i.inStock!==false);
+  const section = document.getElementById("popularSection");
+  const grid = document.getElementById("popularGrid");
+  if(!popularItems.length) { section.classList.add("hidden"); return; }
+  section.classList.remove("hidden");
 
-let editingCartId = null;
-let customItem = null;
-let selectedSugar = "100%";
-let selectedIce = "100%";
-let selectedTops = [];
+  grid.innerHTML = popularItems.map(item => {
+    const dName = lang==='kh'&&item.nameKh ? item.nameKh : item.name;
+    const discount = item.discount||0;
+    const calcPrice = discount>0 ? item.price*(1-discount/100) : item.price;
+    return `
+    <div class="flex-shrink-0 w-36 bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden cursor-pointer hover:border-[var(--gold)] transition-all hover:-translate-y-1 hover:shadow-lg"
+         onclick='openCustomize(${JSON.stringify({id:item.id,name:item.name,nameKh:item.nameKh||'',imageUrl:item.imageUrl||'',price:item.price,discount:item.discount||0,temperature:item.temperature||'both'}).replace(/'/g,"&#39;")})'>
+      <div class="h-24 bg-[var(--sur2)] overflow-hidden relative">
+        <img src="${item.imageUrl||'https://placehold.co/200x150/f5ece3/3c2a21?text=☕'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x150/f5ece3/3c2a21?text=☕'"/>
+        <span class="popular-badge" style="top:5px;left:5px">🔥</span>
+      </div>
+      <div class="p-2.5">
+        <p class="text-xs font-semibold truncate">${dName}</p>
+        <p class="text-[var(--gold)] font-bold text-xs mt-0.5">$${calcPrice.toFixed(2)}</p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CUSTOMIZE ──
+let editingCartId = null, customItem = null;
+let selectedSugar = "100%", selectedIce = "100%", selectedTemp = "ice", selectedTops = [];
+
+window.openCustomize = function(item) {
+  editingCartId = null;
+  customItem = { ...item, basePrice: item.discount>0 ? item.price*(1-item.discount/100) : item.price };
+  selectedSugar = "100%"; selectedIce = "100%"; selectedTops = [];
+  selectedTemp = item.temperature==='hot' ? 'hot' : item.temperature==='frappe' ? 'frappe' : 'ice';
+
+  _openCustomModal();
+};
 
 window.editCartItem = function(cartId) {
-   editingCartId = cartId;
-   const cartItem = cart.find(c => c.cartId === cartId);
-   if(!cartItem) return;
-   
-   customItem = cartItem;
-   selectedSugar = cartItem.sugar;
-   selectedIce = cartItem.ice;
-   selectedTops = cartItem.toppingsData.map(t => t.id);
-
-   const dName = lang === 'kh' && cartItem.nameKh ? cartItem.nameKh : cartItem.name;
-   document.getElementById("cm-title").textContent = dName;
-   document.getElementById("cm-subtitle").textContent = t().toppings;
-   
-   // Render toppings list WITH images
-   document.getElementById("cm-top-list").innerHTML = allToppings.length ? allToppings.map(tp => {
-     const tName = lang === 'kh' && tp.nameKh ? tp.nameKh : tp.name;
-     const isAct = selectedTops.includes(tp.id) ? "active" : "";
-     const imgHTML = tp.imageUrl
-       ? `<img src="${tp.imageUrl}" alt="${tName}" class="w-10 h-10 rounded-lg object-cover border border-[var(--bdr)] flex-shrink-0" onerror="this.style.display='none'"/>`
-       : `<div class="w-10 h-10 rounded-lg bg-[var(--sur2)] border border-[var(--bdr)] flex items-center justify-center flex-shrink-0 text-lg">🧁</div>`;
-     return `
-     <div onclick="toggleTop('${tp.id}')" id="top-${tp.id}" class="top-box ${isAct} flex items-center gap-3 p-3 border border-[var(--bdr)] rounded-xl cursor-pointer hover:border-[var(--gold)] transition-colors">
-       ${imgHTML}
-       <div class="flex-1 min-w-0">
-         <p class="text-sm font-medium text-[var(--txt)]">${tName}</p>
-         ${tp.nameKh && lang !== 'kh' ? `<p class="text-[10px] text-[var(--muted)]">${tp.nameKh}</p>` : ''}
-       </div>
-       <span class="text-xs text-[var(--gold)] font-semibold flex-shrink-0">+$${Number(tp.price).toFixed(2)}</span>
-       <div class="w-5 h-5 rounded-full border-2 border-[var(--bdr)] flex items-center justify-center flex-shrink-0 ${isAct ? 'bg-[var(--green)] border-[var(--green)]' : ''}">
-         ${isAct ? `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>` : ''}
-       </div>
-     </div>`;
-   }).join('') : `<p class="text-sm text-[var(--muted)] text-center py-4">No toppings available</p>`;
-
-   setSugar(selectedSugar);
-   setIce(selectedIce);
-   updateCustomPrice();
-
-   const m = document.getElementById("customModal");
-   m.classList.remove("hidden"); m.style.display = "flex";
+  editingCartId = cartId;
+  const cartItem = cart.find(c=>c.cartId===cartId);
+  if(!cartItem) return;
+  customItem = cartItem;
+  selectedSugar = cartItem.sugar;
+  selectedIce = cartItem.ice;
+  selectedTemp = cartItem.temperature||'ice';
+  selectedTops = cartItem.toppingsData.map(t=>t.id);
+  _openCustomModal();
 };
+
+function _openCustomModal() {
+  const tx = t();
+  const dName = lang==='kh'&&customItem.nameKh ? customItem.nameKh : customItem.name;
+  document.getElementById("cm-title").textContent = dName;
+  document.getElementById("cm-subtitle").textContent = tx.toppings;
+
+  const tempWrap = document.getElementById("cm-temp-wrap");
+  const iceSec = document.getElementById("cm-ice-section");
+  
+  const btnIce = document.getElementById("temp-ice");
+  const btnHot = document.getElementById("temp-hot");
+  const btnFrappe = document.getElementById("temp-frappe");
+
+  // Always show wrapper
+  tempWrap.style.display = 'block';
+  btnIce.style.display = 'none';
+  btnHot.style.display = 'none';
+  btnFrappe.style.display = 'none';
+
+  // Toggle available buttons based on admin's settings
+  if(customItem.temperature === 'ice') {
+    btnIce.style.display = 'block';
+    selectedTemp = 'ice';
+  } else if(customItem.temperature === 'hot') {
+    btnHot.style.display = 'block';
+    selectedTemp = 'hot';
+  } else if(customItem.temperature === 'frappe') {
+    btnFrappe.style.display = 'block';
+    selectedTemp = 'frappe';
+  } else {
+    // Both allowed
+    btnIce.style.display = 'block';
+    btnHot.style.display = 'block';
+    if(selectedTemp === 'frappe') selectedTemp = 'ice';
+  }
+
+  // Render toppings
+  document.getElementById("cm-top-list").innerHTML = allToppings.length ? allToppings.map(tp => {
+    const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
+    const isAct = selectedTops.includes(tp.id);
+    const imgHTML = tp.imageUrl
+      ? `<img src="${tp.imageUrl}" alt="${tName}" class="w-10 h-10 rounded-lg object-cover border border-[var(--bdr)] flex-shrink-0" onerror="this.style.display='none'"/>`
+      : `<div class="w-10 h-10 rounded-lg bg-[var(--sur2)] border border-[var(--bdr)] flex items-center justify-center flex-shrink-0 text-lg">🧁</div>`;
+    return `
+    <div onclick="toggleTop('${tp.id}')" id="top-${tp.id}" class="top-box ${isAct?'active':''} flex items-center gap-3 p-3 border border-[var(--bdr)] rounded-xl cursor-pointer hover:border-[var(--gold)] transition-colors">
+      ${imgHTML}
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-[var(--txt)]">${tName}</p>
+      </div>
+      <span class="text-xs text-[var(--gold)] font-semibold flex-shrink-0">+$${Number(tp.price).toFixed(2)}</span>
+      <div id="top-check-${tp.id}" class="w-5 h-5 rounded-full border-2 ${isAct?'bg-[var(--green)] border-[var(--green)]':'border-[var(--bdr)]'} flex items-center justify-center flex-shrink-0">
+        ${isAct?`<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`:''}
+      </div>
+    </div>`;
+  }).join('') : `<p class="text-sm text-[var(--muted)] text-center py-4">No toppings available</p>`;
+
+  setTemp(selectedTemp); setSugar(selectedSugar); setIce(selectedIce);
+  updateCustomPrice();
+  
+  const m = document.getElementById("customModal");
+  m.classList.remove("hidden"); m.style.display = "flex";
+}
 
 window.closeCustomModal = function() {
   editingCartId = null;
@@ -685,211 +740,236 @@ window.closeCustomModal = function() {
   m.classList.add("hidden"); m.style.display = "none";
 };
 
+window.setTemp = function(val) {
+  selectedTemp = val;
+  const iceSec = document.getElementById("cm-ice-section");
+  ['ice','hot','frappe'].forEach(v => {
+    const btn = document.getElementById(`temp-${v}`);
+    if(btn) btn.classList.toggle('active', v===val);
+  });
+  // Hide ice options if Hot
+  if(val==='hot') { iceSec.style.display='none'; }
+  else { iceSec.style.display='block'; }
+  updateCustomPrice();
+};
+
 window.setSugar = function(lvl) {
   selectedSugar = lvl;
-  ['0', '25', '50', '100'].forEach(val => {
-     const el = document.getElementById(`sug-${val}`);
-     if(el) {
-       if(val+'%' === lvl) { el.classList.add('active'); el.classList.remove('text-[var(--muted)]'); }
-       else { el.classList.remove('active'); el.classList.add('text-[var(--muted)]'); }
-     }
+  ['0','25','50','100'].forEach(v => {
+    const el = document.getElementById(`sug-${v}`);
+    if(el) el.classList.toggle('active', v+'%'===lvl);
   });
 };
+
 window.setIce = function(lvl) {
   selectedIce = lvl;
-  ['0', '50', '100'].forEach(val => {
-     const el = document.getElementById(`ice-${val}`);
-     if(el) {
-       if(val+'%' === lvl) { el.classList.add('active'); el.classList.remove('text-[var(--muted)]'); }
-       else { el.classList.remove('active'); el.classList.add('text-[var(--muted)]'); }
-     }
+  ['0','50','100'].forEach(v => {
+    const el = document.getElementById(`ice-${v}`);
+    if(el) el.classList.toggle('active', v+'%'===lvl);
   });
 };
+
 window.toggleTop = function(tid) {
   const el = document.getElementById(`top-${tid}`);
-  if(selectedTops.includes(tid)) { 
-    selectedTops = selectedTops.filter(id => id !== tid); 
+  const check = document.getElementById(`top-check-${tid}`);
+  if(selectedTops.includes(tid)) {
+    selectedTops = selectedTops.filter(id=>id!==tid);
     el.classList.remove('active');
-    // update check icon
-    const check = el.querySelector('.rounded-full.border-2');
-    if(check) { check.classList.remove('bg-[var(--green)]','border-[var(--green)]'); check.innerHTML = ''; }
-  } else { 
-    selectedTops.push(tid); 
+    if(check) { check.className='w-5 h-5 rounded-full border-2 border-[var(--bdr)] flex items-center justify-center flex-shrink-0'; check.innerHTML=''; }
+  } else {
+    selectedTops.push(tid);
     el.classList.add('active');
-    const check = el.querySelector('.rounded-full.border-2');
-    if(check) { check.classList.add('bg-[var(--green)]','border-[var(--green)]'); check.innerHTML = `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`; }
+    if(check) { check.className='w-5 h-5 rounded-full border-2 bg-[var(--green)] border-[var(--green)] flex items-center justify-center flex-shrink-0'; check.innerHTML=`<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`; }
   }
   updateCustomPrice();
 };
 
 function updateCustomPrice() {
-  const topPrice = selectedTops.reduce((sum, tid) => sum + (allToppings.find(t=>t.id===tid)?.price||0), 0);
-  document.getElementById("cm-price").textContent = "$" + (customItem.basePrice + topPrice).toFixed(2);
+  const topPrice = selectedTops.reduce((sum,tid)=>sum+(allToppings.find(t=>t.id===tid)?.price||0), 0);
+  document.getElementById("cm-price").textContent = "$"+(customItem.basePrice+topPrice).toFixed(2);
 }
 
 window.saveCustomization = function() {
-   if(!editingCartId) return;
-   const cartItem = cart.find(c => c.cartId === editingCartId);
-   
-   const topPrice = selectedTops.reduce((sum, tid) => sum + (allToppings.find(t=>t.id===tid)?.price||0), 0);
-   cartItem.sugar = selectedSugar;
-   cartItem.ice = selectedIce;
-   cartItem.toppingsData = selectedTops.map(tid => allToppings.find(t=>t.id===tid));
-   cartItem.price = cartItem.basePrice + topPrice;
-   
-   renderCart();
-   closeCustomModal();
+  const topPrice = selectedTops.reduce((sum,tid)=>sum+(allToppings.find(t=>t.id===tid)?.price||0), 0);
+  const finalPrice = customItem.basePrice + topPrice;
+  const tops = selectedTops.map(tid=>allToppings.find(t=>t.id===tid)).filter(Boolean);
+
+  if(editingCartId) {
+    const cartItem = cart.find(c=>c.cartId===editingCartId);
+    if(cartItem) {
+      cartItem.sugar = selectedSugar; cartItem.ice = selectedIce;
+      cartItem.temperature = selectedTemp;
+      cartItem.toppingsData = tops; cartItem.price = finalPrice;
+    }
+  } else {
+    cart.push({
+      cartId: 'cart_'+Date.now()+Math.random().toString(36).substr(2,5),
+      id: customItem.id, name: customItem.name, nameKh: customItem.nameKh||'',
+      imageUrl: customItem.imageUrl, basePrice: customItem.basePrice,
+      price: finalPrice, qty: 1, sugar: selectedSugar, ice: selectedIce,
+      temperature: selectedTemp, toppingsData: tops
+    });
+    const dName = lang==='kh'&&customItem.nameKh ? customItem.nameKh : customItem.name;
+    showToast(`✓ ${dName} ${t().addedToast}`);
+    const b = document.getElementById("cartBadge");
+    b.classList.add("pop-anim"); setTimeout(()=>b.classList.remove("pop-anim"),300);
+  }
+  renderCart();
+  closeCustomModal();
 };
 
 window.changeQty = function(cId, d) {
-  const item = cart.find(c => c.cartId === cId);
-  if (!item) return;
+  const item = cart.find(c=>c.cartId===cId);
+  if(!item) return;
   item.qty += d;
-  if (item.qty <= 0) cart = cart.filter(c => c.cartId !== cId);
+  if(item.qty <= 0) cart = cart.filter(c=>c.cartId!==cId);
   renderCart();
 };
-window.clearCart = function() { cart = []; renderCart(); };
+window.clearCart = function() { cart=[]; renderCart(); };
 
 function renderCart() {
   const el = document.getElementById("cartItems");
   const empty = document.getElementById("cartEmpty");
   const badge = document.getElementById("cartBadge");
-  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const count = cart.reduce((s, c) => s + c.qty, 0);
+  const total = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  const count = cart.reduce((s,c)=>s+c.qty, 0);
   const tx = t();
-  
+
   document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
   badge.textContent = count;
   count ? badge.classList.remove("hidden") : badge.classList.add("hidden");
-  
-  if (!cart.length) { el.innerHTML = ""; empty.classList.remove("hidden"); empty.style.display = "flex"; return; }
-  
-  empty.classList.add("hidden"); empty.style.display = "none";
-  el.innerHTML = cart.map(c => {
-    const dName = lang === 'kh' && c.nameKh ? c.nameKh : c.name;
-    // ── CHANGED: Full labels Sugar / Ice ──
-    let sugarIce = `Sugar: ${c.sugar} | Ice: ${c.ice}`;
-    let toppingsList = '';
-    if(c.toppingsData && c.toppingsData.length > 0) {
-       toppingsList = c.toppingsData.map(tp => {
-         const tName = lang === 'kh' && tp.nameKh ? tp.nameKh : tp.name;
-         return `<span class="inline-flex items-center gap-0.5 bg-[var(--sur)] px-1.5 py-0.5 rounded border border-[var(--bdr)]">${tp.imageUrl ? `<img src="${tp.imageUrl}" class="w-3.5 h-3.5 rounded object-cover" onerror="this.style.display='none'"/>` : ''}${tName}</span>`;
-       }).join('');
-    }
 
+  if(!cart.length) { el.innerHTML=""; empty.classList.remove("hidden"); empty.style.display="flex"; return; }
+  empty.classList.add("hidden"); empty.style.display="none";
+
+  el.innerHTML = cart.map(c => {
+    const dName = lang==='kh'&&c.nameKh ? c.nameKh : c.name;
+    const tempIcon = c.temperature==='hot' ? '☕ Hot' : c.temperature==='frappe' ? '🥤 Frappe' : '🧊 Iced';
+    let opts = `${tempIcon} | Sugar: ${c.sugar}`;
+    if(c.temperature!=='hot') opts += ` | Ice: ${c.ice}`;
+    let toppingsList = '';
+    if(c.toppingsData?.length > 0) {
+      toppingsList = c.toppingsData.map(tp => {
+        const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
+        return `<span class="inline-flex items-center gap-0.5 bg-[var(--sur)] px-1.5 py-0.5 rounded border border-[var(--bdr)] text-[10px]">${tName}</span>`;
+      }).join('');
+    }
     return `
     <div class="bg-[var(--sur)] rounded-2xl p-3 flex flex-col gap-3 shadow-sm border border-[var(--bdr)]">
       <div class="flex items-center gap-3">
-        <img src="${c.imageUrl || 'https://placehold.co/48/f5ece3/3c2a21?text=☕'}" class="w-14 h-14 rounded-xl object-cover shrink-0" onerror="this.src='https://placehold.co/48/f5ece3/3c2a21?text=☕'"/>
+        <img src="${c.imageUrl||'https://placehold.co/48/f5ece3/3c2a21?text=☕'}" class="w-14 h-14 rounded-xl object-cover shrink-0" onerror="this.src='https://placehold.co/48/f5ece3/3c2a21?text=☕'"/>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-semibold truncate text-[var(--txt)]">${dName}</p>
-          <!-- Sugar & Ice with full names -->
-          <p class="text-[11px] text-[var(--muted)] mt-1 bg-[var(--sur2)] px-2 py-1 rounded-lg border border-[var(--bdr)]">${sugarIce}</p>
-          ${toppingsList ? `<div class="flex flex-wrap gap-1 mt-1.5 text-[10px] text-[var(--muted)]">${toppingsList}</div>` : ''}
+          <p class="text-[11px] text-[var(--muted)] mt-1 bg-[var(--sur2)] px-2 py-1 rounded-lg border border-[var(--bdr)]">${opts}</p>
+          ${toppingsList ? `<div class="flex flex-wrap gap-1 mt-1.5">${toppingsList}</div>` : ''}
         </div>
-        <div class="flex flex-col items-end gap-2 shrink-0">
-          <p class="text-[var(--gold)] font-bold text-sm">$${(c.price * c.qty).toFixed(2)}</p>
-        </div>
+        <p class="text-[var(--gold)] font-bold text-sm shrink-0">$${(c.price*c.qty).toFixed(2)}</p>
       </div>
-      
       <div class="flex items-center justify-between border-t border-[var(--sur2)] pt-2 mt-1">
-        <!-- CHANGED: "Add Topping" button -->
         <button onclick="editCartItem('${c.cartId}')" class="text-xs text-[var(--gold)] font-semibold flex items-center gap-1.5 bg-[var(--sur2)] px-3 py-1.5 rounded-full border border-[var(--bdr)] hover:border-[var(--gold)] transition-colors">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
           ${tx.addTopping}
         </button>
         <div class="flex items-center gap-2 bg-[var(--sur2)] rounded-full border border-[var(--bdr)] p-0.5">
-          <button onclick="changeQty('${c.cartId}',-1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)] hover:text-[var(--txt)]">−</button>
+          <button onclick="changeQty('${c.cartId}',-1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)]">−</button>
           <span class="w-4 text-center text-sm font-semibold">${c.qty}</span>
-          <button onclick="changeQty('${c.cartId}',1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)] hover:text-[var(--txt)]">+</button>
+          <button onclick="changeQty('${c.cartId}',1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)]">+</button>
         </div>
       </div>
-    </div>`
+    </div>`;
   }).join("");
 }
 
-// ==========================================
-// 7. ORDER PLACEMENT
-// ==========================================
+// ── ORDER PLACEMENT ──
 window.placeOrder = async function() {
   const table = document.getElementById("cartTable").value;
   const note = document.getElementById("cartNote").value.trim();
   const tx = t();
-  if (!table) { showToast("⚠️ " + tx.tableLbl + " Required!"); return; }
-  if (!cart.length) { showToast("⚠️ " + tx.emptyCart); return; }
-  
-  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const items = cart.map(c => ({ 
-    id: c.id, name: c.name, nameKh: c.nameKh || '', price: c.price, qty: c.qty, imageUrl: c.imageUrl || "", 
-    sugar: c.sugar, ice: c.ice, toppingsData: c.toppingsData 
+  if(!table) { showToast("⚠️ "+tx.tableLbl+" Required!"); return; }
+  if(!cart.length) { showToast("⚠️ "+tx.emptyCart); return; }
+
+  const total = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  const items = cart.map(c=>({
+    id:c.id, name:c.name, nameKh:c.nameKh||'', price:c.price, qty:c.qty,
+    imageUrl:c.imageUrl||"", sugar:c.sugar, ice:c.ice, temperature:c.temperature,
+    toppingsData:c.toppingsData
   }));
-  
+
   const btn = document.getElementById("placeBtn");
-  btn.disabled = true; btn.textContent = "…";
-  
+  btn.disabled=true; btn.textContent="…";
+
   try {
-    const orderData = { tableNumber: table, items, total, note: note, status: "pending", lang: lang || "kh", createdAt: serverTimestamp ? serverTimestamp() : new Date() };
-    let orderId = "OFFLINE-" + Math.floor(Math.random() * 100000);
-    if (db) {
-      const ref = await addDoc(collection(db, "orders"), orderData);
+    const orderData = { tableNumber:table, items, total, note, status:"pending", lang:lang||"kh", createdAt:serverTimestamp?serverTimestamp():new Date() };
+    let orderId = "OFFLINE-"+Math.floor(Math.random()*100000);
+    if(db) {
+      const ref = await addDoc(collection(db,"orders"), orderData);
       orderId = ref.id;
       listenOrderStatus(orderId);
     }
-    await sendTelegramAlert({ tableNumber: table, items, total, note: note }, orderId);
-    
+    await sendTelegramAlert({tableNumber:table,items,total,note}, orderId);
+
     let orders = [];
-    try { orders = JSON.parse(safeStorage.get("chafe_orders") || "[]"); } catch (e) {}
-    orders.push({ id: orderId, tableNumber: table, items, total, note: note, status: "pending", createdAt: new Date().toISOString() });
+    try { orders = JSON.parse(safeStorage.get("chafe_orders")||"[]"); } catch(e) {}
+    orders.push({id:orderId,tableNumber:table,items,total,note,status:"pending",createdAt:new Date().toISOString()});
     safeStorage.set("chafe_orders", JSON.stringify(orders));
-    
+
     cart = []; document.getElementById("cartNote").value = "";
     renderCart(); closeCart();
     document.getElementById("conf-id").textContent = `#${orderId.slice(-8).toUpperCase()}`;
     showConfirm();
-  } catch (e) {
+  } catch(e) {
     showToast("❌ Error placing order. Please try again.");
   }
-  btn.disabled = false; btn.textContent = tx.place;
+  btn.disabled=false; btn.textContent=tx.place;
 };
 
-// ==========================================
-// 8. MY ORDERS & UI HELPERS
-// ==========================================
-function loadMyOrders() { try { return JSON.parse(safeStorage.get("chafe_orders") || "[]"); } catch (e) { return []; } }
+// ── MY ORDERS ──
+function loadMyOrders() { try { return JSON.parse(safeStorage.get("chafe_orders")||"[]"); } catch(e) { return []; } }
+
 window.openMyOrders = function() {
   renderMyOrders();
   document.getElementById("myOrdersOverlay").classList.remove("hidden");
-  document.getElementById("myOrdersPanel").style.transform = "translateY(0)"; document.getElementById("myOrdersPanel").classList.add("show");
-  if (db) { loadMyOrders().forEach(o => { if (o.status === "pending" && !o.id.startsWith("OFFLINE")) listenOrderStatus(o.id); }); }
+  document.getElementById("myOrdersPanel").style.transform="translateY(0)";
+  document.getElementById("myOrdersPanel").classList.add("show");
+  if(db) { loadMyOrders().forEach(o=>{if(o.status==="pending"&&!o.id.startsWith("OFFLINE"))listenOrderStatus(o.id);}); }
 };
 window.closeMyOrders = function() {
   document.getElementById("myOrdersOverlay").classList.add("hidden");
-  document.getElementById("myOrdersPanel").style.transform = "translateY(100%)"; document.getElementById("myOrdersPanel").classList.remove("show");
+  document.getElementById("myOrdersPanel").style.transform="translateY(100%)";
+  document.getElementById("myOrdersPanel").classList.remove("show");
 };
 
 function renderMyOrders() {
   const orders = loadMyOrders();
   const el = document.getElementById("myOrdersList");
   const tx = t();
-  if (!orders.length) { el.innerHTML = `<p class="text-center py-10 text-[var(--muted)] text-sm">${tx.emptyCart}</p>`; return; }
-  
+  if(!orders.length) { el.innerHTML=`<p class="text-center py-10 text-[var(--muted)] text-sm">${tx.emptyCart}</p>`; return; }
   el.innerHTML = [...orders].reverse().map(o => {
-    const sc = o.status === "completed" ? "text-[var(--green)]" : o.status === "cancelled" ? "text-[var(--red)]" : "text-[var(--gold)]";
-    const st = tx.status[o.status] || o.status;
-    const ts = o.createdAt ? new Date(o.createdAt).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "";
+    const sc = o.status==="completed"?"text-[var(--green)]":o.status==="cancelled"?"text-[var(--red)]":"text-[var(--gold)]";
+    const st = tx.status[o.status]||o.status;
+    const ts = o.createdAt ? new Date(o.createdAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "";
+    // Status progress bar
+    const prog = o.status==='cancelled' ? '' : `
+    <div class="flex items-center gap-1 my-2">
+      ${['pending','completed'].map(s=>`
+        <div class="flex-1 h-1 rounded-full ${o.status===s||o.status==='completed'?'bg-[var(--gold)]':'bg-[var(--bdr)]'}"></div>
+      `).join('<div class="w-1"></div>')}
+    </div>`;
     return `<div class="bg-[var(--sur2)] rounded-2xl p-4 border border-[var(--bdr)]">
       <div class="flex items-start justify-between mb-2">
         <div><p class="font-semibold text-sm">${tx.tableFor} ${o.tableNumber}</p><p class="text-[var(--muted)] text-xs">${ts} · #${o.id.slice(-6).toUpperCase()}</p></div>
         <span class="text-xs font-semibold ${sc}">${st}</span>
       </div>
-      <ul class="text-xs text-[var(--muted)] space-y-0.5 mb-2">${(o.items || []).map(i => {
-         const dName = lang === 'kh' && i.nameKh ? i.nameKh : i.name;
-         return `<li>• ${dName} ×${i.qty}</li>`;
+      ${prog}
+      <ul class="text-xs text-[var(--muted)] space-y-0.5 mb-2">${(o.items||[]).map(i=>{
+        const dn=lang==='kh'&&i.nameKh?i.nameKh:i.name;
+        const tempIcon = i.temperature==='hot'?'☕':i.temperature==='frappe'?'🥤':'🧊';
+        return `<li>${tempIcon} ${dn} ×${i.qty}</li>`;
       }).join("")}</ul>
-      ${o.note ? `<p class="text-xs text-[var(--txt)] bg-[var(--sur)] p-2 rounded-lg mb-3 border border-[var(--bdr)]">📝 ${o.note}</p>` : `<div class="mb-3"></div>`}
+      ${o.note?`<p class="text-xs text-[var(--txt)] bg-[var(--sur)] p-2 rounded-lg mb-3 border border-[var(--bdr)]">📝 ${o.note}</p>`:`<div class="mb-3"></div>`}
       <div class="flex items-center justify-between border-t border-[var(--bdr)] pt-3 mt-1">
         <span class="text-[var(--gold)] font-semibold text-sm">$${Number(o.total).toFixed(2)}</span>
-        ${o.status === "pending" ? `<button onclick="showCancelModal('${o.id}')" class="r-btn text-xs px-3 py-1.5 rounded-full">${tx.cancelYes}</button>` : ""}
+        ${o.status==="pending"?`<button onclick="showCancelModal('${o.id}')" class="r-btn text-xs px-3 py-1.5 rounded-full">${tx.cancelYes}</button>`:""}
       </div>
     </div>`;
   }).join("");
@@ -897,45 +977,46 @@ function renderMyOrders() {
 
 const statusUnsubs = {};
 function listenOrderStatus(orderId) {
-  if (!db || orderId.startsWith("OFFLINE") || statusUnsubs[orderId]) return;
+  if(!db||orderId.startsWith("OFFLINE")||statusUnsubs[orderId]) return;
   try {
-    statusUnsubs[orderId] = onSnapshot(doc(db, "orders", orderId), snap => {
-      if (!snap.exists()) return;
-      let orders = loadMyOrders(); const idx = orders.findIndex(o => o.id === orderId);
-      if (idx < 0) return;
+    statusUnsubs[orderId] = onSnapshot(doc(db,"orders",orderId), snap => {
+      if(!snap.exists()) return;
+      let orders = loadMyOrders(); const idx = orders.findIndex(o=>o.id===orderId);
+      if(idx<0) return;
       orders[idx].status = snap.data().status;
       safeStorage.set("chafe_orders", JSON.stringify(orders)); renderMyOrders();
-    }, error => { console.warn("Listener error:", error.message); });
-  } catch(e) { console.warn(e); }
+    }, e => {});
+  } catch(e) {}
 }
 
-window.showCancelModal = function(id) { cancelTargetId = id; const m = document.getElementById("cancelModal"); m.classList.remove("hidden"); m.style.display = "flex"; };
-window.closeCancelModal = function() { cancelTargetId = null; const m = document.getElementById("cancelModal"); m.classList.add("hidden"); m.style.display = "none"; };
+window.showCancelModal = id => { cancelTargetId=id; const m=document.getElementById("cancelModal"); m.classList.remove("hidden"); m.style.display="flex"; };
+window.closeCancelModal = () => { cancelTargetId=null; const m=document.getElementById("cancelModal"); m.classList.add("hidden"); m.style.display="none"; };
 window.confirmCancel = async function() {
-  if (!cancelTargetId) return;
+  if(!cancelTargetId) return;
   try {
-    if (db && !cancelTargetId.startsWith("OFFLINE")) { await updateDoc(doc(db, "orders", cancelTargetId), { status: "cancelled" }); }
-    let orders = loadMyOrders(); const idx = orders.findIndex(o => o.id === cancelTargetId);
-    if (idx >= 0) { orders[idx].status = "cancelled"; safeStorage.set("chafe_orders", JSON.stringify(orders)); }
+    if(db&&!cancelTargetId.startsWith("OFFLINE")) await updateDoc(doc(db,"orders",cancelTargetId),{status:"cancelled"});
+    let orders=loadMyOrders(); const idx=orders.findIndex(o=>o.id===cancelTargetId);
+    if(idx>=0){orders[idx].status="cancelled";safeStorage.set("chafe_orders",JSON.stringify(orders));}
     renderMyOrders(); showToast(t().cancelToast);
-  } catch (e) { showToast("❌ Error cancelling order."); }
+  } catch(e) { showToast("❌ Error cancelling order."); }
   closeCancelModal();
 };
 
 window.openCart = function() { document.getElementById("cartPanel").classList.add("show"); document.getElementById("cartOverlay").classList.remove("hidden"); buildTableOptions(); };
 window.closeCart = function() { document.getElementById("cartPanel").classList.remove("show"); document.getElementById("cartOverlay").classList.add("hidden"); };
-function showConfirm() { const m = document.getElementById("confirmModal"); m.classList.remove("hidden"); m.style.display = "flex"; }
-window.closeConfirm = function() { const m = document.getElementById("confirmModal"); m.classList.add("hidden"); m.style.display = "none"; };
+function showConfirm() { const m=document.getElementById("confirmModal"); m.classList.remove("hidden"); m.style.display="flex"; }
+window.closeConfirm = function() { const m=document.getElementById("confirmModal"); m.classList.add("hidden"); m.style.display="none"; };
+
 function showToast(msg) {
-  const el = document.getElementById("toast"); el.textContent = msg; el.style.opacity = "1"; el.style.transform = "translateX(-50%) translateY(0)";
-  clearTimeout(el._t); el._t = setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(-50%) translateY(12px)"; }, 2800);
+  const el=document.getElementById("toast"); el.textContent=msg; el.style.opacity="1"; el.style.transform="translateX(-50%) translateY(0)";
+  clearTimeout(el._t); el._t=setTimeout(()=>{el.style.opacity="0";el.style.transform="translateX(-50%) translateY(12px)";},2800);
 }
 
 // BOOTSTRAP
 try {
-  applyLang(); buildTableOptions(); loadData(); 
-  if (db) { loadMyOrders().forEach(o => { if (o.status === "pending") listenOrderStatus(o.id); }); }
-} catch (e) { document.getElementById("menuSkeleton").classList.add("hidden"); }
+  applyLang(); buildTableOptions(); loadData();
+  if(db) { loadMyOrders().forEach(o=>{if(o.status==="pending")listenOrderStatus(o.id);}); }
+} catch(e) { document.getElementById("menuSkeleton").classList.add("hidden"); }
 </script>
 </body>
 </html>

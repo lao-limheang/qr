@@ -168,7 +168,6 @@
     <div id="view-orders" class="max-w-6xl mx-auto hidden">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <h2 class="text-3xl serif">Live Orders</h2>
-        <!-- Filter buttons -->
         <div class="flex gap-2 flex-wrap">
           <button onclick="setOrderFilter('all')" id="ofilter-all" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#d44e43] text-white transition">All</button>
           <button onclick="setOrderFilter('pending')" id="ofilter-pending" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">⏳ Pending</button>
@@ -240,8 +239,16 @@
             <input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
           </div>
           <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Base Price ($)</label>
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Ice/Base Price ($)</label>
             <input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+          </div>
+          <div class="col-span-12 md:col-span-3">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Hot Price ($)</label>
+            <input type="number" id="addPriceHot" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+          </div>
+          <div class="col-span-12 md:col-span-3">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Frappe Price ($)</label>
+            <input type="number" id="addPriceFrappe" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
           </div>
           <div class="col-span-12 md:col-span-3">
             <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Temperature Options</label>
@@ -258,7 +265,7 @@
               <span class="text-sm text-gray-300">🔥 Popular</span>
             </label>
           </div>
-          <div class="col-span-12 md:col-span-4">
+          <div class="col-span-12 md:col-span-10">
             <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label>
             <input type="text" id="addImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
           </div>
@@ -293,6 +300,7 @@
                 <th class="p-4 text-sm font-medium text-gray-300">Category</th>
                 <th class="p-4 text-sm font-medium text-gray-300">Temp</th>
                 <th class="p-4 text-sm font-medium text-gray-300">Popular</th>
+                <th class="p-4 text-sm font-medium text-gray-300">Stock</th>
                 <th class="p-4 text-sm font-medium text-gray-300">Base Price</th>
                 <th class="p-4 text-sm font-medium text-[#d44e43]">Discount (%)</th>
                 <th class="p-4 text-sm font-medium text-[#5db85b]">Final Price</th>
@@ -350,7 +358,6 @@
       <p class="text-gray-400 text-sm mb-6">Add Facebook and TikTok links. They will appear as a fixed floating icon on the bottom corner for customers.</p>
 
       <div class="bg-[#4e3b32] p-6 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg space-y-6">
-        <!-- Facebook -->
         <div>
           <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
             <svg class="w-4 h-4 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -358,7 +365,6 @@
           </label>
           <input type="url" id="fbUrl" placeholder="https://facebook.com/yourpage" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#1877f2] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
         </div>
-        <!-- TikTok -->
         <div>
           <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
@@ -372,7 +378,6 @@
           <button onclick="clearSocialLinks()" class="px-4 py-3 border border-[#5c453b] rounded-xl text-gray-400 hover:text-white hover:bg-[#3a2a24] text-sm transition">Clear</button>
         </div>
 
-        <!-- Preview -->
         <div class="pt-4 border-t border-[#5c453b]">
           <p class="text-xs text-gray-500 uppercase tracking-wider mb-3 font-bold">Preview (what customers see)</p>
           <div class="bg-[#3a2a24] rounded-xl p-4 flex items-center justify-center gap-4 border border-[#5c453b] min-h-[80px]">
@@ -388,21 +393,35 @@
       </div>
     </div>
 
-  </div><!-- end scrollable -->
-</div><!-- end main wrapper -->
+  </div>
+</div>
 
-<!-- MODALS: Edit Menu, Add/Edit Topping, Edit Slide, Edit Order, Status Quick -->
+<!-- Custom Confirmation Modal (Replaces browser confirm) -->
+<div id="confirmModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[1000] backdrop-blur-sm p-4">
+  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
+    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold" id="confirmTitle">Confirm</h3>
+    <p class="text-gray-300 text-sm mb-6" id="confirmMessage">Are you sure?</p>
+    <div class="flex gap-3">
+      <button id="confirmCancelBtn" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
+      <button id="confirmOkBtn" class="flex-1 py-2 btn-primary rounded font-bold">Yes</button>
+    </div>
+  </div>
+</div>
 
 <!-- Edit Menu Modal -->
 <div id="editMenuModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Edit Drink</h3>
-    <div class="grid grid-cols-2 gap-4 mb-4">
-      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
-      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Base Price ($)</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
-      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Temperature Options</label>
+    <div class="grid grid-cols-3 gap-4 mb-4">
+      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
+      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full"></div>
+      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
+      
+      <div><label class="text-xs text-gray-400 mb-1 block">Ice Price</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Hot Price</label><input type="number" id="editPriceHot" step="0.01" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Frap Price</label><input type="number" id="editPriceFrappe" step="0.01" class="w-full"></div>
+      
+      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Temperature Options</label>
         <select id="editTemperature" class="w-full">
           <option value="both">🧊☕ Ice & Hot</option>
           <option value="ice">🧊 Iced Only</option>
@@ -410,13 +429,13 @@
           <option value="frappe">🥤 Frappe Only</option>
         </select>
       </div>
-      <div class="col-span-2 flex items-center">
+      <div class="col-span-3 flex items-center">
         <label class="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" id="editPopular" class="w-4 h-4 accent-[#d44e43]">
           <span class="text-sm text-gray-300">🔥 Popular</span>
         </label>
       </div>
-      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editImage" class="w-full"></div>
+      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editImage" class="w-full"></div>
     </div>
     <div class="flex gap-3">
       <button onclick="closeEditMenuModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
@@ -529,6 +548,35 @@ let editingOrderId=null, editingSlideId=null;
 let currentHistoryFilteredOrders=[];
 let currentOrderFilter = 'all';
 
+// Custom CustomConfirm Promise wrapper
+window.customConfirm = function(message, title="Confirm Action") {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('confirmModal');
+    document.getElementById('confirmTitle').innerText = title;
+    document.getElementById('confirmMessage').innerText = message;
+    modal.classList.remove('hidden');
+
+    const okBtn = document.getElementById('confirmOkBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+
+    const cleanup = () => {
+      modal.classList.add('hidden');
+      okBtn.replaceWith(okBtn.cloneNode(true));
+      cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+    };
+
+    document.getElementById('confirmOkBtn').addEventListener('click', () => {
+      cleanup();
+      resolve(true);
+    });
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', () => {
+      cleanup();
+      resolve(false);
+    });
+  });
+};
+
 // ── TABS ──
 window.toggleSidebar = function() {
   const sb=document.getElementById('sidebar'), ov=document.getElementById('mobileOverlay');
@@ -578,7 +626,6 @@ async function fetchData() {
     slideshowItems = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
     renderSlideshowList();
   });
-  // Load social
   try {
     const snap = await getDocs(collection(db,"settings"));
     const settings = {};
@@ -704,7 +751,6 @@ function renderOrders() {
 
   let filtered = orders;
   if(orderFilter!=='all') filtered = orders.filter(o=>o.status===orderFilter);
-  // For 'all', show recent 50
   filtered = filtered.slice(0,50);
 
   if(!filtered.length) { grid.innerHTML=''; noOrd.classList.remove('hidden'); return; }
@@ -825,7 +871,7 @@ window.sendSingleOrderToTelegram = async function(id) {
 };
 
 window.deleteOrderHistory = async function(id) {
-  if(confirm("Permanently delete this order?")) {
+  if(await customConfirm("Permanently delete this order?", "Delete Order")) {
     try { await deleteDoc(doc(db,"orders",id)); showToast("Deleted."); }
     catch(e) { showToast("Error",true); }
   }
@@ -850,15 +896,18 @@ window.addMenuItem = async function() {
   const name=document.getElementById("addName").value.trim();
   const nameKh=document.getElementById("addNameKh").value.trim();
   const price=parseFloat(document.getElementById("addPrice").value);
+  const priceHot=parseFloat(document.getElementById("addPriceHot").value)||null;
+  const priceFrappe=parseFloat(document.getElementById("addPriceFrappe").value)||null;
   const cat=document.getElementById("addCat").value.trim();
   const img=document.getElementById("addImage").value.trim();
   const temperature=document.getElementById("addTemperature").value;
   const popular=document.getElementById("addPopular").checked;
   if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
   try {
-    await addDoc(collection(db,"menu"),{name,nameKh,price,category:cat||'Other',imageUrl:img,discount:0,inStock:true,temperature,popular});
+    await addDoc(collection(db,"menu"),{name,nameKh,price,priceHot,priceFrappe,category:cat||'Other',imageUrl:img,discount:0,inStock:true,temperature,popular});
     document.getElementById("addName").value=''; document.getElementById("addNameKh").value='';
-    document.getElementById("addPrice").value=''; document.getElementById("addCat").value='';
+    document.getElementById("addPrice").value=''; document.getElementById("addPriceHot").value='';
+    document.getElementById("addPriceFrappe").value=''; document.getElementById("addCat").value='';
     document.getElementById("addImage").value=''; document.getElementById("addPopular").checked=false;
     document.getElementById("addTemperature").value='both';
     currentMenuCat='All'; document.getElementById('menuCatFilter').value='All';
@@ -872,7 +921,9 @@ window.applyBulkDiscount = async function() {
   if(pctInput===""||isNaN(pct)||pct<0||pct>100) return showToast("Enter 0-100",true);
   const itemsToUpdate=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
   if(!itemsToUpdate.length) return showToast("No items found",true);
-  if(!confirm(`Apply ${pct}% discount to ${currentMenuCat==='All'?'ALL':''+itemsToUpdate.length} items?`)) return;
+  
+  if(!(await customConfirm(`Apply ${pct}% discount to ${currentMenuCat==='All'?'ALL':''+itemsToUpdate.length} items?`, "Apply Discount"))) return;
+  
   try {
     await Promise.all(itemsToUpdate.map(m=>updateDoc(doc(db,"menu",m.id),{discount:pct})));
     document.getElementById("bulkDiscountInput").value=''; showToast(`${pct}% applied!`);
@@ -888,8 +939,16 @@ window.togglePopular = async function(id, val) {
   try { await updateDoc(doc(db,"menu",id),{popular:val}); showToast(val?"Marked popular!":"Removed from popular"); } catch(e) {}
 };
 
+// ── NEW: Toggle In-Stock ──
+window.toggleInStock = async function(id, val) {
+  try {
+    await updateDoc(doc(db,"menu",id),{inStock:val});
+    showToast(val ? "Item marked In Stock ✓" : "Item marked Out of Stock ✗");
+  } catch(e) { showToast("Error updating stock",true); }
+};
+
 window.deleteMenuItem = async function(id) {
-  if(!confirm("Delete this drink?")) return;
+  if(!(await customConfirm("Delete this drink?", "Delete Drink"))) return;
   try { await deleteDoc(doc(db,"menu",id)); showToast("Deleted."); } catch(e) { showToast("Error",true); }
 };
 
@@ -899,6 +958,8 @@ window.openEditMenuModal = function(id) {
   document.getElementById('editName').value=item.name||'';
   document.getElementById('editNameKh').value=item.nameKh||'';
   document.getElementById('editPrice').value=item.price||0;
+  document.getElementById('editPriceHot').value=item.priceHot||'';
+  document.getElementById('editPriceFrappe').value=item.priceFrappe||'';
   document.getElementById('editCat').value=item.category||'';
   document.getElementById('editImage').value=item.imageUrl||'';
   document.getElementById('editTemperature').value=item.temperature||'both';
@@ -911,13 +972,15 @@ window.saveEditMenu = async function() {
   const name=document.getElementById("editName").value.trim();
   const nameKh=document.getElementById("editNameKh").value.trim();
   const price=parseFloat(document.getElementById("editPrice").value);
+  const priceHot=parseFloat(document.getElementById("editPriceHot").value)||null;
+  const priceFrappe=parseFloat(document.getElementById("editPriceFrappe").value)||null;
   const category=document.getElementById("editCat").value.trim()||'Other';
   const imageUrl=document.getElementById("editImage").value.trim();
   const temperature=document.getElementById("editTemperature").value;
   const popular=document.getElementById("editPopular").checked;
   if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
   try {
-    await updateDoc(doc(db,"menu",editingMenuId),{name,nameKh,price,category,imageUrl,temperature,popular});
+    await updateDoc(doc(db,"menu",editingMenuId),{name,nameKh,price,priceHot,priceFrappe,category,imageUrl,temperature,popular});
     closeEditMenuModal(); showToast("Updated!");
   } catch(e) { showToast("Error",true); }
 };
@@ -943,6 +1006,7 @@ function renderMenuTable() {
   const filtered=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
   tbody.innerHTML=filtered.map(m=>{
     const finalPrice=m.price*(1-(m.discount||0)/100);
+    const inStock = m.inStock !== false; // default true
     return `
     <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
       <td class="p-4 flex items-center gap-3">
@@ -953,6 +1017,15 @@ function renderMenuTable() {
       <td class="p-4">${getTempLabel(m.temperature||'both')}</td>
       <td class="p-4">
         <button onclick="togglePopular('${m.id}',${!m.popular})" class="text-lg ${m.popular?'opacity-100':'opacity-25 hover:opacity-60'} transition" title="${m.popular?'Remove popular':'Mark popular'}">🔥</button>
+      </td>
+      <td class="p-4">
+        <button onclick="toggleInStock('${m.id}',${!inStock})"
+          class="px-3 py-1.5 rounded-lg text-xs font-bold transition border ${inStock
+            ? 'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43] hover:border-[#d44e43]/40'
+            : 'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b] hover:border-[#5db85b]/40'}"
+          title="${inStock?'Click to mark Out of Stock':'Click to mark In Stock'}">
+          ${inStock ? '✓ In Stock' : '✗ Out of Stock'}
+        </button>
       </td>
       <td class="p-4">$${Number(m.price).toFixed(2)}</td>
       <td class="p-4">
@@ -994,7 +1067,11 @@ window.saveTopping = async function() {
     showToast("Topping added!");
   } catch(e) { showToast("Error: "+e.message,true); }
 };
-window.deleteTopping = async function(id) { if(!confirm("Remove this topping?")) return; try{await deleteDoc(doc(db,"toppings",id));}catch(e){} };
+window.deleteTopping = async function(id) { 
+  if(!(await customConfirm("Remove this topping?", "Remove Topping"))) return; 
+  try{await deleteDoc(doc(db,"toppings",id));}catch(e){} 
+};
+
 window.openEditToppingModal = function(id) {
   const tp=toppings.find(x=>x.id===id); if(!tp) return; editingToppingId=id;
   document.getElementById("editTopName").value=tp.name||''; document.getElementById("editTopNameKh").value=tp.nameKh||'';
@@ -1050,7 +1127,11 @@ window.addSlide = async function() {
     showToast("Slide added!");
   } catch(e) { showToast("Error",true); }
 };
-window.deleteSlide = async function(id) { if(!confirm("Delete slide?")) return; try{await deleteDoc(doc(db,"slideshow",id));showToast("Deleted.");}catch(e){showToast("Error",true);} };
+window.deleteSlide = async function(id) { 
+  if(!(await customConfirm("Delete slide?", "Delete Slide"))) return; 
+  try{await deleteDoc(doc(db,"slideshow",id));showToast("Deleted.");}catch(e){showToast("Error",true);} 
+};
+
 window.openEditSlideModal = function(id) {
   const slide=slideshowItems.find(s=>s.id===id); if(!slide) return; editingSlideId=id;
   document.getElementById("editSlideStep").value=slide.step||'';

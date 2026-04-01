@@ -7,20 +7,43 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  body { font-family: 'Outfit', sans-serif; background-color: #3e2a24; color: #e6e0d8; margin: 0; min-height: 100vh; overflow-x: hidden; }
-  .serif { font-family: 'Cormorant Garamond', serif; }
-  .btn-primary { background: #d44e43; color: white; transition: background 0.2s; }
-  .btn-primary:hover { background: #b83f36; }
-  .btn-success { background: #5db85b; color: white; transition: background 0.2s; }
-  .btn-success:hover { background: #4cae4c; }
-  
-  input, select, textarea { background-color: #5c453b; border: 1px solid #5c453b; color: white; outline: none; border-radius: 6px; padding: 8px 12px; }
-  input:focus, select:focus, textarea:focus { border-color: #d44e43; }
-  input::placeholder, textarea::placeholder { color: #a3958f; }
+  body{font-family:'Outfit',sans-serif;background-color:#3e2a24;color:#e6e0d8;margin:0;min-height:100vh;overflow-x:hidden;}
+  .serif{font-family:'Cormorant Garamond',serif;}
+  .btn-primary{background:#d44e43;color:white;transition:background .2s;}
+  .btn-primary:hover{background:#b83f36;}
+  .btn-success{background:#5db85b;color:white;transition:background .2s;}
+  .btn-success:hover{background:#4cae4c;}
+  input,select,textarea{background-color:#5c453b;border:1px solid #5c453b;color:white;outline:none;border-radius:6px;padding:8px 12px;}
+  input:focus,select:focus,textarea:focus{border-color:#d44e43;}
+  input::placeholder,textarea::placeholder{color:#a3958f;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:#3a2a24;}
+  ::-webkit-scrollbar-thumb{background:#5c453b;border-radius:4px;}
 
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: #3a2a24; }
-  ::-webkit-scrollbar-thumb { background: #5c453b; border-radius: 4px; }
+  /* Status badges */
+  .status-pending{background:#d1a14a22;color:#d1a14a;border:1px solid #d1a14a44;}
+  .status-completed{background:#5db85b22;color:#5db85b;border:1px solid #5db85b44;}
+  .status-cancelled{background:#d44e4322;color:#d44e43;border:1px solid #d44e4344;}
+
+  /* Order card status ring */
+  .order-card-pending{border-color:#d1a14a60;}
+  .order-card-completed{border-color:#5db85b60;opacity:.75;}
+  .order-card-cancelled{border-color:#d44e4360;opacity:.6;}
+
+  /* Live timer */
+  .order-timer{font-size:11px;font-weight:600;color:#d1a14a;}
+
+  /* Temp pills */
+  .tp-ice{background:#1d4ed822;color:#60a5fa;border:1px solid #1d4ed844;}
+  .tp-hot{background:#b91c1c22;color:#f87171;border:1px solid #b91c1c44;}
+  .tp-frappe{background:#4f46e522;color:#818cf8;border:1px solid #4f46e544;}
+  .tp-both{background:#37415122;color:#9ca3af;border:1px solid #37415144;}
+
+  /* Total order counter banner */
+  #totalOrderBanner{background:linear-gradient(135deg,#d44e43,#a6332f);border-radius:16px;padding:20px 24px;}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .fade-up{animation:fadeUp .3s ease both;}
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -60,12 +83,15 @@
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
       How-to Slides
     </button>
+    <button onclick="switchTab('social')" id="tab-social" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+      Social Links
+    </button>
   </nav>
 </div>
 
 <!-- MAIN CONTENT WRAPPER -->
 <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-
   <!-- MOBILE HEADER -->
   <div class="md:hidden flex items-center justify-between bg-[#3a2a24] p-4 border-b border-[#4a352a] shrink-0 z-30 shadow-md">
     <div class="flex items-center gap-3">
@@ -74,49 +100,62 @@
       </button>
       <h1 class="text-2xl font-serif text-[#d44e43] font-bold leading-none mt-1">Chafé</h1>
     </div>
+    <span id="pendingBadgeMobile" class="bg-[#d44e43] text-white text-xs px-2 py-0.5 rounded-full hidden">0 pending</span>
   </div>
 
   <!-- SCROLLABLE CONTENT -->
   <div class="flex-1 overflow-y-auto p-4 md:p-8 relative" id="main-area">
 
-    <!-- ================= TAB: STATISTICS ================= -->
+    <!-- ═══ TAB: STATISTICS ═══ -->
     <div id="view-stats" class="max-w-6xl mx-auto block">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 class="text-3xl serif">Statistics</h2>
-        <button onclick="sendStatsToTelegram()" class="w-full md:w-auto bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition shadow-sm text-sm">
+        <button onclick="sendStatsToTelegram()" class="w-full md:w-auto bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition text-sm">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
           Send to Telegram
         </button>
       </div>
-      
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-        <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
-          <h3 class="text-sm text-gray-300 mb-2">All Orders</h3>
-          <p class="text-3xl font-bold text-[#d44e43]" id="stat-all">0</p>
+
+      <!-- TOTAL ORDER COUNTER BANNER -->
+      <div id="totalOrderBanner" class="mb-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-widest opacity-70 mb-1">Total Orders All Time</p>
+          <p class="text-5xl font-bold" id="stat-all">0</p>
         </div>
-        <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
-          <h3 class="text-sm text-gray-300 mb-2">Pending</h3>
-          <p class="text-3xl font-bold text-[#d1a14a]" id="stat-pending">0</p>
-        </div>
-        <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
-          <h3 class="text-sm text-gray-300 mb-2">Completed</h3>
-          <p class="text-3xl font-bold text-[#5db85b]" id="stat-completed">0</p>
-        </div>
-        <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] shadow-sm">
-          <h3 class="text-sm text-gray-300 mb-2">All Time Revenue</h3>
-          <p class="text-3xl font-bold text-[#d44e43]" id="stat-rev">$0.00</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full sm:w-auto">
+          <div class="bg-white/10 rounded-xl p-3 text-center">
+            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Pending</p>
+            <p class="text-2xl font-bold" id="stat-pending">0</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-3 text-center">
+            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Completed</p>
+            <p class="text-2xl font-bold" id="stat-completed">0</p>
+          </div>
+          <div class="bg-white/10 rounded-xl p-3 text-center col-span-2 sm:col-span-1">
+            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Revenue</p>
+            <p class="text-2xl font-bold" id="stat-rev">$0</p>
+          </div>
         </div>
       </div>
 
-      <div class="bg-[#4e3b32] p-6 rounded-xl border border-[#5c453b] mb-8 shadow-sm">
+      <!-- TOP ITEMS -->
+      <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
+        <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4 font-bold border-b border-[#5c453b] pb-2">🔥 Most Ordered Items</h3>
+        <div id="topItemsList" class="space-y-2">
+          <p class="text-gray-500 text-sm">Loading...</p>
+        </div>
+      </div>
+
+      <!-- Period Calculation -->
+      <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
         <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4 font-bold border-b border-[#5c453b] pb-2">Period Calculation</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
           <div><label class="block text-xs text-gray-400 mb-2">Start Date</label><input type="date" id="statStartDate" onchange="calculateFilteredStats()" class="w-full"></div>
           <div><label class="block text-xs text-gray-400 mb-2">End Date</label><input type="date" id="statEndDate" onchange="calculateFilteredStats()" class="w-full"></div>
           <div><label class="block text-xs text-gray-400 mb-2">Subtract (%)</label><input type="number" id="statSubtract" oninput="calculateFilteredStats()" placeholder="0" class="w-full"></div>
           <div><label class="block text-xs text-gray-400 mb-2">Note</label><input type="text" id="statNote" placeholder="Optional note..." class="w-full"></div>
         </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-4 border-t border-[#5c453b]">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#5c453b]">
           <div><p class="text-xs text-gray-400 mb-1">Orders</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-orders">0</p></div>
           <div><p class="text-xs text-gray-400 mb-1">Gross Total</p><p class="text-xl font-bold" id="stat-f-gross">$0.00</p></div>
           <div><p class="text-xs text-gray-400 mb-1" id="stat-f-sub-lbl">Subtract (0%)</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-sub-amt">-$0.00</p></div>
@@ -125,33 +164,36 @@
       </div>
     </div>
 
-    <!-- ================= TAB: LIVE ORDERS ================= -->
+    <!-- ═══ TAB: LIVE ORDERS ═══ -->
     <div id="view-orders" class="max-w-6xl mx-auto hidden">
-      <div class="flex justify-between items-center mb-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <h2 class="text-3xl serif">Live Orders</h2>
+        <!-- Filter buttons -->
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="setOrderFilter('all')" id="ofilter-all" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#d44e43] text-white transition">All</button>
+          <button onclick="setOrderFilter('pending')" id="ofilter-pending" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">⏳ Pending</button>
+          <button onclick="setOrderFilter('completed')" id="ofilter-completed" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✓ Completed</button>
+          <button onclick="setOrderFilter('cancelled')" id="ofilter-cancelled" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✗ Cancelled</button>
+        </div>
       </div>
-      <div id="ordersGrid" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3"></div>
-      <p id="noOrders" class="text-center text-gray-400 py-10 hidden">No active orders.</p>
+      <div id="ordersGrid" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
+      <p id="noOrders" class="text-center text-gray-400 py-10 hidden">No orders found.</p>
     </div>
 
-    <!-- ================= TAB: ORDER HISTORY ================= -->
+    <!-- ═══ TAB: ORDER HISTORY ═══ -->
     <div id="view-history" class="max-w-6xl mx-auto hidden">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 class="text-3xl serif">Order History</h2>
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full md:w-auto">
-          <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 bg-[#4e3b32] p-2 rounded-xl border border-[#5c453b] w-full sm:w-auto">
-            <div class="flex items-center gap-2 flex-1 sm:flex-auto">
-              <span class="text-xs text-gray-400 uppercase font-bold tracking-wide">From</span>
-              <input type="date" id="historyStartDate" onchange="renderHistory()" class="w-full sm:w-auto bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
-            </div>
-            <div class="flex items-center gap-2 flex-1 sm:flex-auto">
-              <span class="text-xs text-gray-400 uppercase font-bold tracking-wide">To</span>
-              <input type="date" id="historyEndDate" onchange="renderHistory()" class="w-full sm:w-auto bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
-            </div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+          <div class="flex items-center gap-3 bg-[#4e3b32] p-2 rounded-xl border border-[#5c453b]">
+            <span class="text-xs text-gray-400 font-bold ml-1">From</span>
+            <input type="date" id="historyStartDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
+            <span class="text-xs text-gray-400 font-bold">To</span>
+            <input type="date" id="historyEndDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
           </div>
-          <button onclick="sendHistoryToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-3 sm:py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition shadow-sm text-sm whitespace-nowrap w-full sm:w-auto">
+          <button onclick="sendHistoryToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 text-sm">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-            Send List to Telegram
+            Send to Telegram
           </button>
         </div>
       </div>
@@ -173,9 +215,8 @@
       </div>
     </div>
 
-    <!-- ================= TAB: MENU MANAGER ================= -->
+    <!-- ═══ TAB: MENU MANAGER ═══ -->
     <div id="view-menu" class="max-w-6xl mx-auto hidden space-y-10">
-      
       <!-- Add New Drink -->
       <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg relative overflow-hidden">
         <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-[#d44e43] to-transparent opacity-10 rounded-bl-full pointer-events-none"></div>
@@ -185,47 +226,47 @@
           </div>
           Create New Drink
         </h3>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 md:gap-6 relative z-10">
-          <div class="col-span-12 md:col-span-4 relative group">
-             <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (EN)</label>
-             <div class="relative flex items-center">
-               <div class="absolute left-3 text-gray-500 group-focus-within:text-[#d44e43] transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg></div>
-               <input type="text" id="addName" placeholder="Matcha Latte" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl pl-9 pr-4 py-3 text-sm focus:border-[#d44e43] transition-all outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-             </div>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 relative z-10">
+          <div class="col-span-12 md:col-span-4">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (EN)</label>
+            <input type="text" id="addName" placeholder="Matcha Latte" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
           </div>
-          <div class="col-span-12 md:col-span-4 relative group">
-             <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH)</label>
-             <div class="relative flex items-center">
-               <div class="absolute left-3 text-gray-500 group-focus-within:text-[#d44e43] transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg></div>
-               <input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl pl-9 pr-4 py-3 text-sm focus:border-[#d44e43] transition-all outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-             </div>
+          <div class="col-span-12 md:col-span-4">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH)</label>
+            <input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
           </div>
-          <div class="col-span-12 md:col-span-4 relative group">
-             <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Category</label>
-             <div class="relative flex items-center">
-               <div class="absolute left-3 text-gray-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg></div>
-               <input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl pl-9 pr-4 py-3 text-sm focus:border-[#d44e43] transition-all outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-             </div>
+          <div class="col-span-12 md:col-span-4">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Category</label>
+            <input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
           </div>
-          <div class="col-span-12 md:col-span-4 relative group">
-             <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Base Price ($)</label>
-             <div class="relative flex items-center">
-               <div class="absolute left-3 text-gray-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-               <input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl pl-9 pr-4 py-3 text-sm focus:border-[#d44e43] transition-all outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-             </div>
+          <div class="col-span-12 md:col-span-3">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Base Price ($)</label>
+            <input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
           </div>
-          <div class="col-span-12 md:col-span-8 relative group">
-             <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label>
-             <div class="relative flex items-center">
-               <div class="absolute left-3 text-gray-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
-               <input type="text" id="addImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl pl-9 pr-4 py-3 text-sm focus:border-[#d44e43] transition-all outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-             </div>
+          <div class="col-span-12 md:col-span-3">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Temperature Options</label>
+            <select id="addTemperature" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8]">
+              <option value="both">🧊☕ Ice & Hot</option>
+              <option value="ice">🧊 Iced Only</option>
+              <option value="hot">☕ Hot Only</option>
+              <option value="frappe">🥤 Frappe Only</option>
+            </select>
           </div>
-          <div class="col-span-12 flex justify-end mt-2 md:mt-4">
-             <button onclick="addMenuItem()" class="w-full md:w-auto bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-red-900/20 tracking-wide hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-               Add to Menu
-             </button>
+          <div class="col-span-12 md:col-span-2 flex items-end pb-0">
+            <label class="flex items-center gap-2 cursor-pointer bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 w-full">
+              <input type="checkbox" id="addPopular" class="w-4 h-4 accent-[#d44e43]">
+              <span class="text-sm text-gray-300">🔥 Popular</span>
+            </label>
+          </div>
+          <div class="col-span-12 md:col-span-4">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label>
+            <input type="text" id="addImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+          </div>
+          <div class="col-span-12 flex justify-end mt-2">
+            <button onclick="addMenuItem()" class="w-full md:w-auto bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Add to Menu
+            </button>
           </div>
         </div>
       </div>
@@ -235,11 +276,11 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
           <h3 class="text-2xl serif">Current Menu & Discounts</h3>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-            <select id="menuCatFilter" onchange="filterMenu()" class="w-full sm:w-40 bg-[#3a2a24] border border-[#5c453b] rounded-lg px-3 py-2 text-sm text-gray-300 outline-none focus:border-[#d44e43] shadow-sm">
+            <select id="menuCatFilter" onchange="filterMenu()" class="w-full sm:w-40 bg-[#3a2a24] border border-[#5c453b] rounded-lg px-3 py-2 text-sm text-gray-300 outline-none focus:border-[#d44e43]">
               <option value="All">All Categories</option>
             </select>
             <div class="flex items-center bg-[#3a2a24] rounded-lg border border-[#5c453b] overflow-hidden shrink-0">
-              <input type="number" id="bulkDiscountInput" placeholder="Discount %" class="w-full sm:w-28 bg-transparent border-none text-sm outline-none px-3 py-2 text-[#d44e43] font-bold">
+              <input type="number" id="bulkDiscountInput" placeholder="Discount %" class="w-28 bg-transparent border-none text-sm outline-none px-3 py-2 text-[#d44e43] font-bold">
               <button onclick="applyBulkDiscount()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-4 py-2 text-xs font-bold transition whitespace-nowrap border-l border-[#5c453b]">Apply All</button>
             </div>
           </div>
@@ -250,6 +291,8 @@
               <tr>
                 <th class="p-4 text-sm font-medium text-gray-300">Name & Image</th>
                 <th class="p-4 text-sm font-medium text-gray-300">Category</th>
+                <th class="p-4 text-sm font-medium text-gray-300">Temp</th>
+                <th class="p-4 text-sm font-medium text-gray-300">Popular</th>
                 <th class="p-4 text-sm font-medium text-gray-300">Base Price</th>
                 <th class="p-4 text-sm font-medium text-[#d44e43]">Discount (%)</th>
                 <th class="p-4 text-sm font-medium text-[#5db85b]">Final Price</th>
@@ -261,7 +304,7 @@
         </div>
       </div>
 
-      <!-- Toppings Section — WITH PHOTO -->
+      <!-- Toppings -->
       <div>
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl serif">Dynamic Toppings</h3>
@@ -271,46 +314,20 @@
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="toppingsGrid"></div>
       </div>
-
     </div>
 
-    <!-- ================= TAB: HOW-TO SLIDES ================= -->
+    <!-- ═══ TAB: HOW-TO SLIDES ═══ -->
     <div id="view-slideshow" class="max-w-4xl mx-auto hidden space-y-8">
-      
-      <!-- Add New Slide -->
       <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg">
-        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-6 font-bold flex items-center gap-3">
-          <div class="p-2 bg-[#d44e43]/20 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-          </div>
-          Add How-to-Order Slide
-        </h3>
-        <p class="text-xs text-gray-400 mb-5">These slides appear on the ordering page to guide customers through the ordering process.</p>
+        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-2 font-bold">Add How-to-Order Slide</h3>
+        <p class="text-xs text-gray-400 mb-5">These slides appear on the ordering page to guide customers.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Step Number</label>
-            <input type="number" id="slideStep" placeholder="1" min="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] text-[#e6e0d8]">
-          </div>
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label>
-            <input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label>
-            <input type="text" id="slideTitleEn" placeholder="Scan the QR Code" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label>
-            <input type="text" id="slideTitleKh" placeholder="ស្កែន QR" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (EN)</label>
-            <textarea id="slideDescEn" placeholder="Use your phone camera to scan the QR code on the table." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] text-[#e6e0d8] placeholder-[#8c6b5d] resize-none"></textarea>
-          </div>
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (KH)</label>
-            <textarea id="slideDescKh" placeholder="ប្រើកាមេរ៉ាទូរស័ព្ទស្កែន QR នៅលើតុ" rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] text-[#e6e0d8] placeholder-[#8c6b5d] resize-none"></textarea>
-          </div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Step Number</label><input type="number" id="slideStep" placeholder="1" min="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43]"></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label><input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label><input type="text" id="slideTitleEn" placeholder="Scan the QR Code" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><input type="text" id="slideTitleKh" placeholder="ស្កែន QR" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (EN)</label><textarea id="slideDescEn" placeholder="Use your phone camera..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (KH)</label><textarea id="slideDescKh" placeholder="ប្រើកាមេរ៉ាទូរស័ព្ទ..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
         </div>
         <div class="flex justify-end mt-6">
           <button onclick="addSlide()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2">
@@ -319,38 +336,96 @@
           </button>
         </div>
       </div>
-
-      <!-- Slide List -->
       <div>
         <h3 class="text-2xl serif mb-4">Current Slides</h3>
         <div id="slideshowList" class="space-y-4">
-          <p class="text-center text-gray-400 py-8">No slides yet. Add your first how-to slide above.</p>
+          <p class="text-center text-gray-400 py-8">No slides yet.</p>
         </div>
       </div>
     </div>
 
-  </div>
-</div>
+    <!-- ═══ TAB: SOCIAL LINKS ═══ -->
+    <div id="view-social" class="max-w-2xl mx-auto hidden">
+      <h2 class="text-3xl serif mb-2">Social Links</h2>
+      <p class="text-gray-400 text-sm mb-6">Add Facebook and TikTok links. They will appear as a fixed floating icon on the bottom corner for customers.</p>
+
+      <div class="bg-[#4e3b32] p-6 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg space-y-6">
+        <!-- Facebook -->
+        <div>
+          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
+            <svg class="w-4 h-4 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook Page URL
+          </label>
+          <input type="url" id="fbUrl" placeholder="https://facebook.com/yourpage" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#1877f2] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+        </div>
+        <!-- TikTok -->
+        <div>
+          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            TikTok Profile URL
+          </label>
+          <input type="url" id="ttUrl" placeholder="https://tiktok.com/@yourprofile" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+        </div>
+
+        <div class="flex items-center gap-4 pt-2 border-t border-[#5c453b]">
+          <button onclick="saveSocialLinks()" class="flex-1 bg-[#d44e43] hover:bg-[#b83f36] text-white py-3 rounded-xl font-bold text-sm transition">Save Social Links</button>
+          <button onclick="clearSocialLinks()" class="px-4 py-3 border border-[#5c453b] rounded-xl text-gray-400 hover:text-white hover:bg-[#3a2a24] text-sm transition">Clear</button>
+        </div>
+
+        <!-- Preview -->
+        <div class="pt-4 border-t border-[#5c453b]">
+          <p class="text-xs text-gray-500 uppercase tracking-wider mb-3 font-bold">Preview (what customers see)</p>
+          <div class="bg-[#3a2a24] rounded-xl p-4 flex items-center justify-center gap-4 border border-[#5c453b] min-h-[80px]">
+            <span id="preview-fb" class="hidden items-center justify-center w-10 h-10 rounded-full bg-[#1877f2] text-white shadow-md">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </span>
+            <span id="preview-tt" class="hidden items-center justify-center w-10 h-10 rounded-full bg-black text-white shadow-md">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            </span>
+            <span id="preview-none" class="text-gray-600 text-xs">No floating icons saved yet</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end scrollable -->
+</div><!-- end main wrapper -->
+
+<!-- MODALS: Edit Menu, Add/Edit Topping, Edit Slide, Edit Order, Status Quick -->
 
 <!-- Edit Menu Modal -->
 <div id="editMenuModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Edit Drink</h3>
-    <div class="grid grid-cols-2 gap-4 mb-6">
+    <div class="grid grid-cols-2 gap-4 mb-4">
       <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
       <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full"></div>
-      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Base Price ($)</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
-      <div class="col-span-2 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Base Price ($)</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
+      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Temperature Options</label>
+        <select id="editTemperature" class="w-full">
+          <option value="both">🧊☕ Ice & Hot</option>
+          <option value="ice">🧊 Iced Only</option>
+          <option value="hot">☕ Hot Only</option>
+          <option value="frappe">🥤 Frappe Only</option>
+        </select>
+      </div>
+      <div class="col-span-2 flex items-center">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" id="editPopular" class="w-4 h-4 accent-[#d44e43]">
+          <span class="text-sm text-gray-300">🔥 Popular</span>
+        </label>
+      </div>
       <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editImage" class="w-full"></div>
     </div>
     <div class="flex gap-3">
       <button onclick="closeEditMenuModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveEditMenu()" class="flex-1 py-2 btn-success rounded font-bold">Save Changes</button>
+      <button onclick="saveEditMenu()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
     </div>
   </div>
 </div>
 
-<!-- Add Topping Modal — WITH PHOTO -->
+<!-- Add Topping Modal -->
 <div id="toppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">New Topping</h3>
@@ -360,11 +435,8 @@
       <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="topPrice" placeholder="0.50" step="0.01" class="w-full"></div>
       <div>
         <label class="text-xs text-gray-400 mb-1 block">Photo URL (Optional)</label>
-        <input type="text" id="topImage" placeholder="https://..." class="w-full">
-        <!-- Preview -->
-        <div id="topImagePreview" class="mt-2 hidden">
-          <img id="topImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview"/>
-        </div>
+        <input type="text" id="topImage" placeholder="https://..." class="w-full" oninput="previewImg('topImage','topImagePreviewImg','topImagePreview')">
+        <div id="topImagePreview" class="mt-2 hidden"><img id="topImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview"/></div>
       </div>
     </div>
     <div class="flex gap-3">
@@ -374,7 +446,7 @@
   </div>
 </div>
 
-<!-- Edit Topping Modal — WITH PHOTO -->
+<!-- Edit Topping Modal -->
 <div id="editToppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
     <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Topping</h3>
@@ -383,11 +455,9 @@
       <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editTopNameKh" class="w-full"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="editTopPrice" step="0.01" class="w-full"></div>
       <div>
-        <label class="text-xs text-gray-400 mb-1 block">Photo URL (Optional)</label>
-        <input type="text" id="editTopImage" class="w-full" placeholder="https://...">
-        <div id="editTopImagePreview" class="mt-2">
-          <img id="editTopImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview" onerror="this.parentElement.style.display='none'"/>
-        </div>
+        <label class="text-xs text-gray-400 mb-1 block">Photo URL</label>
+        <input type="text" id="editTopImage" class="w-full" placeholder="https://..." oninput="previewImg('editTopImage','editTopImagePreviewImg','editTopImagePreview')">
+        <div id="editTopImagePreview" class="mt-2"><img id="editTopImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview" onerror="this.parentElement.style.display='none'"/></div>
       </div>
     </div>
     <div class="flex gap-3">
@@ -419,11 +489,11 @@
 <!-- Edit Order Status Modal -->
 <div id="editOrderModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Update Order Status</h3>
+    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Update Status</h3>
     <select id="editOrderStatus" class="w-full mb-6 py-3 text-center font-bold bg-[#3a2a24]">
-      <option value="pending">Pending</option>
-      <option value="completed">Completed</option>
-      <option value="cancelled">Cancelled</option>
+      <option value="pending">⏳ Pending</option>
+      <option value="completed">✓ Completed</option>
+      <option value="cancelled">✗ Cancelled</option>
     </select>
     <div class="flex gap-3">
       <button onclick="closeEditOrderModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Close</button>
@@ -437,705 +507,638 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const FB = {
-  apiKey: "AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
-  authDomain: "lortcha.firebaseapp.com",
-  projectId: "lortcha",
-  storageBucket: "lortcha.firebasestorage.app",
-  messagingSenderId: "51187909854",
-  appId: "1:51187909854:web:f4d7ace62c0a367a192e4f",
-  measurementId: "G-MCXY0YL7PX"
+  apiKey:"AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
+  authDomain:"lortcha.firebaseapp.com",
+  projectId:"lortcha",
+  storageBucket:"lortcha.firebasestorage.app",
+  messagingSenderId:"51187909854",
+  appId:"1:51187909854:web:f4d7ace62c0a367a192e4f"
 };
-
 const app = initializeApp(FB);
 const db = getFirestore(app);
 
-let menuItems = [];
-let toppings = [];
-let orders = [];
-let slideshowItems = [];
-let currentMenuCat = 'All';
-let editingMenuId = null;
-let editingToppingId = null;
-let editingOrderId = null;
-let editingSlideId = null;
-let currentHistoryFilteredOrders = [];
+const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
+const TG_CHAT = "-1003706744326";
 
-// ==========================================
-// TABS & UI LOGIC
-// ==========================================
+let menuItems=[], toppings=[], orders=[], slideshowItems=[];
+let currentMenuCat='All', editingMenuId=null, editingToppingId=null;
+let editingOrderId=null, editingSlideId=null;
+let currentHistoryFilteredOrders=[];
+let currentOrderFilter = 'all';
+
+// ── TABS ──
 window.toggleSidebar = function() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('mobileOverlay');
-  if (sidebar.classList.contains('-translate-x-full')) {
-    sidebar.classList.remove('-translate-x-full');
-    overlay.classList.remove('hidden');
-    setTimeout(() => overlay.classList.add('opacity-100'), 10);
+  const sb=document.getElementById('sidebar'), ov=document.getElementById('mobileOverlay');
+  if(sb.classList.contains('-translate-x-full')) {
+    sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden');
+    setTimeout(()=>ov.classList.add('opacity-100'),10);
   } else {
-    sidebar.classList.add('-translate-x-full');
-    overlay.classList.remove('opacity-100');
-    setTimeout(() => overlay.classList.add('hidden'), 300);
+    sb.classList.add('-translate-x-full'); ov.classList.remove('opacity-100');
+    setTimeout(()=>ov.classList.add('hidden'),300);
   }
 };
 
 window.switchTab = function(tab) {
-  ['stats', 'orders', 'history', 'menu', 'slideshow'].forEach(t => {
-    const view = document.getElementById(`view-${t}`);
-    if(view) view.classList.add('hidden');
-    const btn = document.getElementById(`tab-${t}`);
-    if(btn) {
-      btn.classList.remove('bg-[#8a382f]/20', 'text-[#d44e43]');
-      btn.classList.add('text-gray-400');
-    }
+  ['stats','orders','history','menu','slideshow','social'].forEach(t => {
+    const v=document.getElementById(`view-${t}`), b=document.getElementById(`tab-${t}`);
+    if(v) v.classList.add('hidden');
+    if(b) { b.classList.remove('bg-[#8a382f]/20','text-[#d44e43]'); b.classList.add('text-gray-400'); }
   });
-  const activeView = document.getElementById(`view-${tab}`);
-  if(activeView) activeView.classList.remove('hidden');
-  const activeBtn = document.getElementById(`tab-${tab}`);
-  if(activeBtn) {
-    activeBtn.classList.remove('text-gray-400');
-    activeBtn.classList.add('bg-[#8a382f]/20', 'text-[#d44e43]');
-  }
-  if (window.innerWidth < 768) {
-    const sidebar = document.getElementById('sidebar');
-    if (!sidebar.classList.contains('-translate-x-full')) window.toggleSidebar();
-  }
+  const av=document.getElementById(`view-${tab}`), ab=document.getElementById(`tab-${tab}`);
+  if(av) av.classList.remove('hidden');
+  if(ab) { ab.classList.remove('text-gray-400'); ab.classList.add('bg-[#8a382f]/20','text-[#d44e43]'); }
+  if(window.innerWidth<768) { const sb=document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) window.toggleSidebar(); }
 };
 
-function showToast(msg, isErr=false) {
-  const t = document.getElementById("toast");
-  if(!t) return;
-  t.textContent = msg;
-  t.style.backgroundColor = isErr ? "#d44e43" : "#5db85b";
-  t.style.opacity = "1";
-  setTimeout(() => t.style.opacity = "0", 3000);
+function showToast(msg,isErr=false) {
+  const t=document.getElementById("toast"); if(!t) return;
+  t.textContent=msg; t.style.backgroundColor=isErr?"#d44e43":"#5db85b";
+  t.style.opacity="1"; setTimeout(()=>t.style.opacity="0",3000);
 }
 
-// ==========================================
-// FETCH DATA
-// ==========================================
+// ── FETCH DATA ──
 async function fetchData() {
-  onSnapshot(collection(db, "menu"), (snap) => {
-    menuItems = snap.docs.map(d => ({id: d.id, ...d.data()}));
-    updateCategoryDropdown();
-    renderMenuTable();
+  onSnapshot(collection(db,"menu"), snap => {
+    menuItems = snap.docs.map(d=>({id:d.id,...d.data()}));
+    updateCategoryDropdown(); renderMenuTable();
   });
-
-  onSnapshot(collection(db, "toppings"), (snap) => {
-    toppings = snap.docs.map(d => ({id: d.id, ...d.data()}));
+  onSnapshot(collection(db,"toppings"), snap => {
+    toppings = snap.docs.map(d=>({id:d.id,...d.data()}));
     renderToppings();
   });
-
-  const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
-  onSnapshot(q, (snap) => {
-    orders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-    renderOrders();
-    renderHistory();
-    updateStats();
-    calculateFilteredStats();
+  const q = query(collection(db,"orders"), orderBy("createdAt","desc"));
+  onSnapshot(q, snap => {
+    orders = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderOrders(); renderHistory(); updateStats(); calculateFilteredStats(); renderTopItems();
   });
-
-  onSnapshot(collection(db, "slideshow"), (snap) => {
-    slideshowItems = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (a.order||0)-(b.order||0));
+  onSnapshot(collection(db,"slideshow"), snap => {
+    slideshowItems = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
     renderSlideshowList();
   });
+  // Load social
+  try {
+    const snap = await getDocs(collection(db,"settings"));
+    const settings = {};
+    snap.docs.forEach(d => Object.assign(settings, d.data(), {_docId: d.id}));
+    if(settings.facebookUrl) document.getElementById("fbUrl").value = settings.facebookUrl;
+    if(settings.tiktokUrl) document.getElementById("ttUrl").value = settings.tiktokUrl;
+    window._settingsDocId = settings._docId;
+    updateSocialPreview();
+  } catch(e) {}
 }
 
-// ==========================================
-// STATISTICS & TELEGRAM
-// ==========================================
+// ── STATS ──
 function updateStats() {
-  const pending = orders.filter(o => o.status === 'pending');
-  const completed = orders.filter(o => o.status === 'completed');
-  const rev = completed.reduce((sum, o) => sum + Number(o.total), 0);
-  const elAll = document.getElementById('stat-all');
-  const elPend = document.getElementById('stat-pending');
-  const elComp = document.getElementById('stat-completed');
-  const elRev = document.getElementById('stat-rev');
-  if(elAll) elAll.textContent = orders.length;
-  if(elPend) elPend.textContent = pending.length;
-  if(elComp) elComp.textContent = completed.length;
-  if(elRev) elRev.textContent = `$${rev.toFixed(2)}`;
+  const pending = orders.filter(o=>o.status==='pending');
+  const completed = orders.filter(o=>o.status==='completed');
+  const rev = completed.reduce((s,o)=>s+Number(o.total),0);
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set('stat-all', orders.length); set('stat-pending', pending.length);
+  set('stat-completed', completed.length); set('stat-rev', `$${rev.toFixed(2)}`);
   const badge = document.getElementById("pendingBadge");
-  if(badge) {
-    if(pending.length > 0) { badge.textContent = pending.length; badge.classList.remove("hidden"); }
-    else { badge.classList.add("hidden"); }
-  }
+  const badgeMob = document.getElementById("pendingBadgeMobile");
+  if(badge) { if(pending.length>0){badge.textContent=pending.length;badge.classList.remove("hidden");}else{badge.classList.add("hidden");} }
+  if(badgeMob) { if(pending.length>0){badgeMob.textContent=`${pending.length} pending`;badgeMob.classList.remove("hidden");}else{badgeMob.classList.add("hidden");} }
+}
+
+function renderTopItems() {
+  const counts = {};
+  orders.filter(o=>o.status==='completed').forEach(o => {
+    (o.items||[]).forEach(i => {
+      const key = i.name;
+      if(!counts[key]) counts[key] = { name:i.name, qty:0 };
+      counts[key].qty += i.qty;
+    });
+  });
+  const sorted = Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,5);
+  const el = document.getElementById("topItemsList");
+  if(!el) return;
+  if(!sorted.length) { el.innerHTML = '<p class="text-gray-500 text-sm">No completed orders yet.</p>'; return; }
+  const max = sorted[0].qty;
+  el.innerHTML = sorted.map((item,i) => `
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-gray-500 w-4">${i+1}</span>
+      <div class="flex-1">
+        <div class="flex justify-between text-sm mb-1">
+          <span class="font-medium">${item.name}</span>
+          <span class="text-[#d44e43] font-bold">${item.qty}×</span>
+        </div>
+        <div class="h-1.5 bg-[#3a2a24] rounded-full overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-[#d44e43] to-[#d1a14a] rounded-full" style="width:${(item.qty/max*100).toFixed(0)}%"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
 window.calculateFilteredStats = function() {
-  const startDate = document.getElementById('statStartDate')?.value;
-  const endDate = document.getElementById('statEndDate')?.value;
-  const subPct = parseFloat(document.getElementById('statSubtract')?.value) || 0;
-  let filtered = orders.filter(o => o.status === 'completed');
-  if(startDate || endDate) {
-    filtered = filtered.filter(o => {
+  const startDate=document.getElementById('statStartDate')?.value;
+  const endDate=document.getElementById('statEndDate')?.value;
+  const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
+  let filtered=orders.filter(o=>o.status==='completed');
+  if(startDate||endDate) {
+    filtered=filtered.filter(o=>{
       if(!o.createdAt) return false;
-      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
-      const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-      if(startDate && iso < startDate) return false;
-      if(endDate && iso > endDate) return false;
+      const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
+      const iso=new Date(d.getTime()-(d.getTimezoneOffset()*60000)).toISOString().split('T')[0];
+      if(startDate&&iso<startDate) return false;
+      if(endDate&&iso>endDate) return false;
       return true;
     });
   }
-  const gross = filtered.reduce((sum, o) => sum + Number(o.total), 0);
-  const subAmt = gross * (subPct / 100);
-  const net = gross - subAmt;
-  const fOrders = document.getElementById('stat-f-orders');
-  const fGross = document.getElementById('stat-f-gross');
-  const fSubLbl = document.getElementById('stat-f-sub-lbl');
-  const fSubAmt = document.getElementById('stat-f-sub-amt');
-  const fNet = document.getElementById('stat-f-net');
-  if(fOrders) fOrders.textContent = filtered.length;
-  if(fGross) fGross.textContent = `$${gross.toFixed(2)}`;
-  if(fSubLbl) fSubLbl.textContent = `Subtract (${subPct}%)`;
-  if(fSubAmt) fSubAmt.textContent = `-$${subAmt.toFixed(2)}`;
-  if(fNet) fNet.textContent = `$${net.toFixed(2)}`;
-}
-
-window.sendStatsToTelegram = async function() {
-  const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
-  const TG_CHAT = "-1003706744326";
-  const startDate = document.getElementById('statStartDate')?.value;
-  const endDate = document.getElementById('statEndDate')?.value;
-  const subPct = parseFloat(document.getElementById('statSubtract')?.value) || 0;
-  const note = document.getElementById('statNote')?.value.trim() || 'None';
-  const fOrders = document.getElementById('stat-f-orders')?.textContent || '0';
-  const fGross = document.getElementById('stat-f-gross')?.textContent || '$0.00';
-  const fSubAmt = document.getElementById('stat-f-sub-amt')?.textContent || '-$0.00';
-  const fNet = document.getElementById('stat-f-net')?.textContent || '$0.00';
-  let periodStr = "All Time";
-  if (startDate && endDate) periodStr = `${startDate} to ${endDate}`;
-  else if (startDate) periodStr = `From ${startDate}`;
-  else if (endDate) periodStr = `Until ${endDate}`;
-  const msg = `📊 <b>Chafé Revenue Report</b>\n\n📅 <b>Period:</b> ${periodStr}\n📝 <b>Note:</b> ${note}\n\n📦 <b>Completed Orders:</b> ${fOrders}\n💵 <b>Gross Total:</b> ${fGross}\n📉 <b>Subtract (${subPct}%):</b> ${fSubAmt}\n💰 <b>Net Total:</b> ${fNet}\n\n<i>Generated from Admin Panel</i>`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
-    });
-    showToast("Statistics sent to Telegram!");
-  } catch (e) { showToast("Error sending to Telegram", true); }
+  const gross=filtered.reduce((s,o)=>s+Number(o.total),0);
+  const subAmt=gross*(subPct/100); const net=gross-subAmt;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('stat-f-orders',filtered.length); set('stat-f-gross',`$${gross.toFixed(2)}`);
+  set('stat-f-sub-lbl',`Subtract (${subPct}%)`); set('stat-f-sub-amt',`-$${subAmt.toFixed(2)}`);
+  set('stat-f-net',`$${net.toFixed(2)}`);
 };
 
-// ==========================================
-// LIVE ORDERS & HISTORY
-// ==========================================
+window.sendStatsToTelegram = async function() {
+  const s=id=>document.getElementById(id)?.textContent||'';
+  const startDate=document.getElementById('statStartDate')?.value;
+  const endDate=document.getElementById('statEndDate')?.value;
+  const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
+  const note=document.getElementById('statNote')?.value.trim()||'None';
+  let periodStr="All Time";
+  if(startDate&&endDate) periodStr=`${startDate} to ${endDate}`;
+  else if(startDate) periodStr=`From ${startDate}`;
+  else if(endDate) periodStr=`Until ${endDate}`;
+  const msg=`📊 <b>Chafé Revenue Report</b>\n\n📅 <b>Period:</b> ${periodStr}\n📝 <b>Note:</b> ${note}\n\n📦 <b>Total Orders:</b> ${s('stat-all')}\n⏳ <b>Pending:</b> ${s('stat-pending')}\n✓ <b>Completed:</b> ${s('stat-completed')}\n💵 <b>All Time Revenue:</b> ${s('stat-rev')}\n\n<b>Filtered Period:</b>\n📦 Orders: ${s('stat-f-orders')}\n💵 Gross: ${s('stat-f-gross')}\n📉 Subtract (${subPct}%): ${s('stat-f-sub-amt')}\n💰 Net: ${s('stat-f-net')}\n\n<i>Generated from Admin Panel</i>`;
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
+    showToast("Stats sent to Telegram!");
+  } catch(e) { showToast("Error sending",true); }
+};
+
+// ── LIVE ORDERS ──
+let orderFilter = 'all';
+
+window.setOrderFilter = function(f) {
+  orderFilter = f;
+  ['all','pending','completed','cancelled'].forEach(fv => {
+    const btn = document.getElementById(`ofilter-${fv}`);
+    if(!btn) return;
+    if(fv===f) { btn.classList.remove('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]'); btn.classList.add('bg-[#d44e43]','text-white'); }
+    else { btn.classList.add('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]'); btn.classList.remove('bg-[#d44e43]','text-white'); }
+  });
+  renderOrders();
+};
+
+function getElapsedTime(createdAt) {
+  if(!createdAt) return '';
+  const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+  const mins = Math.floor((Date.now()-d.getTime())/60000);
+  if(mins<1) return 'just now';
+  if(mins<60) return `${mins}m ago`;
+  return `${Math.floor(mins/60)}h ${mins%60}m ago`;
+}
+
 function renderOrders() {
-  const grid = document.getElementById('ordersGrid');
-  const noOrd = document.getElementById('noOrders');
-  if(!grid || !noOrd) return;
-  const activeOrders = orders.filter(o => o.status === 'pending');
-  if (activeOrders.length === 0) { grid.innerHTML = ''; noOrd.classList.remove('hidden'); return; }
+  const grid=document.getElementById('ordersGrid');
+  const noOrd=document.getElementById('noOrders');
+  if(!grid||!noOrd) return;
+
+  let filtered = orders;
+  if(orderFilter!=='all') filtered = orders.filter(o=>o.status===orderFilter);
+  // For 'all', show recent 50
+  filtered = filtered.slice(0,50);
+
+  if(!filtered.length) { grid.innerHTML=''; noOrd.classList.remove('hidden'); return; }
   noOrd.classList.add('hidden');
-  grid.innerHTML = activeOrders.map(o => {
-    const time = o.createdAt ? new Date(o.createdAt.toDate ? o.createdAt.toDate() : o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '';
+
+  grid.innerHTML = filtered.map(o => {
+    const time = o.createdAt ? new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+    const elapsed = getElapsedTime(o.createdAt);
+    const cardClass = `order-card-${o.status}`;
+    const statusClass = `status-${o.status}`;
+    const statusLabel = o.status==='pending'?'⏳ Pending':o.status==='completed'?'✓ Completed':'✗ Cancelled';
+    const tempIcon = item => item.temperature==='hot'?'☕':item.temperature==='frappe'?'🥤':'🧊';
+
     return `
-    <div class="bg-[#4e3b32] rounded-xl border border-[#d44e43]/40 overflow-hidden shadow-lg flex flex-col">
-      <div class="bg-[#d44e43]/20 p-3 border-b border-[#d44e43]/30 flex justify-between items-center">
-        <span class="font-bold text-[#d44e43]">Table ${o.tableNumber}</span>
-        <span class="text-xs text-gray-300">#${o.id.slice(-5).toUpperCase()} · ${time}</span>
+    <div class="bg-[#4e3b32] rounded-xl border ${cardClass} overflow-hidden shadow-lg flex flex-col fade-up">
+      <div class="p-3 border-b border-[#5c453b] flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-[#d44e43] text-sm">Table ${o.tableNumber}</span>
+          <span class="text-xs text-gray-400">#${o.id.slice(-5).toUpperCase()}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="order-timer">${elapsed}</span>
+          <span class="text-[10px] font-bold px-2 py-1 rounded-full ${statusClass}">${statusLabel}</span>
+        </div>
       </div>
-      <div class="p-4 flex-1 flex flex-col gap-3">
+      <div class="p-4 flex-1 space-y-2">
         ${(o.items||[]).map(i => {
-           let opts = `Sugar: ${i.sugar} | Ice: ${i.ice}`;
-           if(i.toppingsData?.length) opts += ` | +${i.toppingsData.length} Tops`;
-           return `
-           <div class="border-b border-[#5c453b] pb-2 last:border-0 last:pb-0">
-             <div class="flex justify-between text-sm">
-               <span class="font-bold">${i.qty}x ${i.name}</span>
-               <span>$${(i.price*i.qty).toFixed(2)}</span>
-             </div>
-             <p class="text-xs text-gray-400 mt-0.5">${opts}</p>
-           </div>`
+          let opts = `${tempIcon(i)} | Sugar:${i.sugar}`;
+          if(i.temperature!=='hot') opts += ` | Ice:${i.ice}`;
+          if(i.toppingsData?.length) opts += ` | +${i.toppingsData.length} tops`;
+          return `<div class="border-b border-[#5c453b] pb-2 last:border-0 last:pb-0">
+            <div class="flex justify-between text-sm"><span class="font-bold">${i.qty}× ${i.name}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
+            <p class="text-xs text-gray-400 mt-0.5">${opts}</p>
+          </div>`;
         }).join('')}
-        ${o.note ? `<div class="mt-2 p-2 bg-[#3a2a24] rounded border border-[#5c453b] text-xs text-gray-300">📝 ${o.note}</div>` : ''}
+        ${o.note?`<div class="mt-2 p-2 bg-[#3a2a24] rounded border border-[#5c453b] text-xs text-gray-300">📝 ${o.note}</div>`:''}
       </div>
-      <div class="bg-[#3a2a24] p-4 border-t border-[#5c453b] flex items-center justify-between mt-auto">
-        <span class="font-bold text-lg text-[#5db85b]">$${Number(o.total).toFixed(2)}</span>
-        <button onclick="completeOrder('${o.id}')" class="btn-success px-4 py-2 rounded font-bold text-sm shadow">Complete ✓</button>
+      <div class="bg-[#3a2a24] p-3 border-t border-[#5c453b] flex items-center justify-between">
+        <span class="font-bold text-[#5db85b]">$${Number(o.total).toFixed(2)}</span>
+        <div class="flex gap-2">
+          ${o.status==='pending'
+            ? `<button onclick="quickStatus('${o.id}','completed')" class="bg-[#5db85b] hover:bg-[#4cae4c] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">✓ Complete</button>
+               <button onclick="quickStatus('${o.id}','cancelled')" class="bg-[#d44e43]/30 hover:bg-[#d44e43] text-[#d44e43] hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-[#d44e43]/50 transition">✗ Cancel</button>`
+            : `<button onclick="openEditOrderModal('${o.id}')" class="bg-[#5c453b] hover:bg-[#6b5040] text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit Status</button>`}
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
-window.completeOrder = async function(id) {
+window.quickStatus = async function(id, status) {
   try {
-    await updateDoc(doc(db, "orders", id), { status: "completed" });
-    showToast("Order Completed!");
-  } catch (e) { showToast("Error updating order", true); }
-}
+    await updateDoc(doc(db,"orders",id), {status});
+    showToast(`Order ${status}!`);
+  } catch(e) { showToast("Error updating",true); }
+};
 
+// ── ORDER HISTORY ──
 window.renderHistory = function() {
-  const startDate = document.getElementById('historyStartDate')?.value;
-  const endDate = document.getElementById('historyEndDate')?.value;
-  const tbody = document.getElementById('historyTableBody');
+  const startDate=document.getElementById('historyStartDate')?.value;
+  const endDate=document.getElementById('historyEndDate')?.value;
+  const tbody=document.getElementById('historyTableBody');
   if(!tbody) return;
-  let filtered = orders;
-  if(startDate || endDate) {
-    filtered = orders.filter(o => {
+  let filtered=orders;
+  if(startDate||endDate) {
+    filtered=orders.filter(o=>{
       if(!o.createdAt) return false;
-      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
-      const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-      if(startDate && iso < startDate) return false;
-      if(endDate && iso > endDate) return false;
-      return true;
+      const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
+      const iso=new Date(d.getTime()-(d.getTimezoneOffset()*60000)).toISOString().split('T')[0];
+      if(startDate&&iso<startDate) return false; if(endDate&&iso>endDate) return false; return true;
     });
   }
-  currentHistoryFilteredOrders = filtered;
-  if(filtered.length === 0) {
-     tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">No orders found for this date range.</td></tr>`;
-     return;
-  }
-  tbody.innerHTML = filtered.map(o => {
-    const time = o.createdAt ? new Date(o.createdAt.toDate ? o.createdAt.toDate() : o.createdAt).toLocaleString() : '';
-    const itemsTxt = (o.items||[]).map(i => `${i.qty}x ${i.name}`).join(', ');
-    const statColor = o.status === 'completed' ? 'text-[#5db85b]' : o.status === 'cancelled' ? 'text-red-500' : 'text-[#d1a14a]';
-    return `
-    <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
-      <td class="p-4">#${o.id.slice(-6).toUpperCase()}</td>
+  currentHistoryFilteredOrders=filtered;
+  if(!filtered.length) { tbody.innerHTML=`<tr><td colspan="7" class="p-8 text-center text-gray-400">No orders found for this date range.</td></tr>`; return; }
+  tbody.innerHTML=filtered.map(o=>{
+    const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleString():'';
+    const itemsTxt=(o.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ');
+    const sc=o.status==='completed'?'text-[#5db85b]':o.status==='cancelled'?'text-red-500':'text-[#d1a14a]';
+    return `<tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
+      <td class="p-4 text-xs font-mono">#${o.id.slice(-6).toUpperCase()}</td>
       <td class="p-4 text-xs text-gray-400">${time}</td>
-      <td class="p-4">Table ${o.tableNumber}</td>
-      <td class="p-4 text-xs max-w-[200px] truncate" title="${itemsTxt}">${itemsTxt}</td>
+      <td class="p-4">T${o.tableNumber}</td>
+      <td class="p-4 text-xs max-w-[180px] truncate" title="${itemsTxt}">${itemsTxt}</td>
       <td class="p-4 font-bold">$${Number(o.total).toFixed(2)}</td>
-      <td class="p-4 font-bold ${statColor} uppercase text-xs">${o.status}</td>
+      <td class="p-4 font-bold ${sc} uppercase text-xs">${o.status}</td>
       <td class="p-4 text-right flex items-center justify-end gap-3 h-full pt-4">
-        <button onclick="sendSingleOrderToTelegram('${o.id}')" class="text-blue-400 hover:text-blue-300 transition" title="Send to Telegram">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
-        </button>
-        <button onclick="openEditOrderModal('${o.id}')" class="text-gray-400 hover:text-[#5db85b] transition" title="Edit Status">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        </button>
-        <button onclick="deleteOrderHistory('${o.id}')" class="text-gray-400 hover:text-[#d44e43] transition" title="Delete Order">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-        </button>
+        <button onclick="sendSingleOrderToTelegram('${o.id}')" class="text-blue-400 hover:text-blue-300 transition" title="Send"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></button>
+        <button onclick="openEditOrderModal('${o.id}')" class="text-gray-400 hover:text-[#5db85b] transition" title="Edit"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+        <button onclick="deleteOrderHistory('${o.id}')" class="text-gray-400 hover:text-[#d44e43] transition" title="Delete"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
       </td>
     </tr>`;
   }).join('');
 };
 
 window.sendHistoryToTelegram = async function() {
-  if (currentHistoryFilteredOrders.length === 0) return showToast("No orders in the current list to send.", true);
-  const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
-  const TG_CHAT = "-1003706744326";
-  const startDate = document.getElementById('historyStartDate')?.value;
-  const endDate = document.getElementById('historyEndDate')?.value;
-  let periodStr = "All Time History";
-  if (startDate && endDate) periodStr = `${startDate} to ${endDate}`;
-  else if (startDate) periodStr = `From ${startDate}`;
-  else if (endDate) periodStr = `Until ${endDate}`;
-  let listTxt = ""; let listTotal = 0;
-  currentHistoryFilteredOrders.forEach(o => {
-    const time = o.createdAt ? new Date(o.createdAt.toDate ? o.createdAt.toDate() : o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '';
-    listTxt += `• <b>#${o.id.slice(-6).toUpperCase()}</b> (${time}) - $${Number(o.total).toFixed(2)} [${o.status.toUpperCase()}]\n`;
-    if(o.status === 'completed') listTotal += Number(o.total);
+  if(!currentHistoryFilteredOrders.length) return showToast("No orders to send",true);
+  let listTxt="", listTotal=0;
+  currentHistoryFilteredOrders.forEach(o=>{
+    const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+    listTxt+=`• <b>#${o.id.slice(-6).toUpperCase()}</b> (${time}) - $${Number(o.total).toFixed(2)} [${o.status.toUpperCase()}]\n`;
+    if(o.status==='completed') listTotal+=Number(o.total);
   });
-  const msg = `📋 <b>Order List Export</b>\n\n📅 <b>Period:</b> ${periodStr}\n📦 <b>Total Orders:</b> ${currentHistoryFilteredOrders.length}\n💰 <b>Completed Sum:</b> $${listTotal.toFixed(2)}\n\n<b>Order Breakdown:</b>\n${listTxt}`;
+  const msg=`📋 <b>Order List Export</b>\n\n📦 <b>Total Orders:</b> ${currentHistoryFilteredOrders.length}\n💰 <b>Completed Sum:</b> $${listTotal.toFixed(2)}\n\n${listTxt}`;
   try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
-    });
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
     showToast("List sent to Telegram!");
-  } catch (e) { showToast("Failed to send list.", true); }
-}
+  } catch(e) { showToast("Failed to send",true); }
+};
 
 window.sendSingleOrderToTelegram = async function(id) {
-  const o = orders.find(x => x.id === id);
-  if(!o) return;
-  const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
-  const TG_CHAT = "-1003706744326";
-  const itemLines = (o.items||[]).map(i => `  • ${i.qty}x ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join("\n");
-  const msg = `🧾 <b>Order Receipt Update</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n📌 Status: <b>${o.status.toUpperCase()}</b>\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`;
+  const o=orders.find(x=>x.id===id); if(!o) return;
+  const itemLines=(o.items||[]).map(i=>`  • ${i.qty}× ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join("\n");
+  const msg=`🧾 <b>Order Receipt</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n📌 Status: <b>${o.status.toUpperCase()}</b>\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`;
   try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TG_CHAT, text: msg, parse_mode: "HTML" })
-    });
-    showToast("Order sent to Telegram!");
-  } catch (e) { showToast("Failed to send order.", true); }
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
+    showToast("Order sent!");
+  } catch(e) { showToast("Failed",true); }
 };
 
 window.deleteOrderHistory = async function(id) {
-  if(confirm("Permanently delete this order from history? This cannot be undone.")) {
-    try { await deleteDoc(doc(db, "orders", id)); showToast("Order deleted."); }
-    catch(e) { showToast("Error deleting order.", true); }
+  if(confirm("Permanently delete this order?")) {
+    try { await deleteDoc(doc(db,"orders",id)); showToast("Deleted."); }
+    catch(e) { showToast("Error",true); }
   }
-}
+};
 
 window.openEditOrderModal = function(id) {
-  editingOrderId = id;
-  const o = orders.find(x => x.id === id);
-  if(!o) return;
-  document.getElementById('editOrderStatus').value = o.status || 'pending';
-  const modal = document.getElementById('editOrderModal');
-  modal.classList.remove('hidden'); modal.style.display = 'flex';
-}
-window.closeEditOrderModal = function() {
-  editingOrderId = null;
-  const modal = document.getElementById('editOrderModal');
-  modal.classList.add('hidden'); modal.style.display = 'none';
-}
+  editingOrderId=id;
+  const o=orders.find(x=>x.id===id); if(!o) return;
+  document.getElementById('editOrderStatus').value=o.status||'pending';
+  const m=document.getElementById('editOrderModal'); m.classList.remove('hidden'); m.style.display='flex';
+};
+window.closeEditOrderModal = function() { editingOrderId=null; const m=document.getElementById('editOrderModal'); m.classList.add('hidden'); m.style.display='none'; };
 window.saveEditOrder = async function() {
   if(!editingOrderId) return;
-  const status = document.getElementById('editOrderStatus').value;
-  try { await updateDoc(doc(db, "orders", editingOrderId), { status }); closeEditOrderModal(); showToast("Status updated."); }
-  catch(e) { showToast("Error updating status.", true); }
-}
+  const status=document.getElementById('editOrderStatus').value;
+  try { await updateDoc(doc(db,"orders",editingOrderId),{status}); closeEditOrderModal(); showToast("Status updated!"); }
+  catch(e) { showToast("Error",true); }
+};
 
-// ==========================================
-// MENU MANAGER
-// ==========================================
+// ── MENU MANAGER ──
 window.addMenuItem = async function() {
-  const name = document.getElementById("addName").value.trim();
-  const nameKh = document.getElementById("addNameKh").value.trim();
-  const price = parseFloat(document.getElementById("addPrice").value);
-  const cat = document.getElementById("addCat").value.trim();
-  const img = document.getElementById("addImage").value.trim();
-  if(!name || isNaN(price)) { showToast("Name and Price required", true); return; }
+  const name=document.getElementById("addName").value.trim();
+  const nameKh=document.getElementById("addNameKh").value.trim();
+  const price=parseFloat(document.getElementById("addPrice").value);
+  const cat=document.getElementById("addCat").value.trim();
+  const img=document.getElementById("addImage").value.trim();
+  const temperature=document.getElementById("addTemperature").value;
+  const popular=document.getElementById("addPopular").checked;
+  if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
   try {
-    await addDoc(collection(db, "menu"), {
-      name, nameKh, price, category: cat || 'Other', imageUrl: img, discount: 0, inStock: true
-    });
-    document.getElementById("addName").value = '';
-    document.getElementById("addNameKh").value = '';
-    document.getElementById("addPrice").value = '';
-    document.getElementById("addCat").value = '';
-    document.getElementById("addImage").value = '';
-    currentMenuCat = 'All';
-    const filterEl = document.getElementById('menuCatFilter');
-    if(filterEl) filterEl.value = 'All';
+    await addDoc(collection(db,"menu"),{name,nameKh,price,category:cat||'Other',imageUrl:img,discount:0,inStock:true,temperature,popular});
+    document.getElementById("addName").value=''; document.getElementById("addNameKh").value='';
+    document.getElementById("addPrice").value=''; document.getElementById("addCat").value='';
+    document.getElementById("addImage").value=''; document.getElementById("addPopular").checked=false;
+    document.getElementById("addTemperature").value='both';
+    currentMenuCat='All'; document.getElementById('menuCatFilter').value='All';
     showToast("Item added!");
-  } catch(e) { showToast("Error adding item", true); }
-}
+  } catch(e) { showToast("Error adding item",true); }
+};
 
 window.applyBulkDiscount = async function() {
-  const pctInput = document.getElementById("bulkDiscountInput").value;
-  const pct = parseInt(pctInput);
-  if(pctInput === "" || isNaN(pct) || pct < 0 || pct > 100) return showToast("Enter a valid discount % (0-100)", true);
-  const itemsToUpdate = currentMenuCat === 'All' ? menuItems : menuItems.filter(m => (m.category || 'Other') === currentMenuCat);
-  if(itemsToUpdate.length === 0) return showToast("No items found to discount", true);
-  const confirmMsg = currentMenuCat === 'All' ? `Apply ${pct}% discount to ALL items on the menu?` : `Apply ${pct}% discount to all ${itemsToUpdate.length} items in '${currentMenuCat}'?`;
-  if(!confirm(confirmMsg)) return;
+  const pctInput=document.getElementById("bulkDiscountInput").value;
+  const pct=parseInt(pctInput);
+  if(pctInput===""||isNaN(pct)||pct<0||pct>100) return showToast("Enter 0-100",true);
+  const itemsToUpdate=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
+  if(!itemsToUpdate.length) return showToast("No items found",true);
+  if(!confirm(`Apply ${pct}% discount to ${currentMenuCat==='All'?'ALL':''+itemsToUpdate.length} items?`)) return;
   try {
-    const promises = itemsToUpdate.map(m => updateDoc(doc(db, "menu", m.id), { discount: pct }));
-    await Promise.all(promises);
-    document.getElementById("bulkDiscountInput").value = '';
-    showToast(`Bulk discount of ${pct}% applied!`);
-  } catch(e) { showToast("Error applying bulk discount", true); }
-}
+    await Promise.all(itemsToUpdate.map(m=>updateDoc(doc(db,"menu",m.id),{discount:pct})));
+    document.getElementById("bulkDiscountInput").value=''; showToast(`${pct}% applied!`);
+  } catch(e) { showToast("Error",true); }
+};
 
-window.updateDiscount = async function(id, val) {
-  const discount = parseInt(val) || 0;
-  try { await updateDoc(doc(db, "menu", id), { discount }); }
-  catch(e) { showToast("Error updating discount", true); }
-}
+window.updateDiscount = async function(id,val) {
+  const discount=parseInt(val)||0;
+  try { await updateDoc(doc(db,"menu",id),{discount}); } catch(e) { showToast("Error",true); }
+};
+
+window.togglePopular = async function(id, val) {
+  try { await updateDoc(doc(db,"menu",id),{popular:val}); showToast(val?"Marked popular!":"Removed from popular"); } catch(e) {}
+};
 
 window.deleteMenuItem = async function(id) {
-  if(!confirm("Delete this drink from the menu?")) return;
-  try { await deleteDoc(doc(db, "menu", id)); showToast("Deleted."); }
-  catch(e) { showToast("Error deleting", true); }
-}
+  if(!confirm("Delete this drink?")) return;
+  try { await deleteDoc(doc(db,"menu",id)); showToast("Deleted."); } catch(e) { showToast("Error",true); }
+};
 
 window.openEditMenuModal = function(id) {
-  const item = menuItems.find(m => m.id === id);
-  if(!item) return;
-  editingMenuId = id;
-  document.getElementById('editName').value = item.name || '';
-  document.getElementById('editNameKh').value = item.nameKh || '';
-  document.getElementById('editPrice').value = item.price || 0;
-  document.getElementById('editCat').value = item.category || '';
-  document.getElementById('editImage').value = item.imageUrl || '';
-  const m = document.getElementById("editMenuModal");
-  m.classList.remove("hidden"); m.style.display = "flex";
+  const item=menuItems.find(m=>m.id===id); if(!item) return;
+  editingMenuId=id;
+  document.getElementById('editName').value=item.name||'';
+  document.getElementById('editNameKh').value=item.nameKh||'';
+  document.getElementById('editPrice').value=item.price||0;
+  document.getElementById('editCat').value=item.category||'';
+  document.getElementById('editImage').value=item.imageUrl||'';
+  document.getElementById('editTemperature').value=item.temperature||'both';
+  document.getElementById('editPopular').checked=!!item.popular;
+  const m=document.getElementById("editMenuModal"); m.classList.remove("hidden"); m.style.display="flex";
 };
-
-window.closeEditMenuModal = function() {
-  editingMenuId = null;
-  const m = document.getElementById("editMenuModal");
-  m.classList.add("hidden"); m.style.display = "none";
-};
-
+window.closeEditMenuModal = function() { editingMenuId=null; const m=document.getElementById("editMenuModal"); m.classList.add("hidden"); m.style.display="none"; };
 window.saveEditMenu = async function() {
   if(!editingMenuId) return;
-  const name = document.getElementById("editName").value.trim();
-  const nameKh = document.getElementById("editNameKh").value.trim();
-  const price = parseFloat(document.getElementById("editPrice").value);
-  const category = document.getElementById("editCat").value.trim() || 'Other';
-  const imageUrl = document.getElementById("editImage").value.trim();
-  if(!name || isNaN(price)) { showToast("Name and Price required", true); return; }
+  const name=document.getElementById("editName").value.trim();
+  const nameKh=document.getElementById("editNameKh").value.trim();
+  const price=parseFloat(document.getElementById("editPrice").value);
+  const category=document.getElementById("editCat").value.trim()||'Other';
+  const imageUrl=document.getElementById("editImage").value.trim();
+  const temperature=document.getElementById("editTemperature").value;
+  const popular=document.getElementById("editPopular").checked;
+  if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
   try {
-    await updateDoc(doc(db, "menu", editingMenuId), { name, nameKh, price, category, imageUrl });
-    closeEditMenuModal(); showToast("Drink updated!");
-  } catch(e) { showToast("Error updating drink", true); }
+    await updateDoc(doc(db,"menu",editingMenuId),{name,nameKh,price,category,imageUrl,temperature,popular});
+    closeEditMenuModal(); showToast("Updated!");
+  } catch(e) { showToast("Error",true); }
 };
 
-window.filterMenu = function() {
-  currentMenuCat = document.getElementById('menuCatFilter').value;
-  renderMenuTable();
-};
+window.filterMenu = function() { currentMenuCat=document.getElementById('menuCatFilter').value; renderMenuTable(); };
 
 function updateCategoryDropdown() {
-  const select = document.getElementById('menuCatFilter');
-  if (!select) return;
-  const cats = [...new Set(menuItems.map(m => m.category || 'Other'))];
-  let html = `<option value="All">All Categories</option>`;
-  cats.forEach(c => { html += `<option value="${c}" ${currentMenuCat === c ? 'selected' : ''}>${c}</option>`; });
-  select.innerHTML = html;
+  const select=document.getElementById('menuCatFilter'); if(!select) return;
+  const cats=[...new Set(menuItems.map(m=>m.category||'Other'))];
+  select.innerHTML=`<option value="All">All Categories</option>`;
+  cats.forEach(c=>{ select.innerHTML+=`<option value="${c}" ${currentMenuCat===c?'selected':''}>${c}</option>`; });
+}
+
+function getTempLabel(t) {
+  if(t==='ice') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-ice">🧊 Ice</span>`;
+  if(t==='hot') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-hot">☕ Hot</span>`;
+  if(t==='frappe') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-frappe">🥤 Frappe</span>`;
+  return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-both">🧊☕ Both</span>`;
 }
 
 function renderMenuTable() {
-  const tbody = document.getElementById("menuTableBody");
-  if(!tbody) return;
-  const filtered = currentMenuCat === 'All' ? menuItems : menuItems.filter(m => (m.category || 'Other') === currentMenuCat);
-  tbody.innerHTML = filtered.map(m => {
-    const finalPrice = m.price * (1 - (m.discount||0)/100);
+  const tbody=document.getElementById("menuTableBody"); if(!tbody) return;
+  const filtered=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
+  tbody.innerHTML=filtered.map(m=>{
+    const finalPrice=m.price*(1-(m.discount||0)/100);
     return `
     <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
       <td class="p-4 flex items-center gap-3">
-        <img src="${m.imageUrl || 'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-10 h-10 rounded shadow object-cover border border-[#5c453b]" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'">
-        <div>
-          <div class="font-medium">${m.name}</div>
-          <div class="text-xs text-gray-400">${m.nameKh || ''}</div>
-        </div>
+        <img src="${m.imageUrl||'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-10 h-10 rounded shadow object-cover border border-[#5c453b]" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'">
+        <div><div class="font-medium">${m.name}</div><div class="text-xs text-gray-400">${m.nameKh||''}</div></div>
       </td>
       <td class="p-4"><span class="bg-[#3a2a24] border border-[#5c453b] px-2 py-1 rounded text-xs">${m.category}</span></td>
+      <td class="p-4">${getTempLabel(m.temperature||'both')}</td>
+      <td class="p-4">
+        <button onclick="togglePopular('${m.id}',${!m.popular})" class="text-lg ${m.popular?'opacity-100':'opacity-25 hover:opacity-60'} transition" title="${m.popular?'Remove popular':'Mark popular'}">🔥</button>
+      </td>
       <td class="p-4">$${Number(m.price).toFixed(2)}</td>
       <td class="p-4">
-        <div class="flex items-center gap-1 bg-[#3a2a24] border border-[#5c453b] rounded p-1 w-[80px]">
-          <input type="number" min="0" max="100" value="${m.discount||0}" onchange="updateDiscount('${m.id}', this.value)" class="w-full bg-transparent text-center border-none p-0 text-[#d44e43] font-bold focus:ring-0">
+        <div class="flex items-center gap-1 bg-[#3a2a24] border border-[#5c453b] rounded p-1 w-20">
+          <input type="number" min="0" max="100" value="${m.discount||0}" onchange="updateDiscount('${m.id}',this.value)" class="w-full bg-transparent text-center border-none p-0 text-[#d44e43] font-bold focus:ring-0">
           <span class="pr-2 text-gray-400 text-xs">%</span>
         </div>
       </td>
       <td class="p-4 text-[#5db85b] font-bold">$${finalPrice.toFixed(2)}</td>
       <td class="p-4 text-right">
-        <button onclick="openEditMenuModal('${m.id}')" class="text-gray-400 hover:text-[#5db85b] transition mr-2" title="Edit">
-          <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-        </button>
-        <button onclick="deleteMenuItem('${m.id}')" class="text-gray-400 hover:text-[#d44e43] transition" title="Delete">
-          <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-        </button>
+        <button onclick="openEditMenuModal('${m.id}')" class="text-gray-400 hover:text-[#5db85b] transition mr-3"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+        <button onclick="deleteMenuItem('${m.id}')" class="text-gray-400 hover:text-[#d44e43] transition"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
       </td>
     </tr>`;
   }).join('');
 }
 
-// ==========================================
-// TOPPINGS MANAGER — WITH PHOTO
-// ==========================================
-window.openAddToppingModal = () => {
-  const m = document.getElementById("toppingModal");
-  m.classList.remove("hidden"); m.style.display = "flex";
+// ── TOPPINGS ──
+window.previewImg = function(inputId, imgId, previewId) {
+  const val=document.getElementById(inputId)?.value.trim();
+  const prev=document.getElementById(previewId); const img=document.getElementById(imgId);
+  if(val&&prev&&img) { img.src=val; prev.classList.remove("hidden"); }
+  else if(prev) prev.classList.add("hidden");
 };
-window.closeAddToppingModal = () => {
-  const m = document.getElementById("toppingModal");
-  m.classList.add("hidden"); m.style.display = "none";
-};
-
-// Live image preview for add topping
-document.getElementById("topImage").addEventListener("input", function() {
-  const preview = document.getElementById("topImagePreview");
-  const img = document.getElementById("topImagePreviewImg");
-  if(this.value.trim()) {
-    img.src = this.value.trim();
-    preview.classList.remove("hidden");
-  } else {
-    preview.classList.add("hidden");
-  }
-});
-
+window.openAddToppingModal = () => { const m=document.getElementById("toppingModal"); m.classList.remove("hidden"); m.style.display="flex"; };
+window.closeAddToppingModal = () => { const m=document.getElementById("toppingModal"); m.classList.add("hidden"); m.style.display="none"; };
 window.saveTopping = async function() {
-  const name = document.getElementById("topName").value.trim();
-  const nameKh = document.getElementById("topNameKh").value.trim();
-  const price = parseFloat(document.getElementById("topPrice").value);
-  const imageUrl = document.getElementById("topImage").value.trim();
-  if(!name) { showToast("Topping name is required!", true); return; }
-  if(isNaN(price) || price < 0) { showToast("Valid price is required!", true); return; }
+  const name=document.getElementById("topName").value.trim();
+  const nameKh=document.getElementById("topNameKh").value.trim();
+  const price=parseFloat(document.getElementById("topPrice").value);
+  const imageUrl=document.getElementById("topImage").value.trim();
+  if(!name) { showToast("Name required!",true); return; }
+  if(isNaN(price)||price<0) { showToast("Valid price required!",true); return; }
   try {
-    await addDoc(collection(db, "toppings"), { name, nameKh, price, imageUrl });
+    await addDoc(collection(db,"toppings"),{name,nameKh,price,imageUrl});
     closeAddToppingModal();
-    document.getElementById("topName").value = '';
-    document.getElementById("topNameKh").value = '';
-    document.getElementById("topPrice").value = '';
-    document.getElementById("topImage").value = '';
+    ['topName','topNameKh','topPrice','topImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById("topImagePreview").classList.add("hidden");
     showToast("Topping added!");
-  } catch(e) { showToast("Error: " + e.message, true); }
-}
-
-window.deleteTopping = async function(id) {
-  if(!confirm("Remove this topping?")) return;
-  try { await deleteDoc(doc(db, "toppings", id)); } catch(e) {}
-}
-
-window.openEditToppingModal = function(id) {
-  const tp = toppings.find(x => x.id === id);
-  if(!tp) return;
-  editingToppingId = id;
-  document.getElementById("editTopName").value = tp.name || '';
-  document.getElementById("editTopNameKh").value = tp.nameKh || '';
-  document.getElementById("editTopPrice").value = tp.price || 0;
-  document.getElementById("editTopImage").value = tp.imageUrl || '';
-  const prevImg = document.getElementById("editTopImagePreviewImg");
-  if(tp.imageUrl) { prevImg.src = tp.imageUrl; document.getElementById("editTopImagePreview").style.display = 'block'; }
-  else { document.getElementById("editTopImagePreview").style.display = 'none'; }
-  const m = document.getElementById("editToppingModal");
-  m.classList.remove("hidden"); m.style.display = "flex";
+  } catch(e) { showToast("Error: "+e.message,true); }
 };
-
-window.closeEditToppingModal = function() {
-  editingToppingId = null;
-  const m = document.getElementById("editToppingModal");
-  m.classList.add("hidden"); m.style.display = "none";
-}
-
+window.deleteTopping = async function(id) { if(!confirm("Remove this topping?")) return; try{await deleteDoc(doc(db,"toppings",id));}catch(e){} };
+window.openEditToppingModal = function(id) {
+  const tp=toppings.find(x=>x.id===id); if(!tp) return; editingToppingId=id;
+  document.getElementById("editTopName").value=tp.name||''; document.getElementById("editTopNameKh").value=tp.nameKh||'';
+  document.getElementById("editTopPrice").value=tp.price||0; document.getElementById("editTopImage").value=tp.imageUrl||'';
+  const prevImg=document.getElementById("editTopImagePreviewImg");
+  if(tp.imageUrl){prevImg.src=tp.imageUrl;document.getElementById("editTopImagePreview").style.display='block';}
+  else{document.getElementById("editTopImagePreview").style.display='none';}
+  const m=document.getElementById("editToppingModal"); m.classList.remove("hidden"); m.style.display="flex";
+};
+window.closeEditToppingModal = function() { editingToppingId=null; const m=document.getElementById("editToppingModal"); m.classList.add("hidden"); m.style.display="none"; };
 window.saveEditTopping = async function() {
   if(!editingToppingId) return;
-  const name = document.getElementById("editTopName").value.trim();
-  const nameKh = document.getElementById("editTopNameKh").value.trim();
-  const price = parseFloat(document.getElementById("editTopPrice").value);
-  const imageUrl = document.getElementById("editTopImage").value.trim();
-  if(!name) { showToast("Topping name is required!", true); return; }
-  if(isNaN(price) || price < 0) { showToast("Valid price is required!", true); return; }
-  try {
-    await updateDoc(doc(db, "toppings", editingToppingId), { name, nameKh, price, imageUrl });
-    closeEditToppingModal(); showToast("Topping updated!");
-  } catch(e) { showToast("Error updating topping", true); }
-}
-
+  const name=document.getElementById("editTopName").value.trim();
+  const nameKh=document.getElementById("editTopNameKh").value.trim();
+  const price=parseFloat(document.getElementById("editTopPrice").value);
+  const imageUrl=document.getElementById("editTopImage").value.trim();
+  if(!name||isNaN(price)||price<0) { showToast("Invalid data",true); return; }
+  try { await updateDoc(doc(db,"toppings",editingToppingId),{name,nameKh,price,imageUrl}); closeEditToppingModal(); showToast("Updated!"); }
+  catch(e) { showToast("Error",true); }
+};
 function renderToppings() {
-  const grid = document.getElementById("toppingsGrid");
-  if(!grid) return;
-  grid.innerHTML = toppings.map(tp => `
+  const grid=document.getElementById("toppingsGrid"); if(!grid) return;
+  grid.innerHTML=toppings.map(tp=>`
     <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden shadow-sm">
-      ${tp.imageUrl ? `<div class="h-28 bg-[#3a2a24] overflow-hidden"><img src="${tp.imageUrl}" alt="${tp.name}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/></div>` : `<div class="h-28 bg-[#3a2a24] flex items-center justify-center text-4xl opacity-30">🧁</div>`}
+      ${tp.imageUrl?`<div class="h-28 bg-[#3a2a24] overflow-hidden"><img src="${tp.imageUrl}" alt="${tp.name}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/></div>`:`<div class="h-28 bg-[#3a2a24] flex items-center justify-center text-4xl opacity-30">🧁</div>`}
       <div class="p-4 flex justify-between items-start">
         <div class="flex-1 min-w-0 mr-2">
           <p class="font-bold text-sm truncate">${tp.name}</p>
-          <p class="text-[10px] text-gray-400 mb-1 truncate">${tp.nameKh || ''}</p>
+          <p class="text-[10px] text-gray-400 mb-1 truncate">${tp.nameKh||''}</p>
           <p class="text-[#5db85b] font-semibold text-sm">+$${Number(tp.price).toFixed(2)}</p>
         </div>
         <div class="flex gap-1 flex-shrink-0">
-          <button onclick="openEditToppingModal('${tp.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]">
-             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-          </button>
-          <button onclick="deleteTopping('${tp.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]">
-             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-          </button>
+          <button onclick="openEditToppingModal('${tp.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+          <button onclick="deleteTopping('${tp.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
         </div>
       </div>
     </div>
   `).join('');
 }
 
-// ==========================================
-// SLIDESHOW MANAGER
-// ==========================================
+// ── SLIDESHOW ──
 window.addSlide = async function() {
-  const step = parseInt(document.getElementById("slideStep").value) || (slideshowItems.length + 1);
-  const imageUrl = document.getElementById("slideImage").value.trim();
-  const titleEn = document.getElementById("slideTitleEn").value.trim();
-  const titleKh = document.getElementById("slideTitleKh").value.trim();
-  const descEn = document.getElementById("slideDescEn").value.trim();
-  const descKh = document.getElementById("slideDescKh").value.trim();
-
-  if(!titleEn) { showToast("Title (EN) is required", true); return; }
-
+  const step=parseInt(document.getElementById("slideStep").value)||(slideshowItems.length+1);
+  const imageUrl=document.getElementById("slideImage").value.trim();
+  const titleEn=document.getElementById("slideTitleEn").value.trim();
+  const titleKh=document.getElementById("slideTitleKh").value.trim();
+  const descEn=document.getElementById("slideDescEn").value.trim();
+  const descKh=document.getElementById("slideDescKh").value.trim();
+  if(!titleEn) { showToast("Title (EN) required",true); return; }
   try {
-    await addDoc(collection(db, "slideshow"), {
-      step, order: step, imageUrl, title: titleEn, titleKh, description: descEn, descKh
-    });
-    document.getElementById("slideStep").value = '';
-    document.getElementById("slideImage").value = '';
-    document.getElementById("slideTitleEn").value = '';
-    document.getElementById("slideTitleKh").value = '';
-    document.getElementById("slideDescEn").value = '';
-    document.getElementById("slideDescKh").value = '';
+    await addDoc(collection(db,"slideshow"),{step,order:step,imageUrl,title:titleEn,titleKh,description:descEn,descKh});
+    ['slideStep','slideImage','slideTitleEn','slideTitleKh','slideDescEn','slideDescKh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     showToast("Slide added!");
-  } catch(e) { showToast("Error adding slide", true); }
+  } catch(e) { showToast("Error",true); }
 };
-
-window.deleteSlide = async function(id) {
-  if(!confirm("Delete this slide?")) return;
-  try { await deleteDoc(doc(db, "slideshow", id)); showToast("Slide deleted."); }
-  catch(e) { showToast("Error deleting slide", true); }
-};
-
+window.deleteSlide = async function(id) { if(!confirm("Delete slide?")) return; try{await deleteDoc(doc(db,"slideshow",id));showToast("Deleted.");}catch(e){showToast("Error",true);} };
 window.openEditSlideModal = function(id) {
-  const slide = slideshowItems.find(s => s.id === id);
-  if(!slide) return;
-  editingSlideId = id;
-  document.getElementById("editSlideStep").value = slide.step || '';
-  document.getElementById("editSlideImage").value = slide.imageUrl || '';
-  document.getElementById("editSlideTitleEn").value = slide.title || '';
-  document.getElementById("editSlideTitleKh").value = slide.titleKh || '';
-  document.getElementById("editSlideDescEn").value = slide.description || '';
-  document.getElementById("editSlideDescKh").value = slide.descKh || '';
-  const m = document.getElementById("editSlideModal");
-  m.classList.remove("hidden"); m.style.display = "flex";
+  const slide=slideshowItems.find(s=>s.id===id); if(!slide) return; editingSlideId=id;
+  document.getElementById("editSlideStep").value=slide.step||'';
+  document.getElementById("editSlideImage").value=slide.imageUrl||'';
+  document.getElementById("editSlideTitleEn").value=slide.title||'';
+  document.getElementById("editSlideTitleKh").value=slide.titleKh||'';
+  document.getElementById("editSlideDescEn").value=slide.description||'';
+  document.getElementById("editSlideDescKh").value=slide.descKh||'';
+  const m=document.getElementById("editSlideModal"); m.classList.remove("hidden"); m.style.display="flex";
 };
-
-window.closeEditSlideModal = function() {
-  editingSlideId = null;
-  const m = document.getElementById("editSlideModal");
-  m.classList.add("hidden"); m.style.display = "none";
-};
-
+window.closeEditSlideModal = function() { editingSlideId=null; const m=document.getElementById("editSlideModal"); m.classList.add("hidden"); m.style.display="none"; };
 window.saveEditSlide = async function() {
   if(!editingSlideId) return;
-  const step = parseInt(document.getElementById("editSlideStep").value) || 1;
-  const imageUrl = document.getElementById("editSlideImage").value.trim();
-  const title = document.getElementById("editSlideTitleEn").value.trim();
-  const titleKh = document.getElementById("editSlideTitleKh").value.trim();
-  const description = document.getElementById("editSlideDescEn").value.trim();
-  const descKh = document.getElementById("editSlideDescKh").value.trim();
-  if(!title) { showToast("Title (EN) is required", true); return; }
-  try {
-    await updateDoc(doc(db, "slideshow", editingSlideId), { step, order: step, imageUrl, title, titleKh, description, descKh });
-    closeEditSlideModal(); showToast("Slide updated!");
-  } catch(e) { showToast("Error updating slide", true); }
+  const step=parseInt(document.getElementById("editSlideStep").value)||1;
+  const imageUrl=document.getElementById("editSlideImage").value.trim();
+  const title=document.getElementById("editSlideTitleEn").value.trim();
+  const titleKh=document.getElementById("editSlideTitleKh").value.trim();
+  const description=document.getElementById("editSlideDescEn").value.trim();
+  const descKh=document.getElementById("editSlideDescKh").value.trim();
+  if(!title) { showToast("Title required",true); return; }
+  try { await updateDoc(doc(db,"slideshow",editingSlideId),{step,order:step,imageUrl,title,titleKh,description,descKh}); closeEditSlideModal(); showToast("Updated!"); }
+  catch(e) { showToast("Error",true); }
 };
-
 function renderSlideshowList() {
-  const container = document.getElementById("slideshowList");
-  if(!container) return;
-  if(slideshowItems.length === 0) {
-    container.innerHTML = `<p class="text-center text-gray-400 py-8">No slides yet. Add your first how-to slide above.</p>`;
-    return;
-  }
-  container.innerHTML = slideshowItems.map(slide => `
+  const container=document.getElementById("slideshowList"); if(!container) return;
+  if(!slideshowItems.length) { container.innerHTML=`<p class="text-center text-gray-400 py-8">No slides yet.</p>`; return; }
+  container.innerHTML=slideshowItems.map(slide=>`
     <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden flex gap-0">
-      ${slide.imageUrl ? `
-        <div class="w-28 flex-shrink-0 bg-[#3a2a24]">
-          <img src="${slide.imageUrl}" alt="Slide" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-3xl opacity-20\'>🖼️</div>'"/>
-        </div>
-      ` : `<div class="w-28 flex-shrink-0 bg-[#3a2a24] flex items-center justify-center text-3xl opacity-20">🖼️</div>`}
+      ${slide.imageUrl?`<div class="w-28 flex-shrink-0 bg-[#3a2a24]"><img src="${slide.imageUrl}" alt="Slide" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-3xl opacity-20\'>🖼️</div>'"/></div>`:`<div class="w-28 flex-shrink-0 bg-[#3a2a24] flex items-center justify-center text-3xl opacity-20">🖼️</div>`}
       <div class="flex-1 p-4 flex justify-between items-start min-w-0">
         <div class="flex-1 min-w-0 mr-3">
           <div class="flex items-center gap-2 mb-1">
-            <span class="w-6 h-6 rounded-full bg-[#d44e43] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">${slide.step || '?'}</span>
-            <p class="font-bold text-sm truncate">${slide.title || 'Untitled'}</p>
+            <span class="w-6 h-6 rounded-full bg-[#d44e43] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">${slide.step||'?'}</span>
+            <p class="font-bold text-sm truncate">${slide.title||'Untitled'}</p>
           </div>
-          ${slide.titleKh ? `<p class="text-xs text-gray-400 mb-1 truncate">${slide.titleKh}</p>` : ''}
-          ${slide.description ? `<p class="text-xs text-gray-500 line-clamp-2">${slide.description}</p>` : ''}
+          ${slide.titleKh?`<p class="text-xs text-gray-400 mb-1 truncate">${slide.titleKh}</p>`:''}
+          ${slide.description?`<p class="text-xs text-gray-500 line-clamp-2">${slide.description}</p>`:''}
         </div>
         <div class="flex gap-1 flex-shrink-0">
-          <button onclick="openEditSlideModal('${slide.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-          </button>
-          <button onclick="deleteSlide('${slide.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-          </button>
+          <button onclick="openEditSlideModal('${slide.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+          <button onclick="deleteSlide('${slide.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
         </div>
       </div>
     </div>
   `).join('');
 }
+
+// ── SOCIAL LINKS ──
+function updateSocialPreview() {
+  const fbVal=document.getElementById("fbUrl").value.trim();
+  const ttVal=document.getElementById("ttUrl").value.trim();
+  const pfb=document.getElementById("preview-fb"); const ptt=document.getElementById("preview-tt"); const pnone=document.getElementById("preview-none");
+  if(!pfb||!ptt||!pnone) return;
+  if(fbVal||ttVal) {
+    pnone.classList.add("hidden");
+    if(fbVal){pfb.classList.remove("hidden");pfb.style.display="flex";}else{pfb.classList.add("hidden");}
+    if(ttVal){ptt.classList.remove("hidden");ptt.style.display="flex";}else{ptt.classList.add("hidden");}
+  } else {
+    pfb.classList.add("hidden"); ptt.classList.add("hidden"); pnone.classList.remove("hidden");
+  }
+}
+document.getElementById("fbUrl").addEventListener("input", updateSocialPreview);
+document.getElementById("ttUrl").addEventListener("input", updateSocialPreview);
+
+window.saveSocialLinks = async function() {
+  const fbUrl=document.getElementById("fbUrl").value.trim();
+  const tiktokUrl=document.getElementById("ttUrl").value.trim();
+  try {
+    await setDoc(doc(db,"settings","socialLinks"),{facebookUrl:fbUrl,tiktokUrl:tiktokUrl});
+    showToast("Social links saved! Customers will see them on the order page.");
+    updateSocialPreview();
+  } catch(e) { showToast("Error saving: "+e.message,true); }
+};
+
+window.clearSocialLinks = async function() {
+  document.getElementById("fbUrl").value=''; document.getElementById("ttUrl").value='';
+  try {
+    await setDoc(doc(db,"settings","socialLinks"),{facebookUrl:'',tiktokUrl:''});
+    showToast("Social links cleared.");
+    updateSocialPreview();
+  } catch(e) {}
+};
 
 // Init
 fetchData();
 
+// Refresh elapsed timers every minute
+setInterval(()=>{ if(document.getElementById('view-orders')&&!document.getElementById('view-orders').classList.contains('hidden')) renderOrders(); }, 60000);
 </script>
 </body>
 </html>

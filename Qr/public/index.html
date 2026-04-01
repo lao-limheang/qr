@@ -20,12 +20,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .m-card:hover{border-color:rgba(191,60,55,.4);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.1);}
 .m-card.out-stock{opacity:.5;pointer-events:none;}
 .out-stock-badge{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;border-radius:inherit;}
-.add-btn{background:transparent;border:1px solid var(--gold);color:var(--gold);transition:all .18s;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;}
-.add-btn:hover{background:var(--gold);color:#faf6eb;}
-#cartPanel{transition:transform .35s cubic-bezier(.4,0,.2,1);}
-#cartPanel.show{transform:translateX(0)!important;}
-#myOrdersPanel{transition:transform .35s cubic-bezier(.4,0,.2,1);}
-#myOrdersPanel.show{transform:translateY(0)!important;}
+
+/* Panel Slide Animations */
+#cartPanel, #myOrdersPanel, #customPanel { transition: transform .35s cubic-bezier(.4,0,.2,1); }
+#cartPanel.show { transform: translateX(0) !important; }
+#myOrdersPanel.show { transform: translateY(0) !important; }
+#customPanel.show { transform: translate(0, 0) !important; }
+
 .g-btn{background:var(--gold);color:#faf6eb;font-weight:700;cursor:pointer;transition:background .18s,transform .1s;border:none;}
 .g-btn:hover{background:var(--gold2);}
 .g-btn:active{transform:scale(.97);}
@@ -33,7 +34,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .r-btn{background:transparent;border:1px solid var(--red);color:var(--red);cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
 .r-btn:hover{background:var(--red);color:#fff;}
 #toast{transition:opacity .3s,transform .3s;pointer-events:none;}
-@keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin .8s linear infinite;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-up{animation:fadeUp .35s ease both;}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .shimmer{background:linear-gradient(90deg,var(--sur) 25%,var(--sur2) 50%,var(--sur) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
@@ -45,24 +45,26 @@ select option{background:var(--sur);}
 .lang-opt{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;cursor:pointer;transition:background .15s;}
 .lang-opt:hover{background:var(--sur2);}
 .lang-opt.active{color:var(--gold);}
+
+/* Customize Buttons */
+.opt-btn { transition: all 0.15s; background: transparent; }
 .opt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
 .top-box.active{border-color:var(--green);background:rgba(72,168,99,0.05);}
+.temp-btn{padding:8px;border-radius:12px;border:1px solid var(--bdr);color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:'Outfit',sans-serif;}
+.temp-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(191,60,55,.05);}
+
 /* SLIDESHOW */
 #slideshow-section{position:relative;overflow:hidden;}
-.slide{display:none;}
-.slide.active{display:flex;}
 .slide-dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);cursor:pointer;transition:all .2s;}
 .slide-dot.on{background:var(--gold);width:20px;border-radius:4px;}
-@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-.slide.active{animation:slideIn .35s ease;}
 .step-badge{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#faf6eb;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-/* POPULAR BADGE */
+/* BADGES */
 .popular-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;box-shadow:0 2px 8px rgba(239,68,68,.4);}
-/* TEMP BADGE */
 .temp-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600;letter-spacing:.3px;}
 .temp-ice{background:#dbeafe;color:#1d4ed8;}
 .temp-hot{background:#fee2e2;color:#b91c1c;}
 .temp-frappe{background:#e0e7ff;color:#4338ca;}
+.order-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(60,42,33,0.85);color:#f5ece3;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;backdrop-filter:blur(4px);border:1px solid rgba(191,60,55,.4);}
 /* SOCIAL BAR */
 #socialBar{position:fixed;bottom:24px;right:24px;z-index:45;background:transparent;border:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;}
 #socialBar.hidden-bar{display:none;}
@@ -71,9 +73,6 @@ select option{background:var(--sur);}
 .social-fb:hover{background:#166fe5;transform:translateY(-2px) scale(1.05);}
 .social-tiktok{background:#000;color:#fff;}
 .social-tiktok:hover{background:#111;transform:translateY(-2px) scale(1.05);}
-/* TEMP SELECTOR IN CART */
-.temp-btn{flex:1;padding:6px;font-size:11px;border-radius:10px;border:1px solid var(--bdr);color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:'Outfit',sans-serif;}
-.temp-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(191,60,55,.07);font-weight:700;}
 </style>
 </head>
 <body>
@@ -82,9 +81,9 @@ select option{background:var(--sur);}
 <header class="sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md" style="box-shadow:0 1px 0 var(--bdr),0 4px 20px rgba(0,0,0,.06)">
   <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
     <div class="flex items-center gap-3">
-      <p class="serif text-[var(--gold)] text-2xl leading-none">Chafé</p>
+      <img src="../src/img/logo/Icon.png" alt="Chafé Logo" class="h-8 w-auto object-contain" onerror="this.src='https://placehold.co/100x40/faf6eb/bf3c37?text=Chaf%C3%A9'" />
       <span class="hidden sm:block text-[var(--bdr)]">|</span>
-      <p class="hidden sm:block text-xs text-[var(--muted)] tracking-widest uppercase" id="h-sub">Order</p>
+      <p class="hidden sm:block text-xs text-[var(--muted)] tracking-widest uppercase mt-0.5" id="h-sub">Order</p>
     </div>
     <div class="flex items-center gap-2">
       <div class="relative" id="langWrap">
@@ -111,24 +110,19 @@ select option{background:var(--sur);}
   </div>
 </header>
 
-<!-- HERO -->
-<div class="relative overflow-hidden py-14 text-center flex flex-col items-center" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(191,60,55,.12) 0%,transparent 70%)">
-  <img src="../src/img/logo/Icon.png" alt="Chafé Logo" class="h-28 w-auto object-contain drop-shadow-sm mb-3" onerror="this.src='https://placehold.co/300x120/faf6eb/bf3c37?text=Chaf%C3%A9'"/>
-  <div class="mt-4 flex justify-center gap-2 items-center">
-    <div class="w-10 h-px bg-[var(--gold)] opacity-30"></div>
-    <div class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] opacity-60"></div>
-    <div class="w-10 h-px bg-[var(--gold)] opacity-30"></div>
-  </div>
-</div>
-
 <!-- ══════════════════════ HOW TO ORDER SLIDESHOW ══════════════════════ -->
-<div id="slideshow-section" class="hidden max-w-4xl mx-auto px-4 mb-6">
+<div id="slideshow-section" class="hidden max-w-4xl mx-auto px-4 mt-6 mb-6">
   <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden shadow-sm">
     <div class="px-5 pt-4 pb-3 border-b border-[var(--bdr)] flex items-center justify-between">
       <h2 class="serif text-lg text-[var(--gold)] font-bold" id="slideshow-title">How to Order</h2>
       <div class="flex items-center gap-1.5" id="slide-dots"></div>
     </div>
-    <div id="slides-container" class="relative min-h-[160px]"></div>
+    
+    <!-- Smooth Sliding Track -->
+    <div class="overflow-hidden relative w-full">
+      <div id="slides-container" class="flex transition-transform duration-500 ease-in-out min-h-[160px]"></div>
+    </div>
+
     <div class="px-5 py-3 flex items-center justify-between border-t border-[var(--bdr)] bg-[var(--bg)]/50">
       <button onclick="prevSlide()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -174,12 +168,12 @@ select option{background:var(--sur);}
 </main>
 
 <!-- CART OVERLAY & PANEL -->
-<div id="cartOverlay" onclick="closeCart()" class="fixed inset-0 bg-black/60 z-50 hidden" style="backdrop-filter:blur(4px)"></div>
+<div id="cartOverlay" onclick="closePanels()" class="fixed inset-0 bg-black/60 z-50 hidden" style="backdrop-filter:blur(4px)"></div>
 <aside id="cartPanel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-[var(--sur)] z-50 flex flex-col shadow-2xl border-l border-[var(--bdr)]" style="transform:translateX(100%)">
   <div class="px-5 py-4 border-b border-[var(--bdr)] flex items-center justify-between">
     <div><h2 class="serif text-2xl text-[var(--gold)]" id="c-title">Your Order</h2>
     <p class="text-xs text-[var(--muted)]" id="c-sub">Review before placing</p></div>
-    <button onclick="closeCart()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl w-8 h-8 flex items-center justify-center cursor-pointer">×</button>
+    <button onclick="closePanels()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl w-8 h-8 flex items-center justify-center cursor-pointer">×</button>
   </div>
   <div id="cartItems" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
   <div id="cartEmpty" class="flex-1 items-center justify-center flex-col gap-3 hidden bg-[var(--bg)]">
@@ -212,69 +206,84 @@ select option{background:var(--sur);}
   </div>
 </aside>
 
-<!-- CUSTOMIZE MODAL -->
-<div id="customModal" class="fixed inset-0 z-[998] bg-black/60 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
-  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-5 w-full max-w-sm mx-4 shadow-2xl fade-up flex flex-col max-h-[90vh]">
-    <div class="flex justify-between items-center mb-4">
-      <div>
-        <h3 class="serif text-2xl text-[var(--gold)]" id="cm-title">Drink Name</h3>
-        <p class="text-xs text-[var(--muted)] mt-0.5" id="cm-subtitle">Customize your drink</p>
-      </div>
-      <button onclick="closeCustomModal()" class="text-2xl text-[var(--muted)] hover:text-[var(--txt)]">&times;</button>
-    </div>
-    <div class="overflow-y-auto flex-1 space-y-5 pb-4" style="scrollbar-width:none">
-      <!-- Temperature -->
-      <div id="cm-temp-wrap">
-        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-temp-lbl">Temperature</label>
-        <div class="flex gap-2">
-          <button onclick="setTemp('ice')" id="temp-ice" class="temp-btn flex-1 hidden">🧊 <span id="temp-ice-lbl">Iced</span></button>
-          <button onclick="setTemp('hot')" id="temp-hot" class="temp-btn flex-1 hidden">☕ <span id="temp-hot-lbl">Hot</span></button>
-          <button onclick="setTemp('frappe')" id="temp-frappe" class="temp-btn flex-1 hidden">🥤 <span id="temp-frappe-lbl">Frappe</span></button>
-        </div>
-      </div>
-      <!-- Sugar -->
-      <div>
-        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
-        <div class="flex gap-2">
-          <button onclick="setSugar('0%')" id="sug-0" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">0%</button>
-          <button onclick="setSugar('25%')" id="sug-25" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">25%</button>
-          <button onclick="setSugar('50%')" id="sug-50" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">50%</button>
-          <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">100%</button>
-        </div>
-      </div>
-      <!-- Ice Level (only shown when temp=ice) -->
-      <div id="cm-ice-section">
-        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
-        <div class="flex gap-2">
-          <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">0%</button>
-          <button onclick="setIce('50%')" id="ice-50" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">50%</button>
-          <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">100%</button>
-        </div>
-      </div>
-      <!-- Toppings -->
-      <div>
-        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
-        <div class="space-y-2" id="cm-top-list"></div>
-      </div>
-    </div>
-    <div class="pt-4 border-t border-[var(--bdr)] mt-auto">
-      <button onclick="saveCustomization()" class="g-btn w-full py-3.5 rounded-2xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/10">
-        <span id="cm-add-btn-txt">Save Changes</span>
-        <span class="font-bold text-lg" id="cm-price">$0.00</span>
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- MY ORDERS PANEL -->
-<div id="myOrdersOverlay" onclick="closeMyOrders()" class="fixed inset-0 bg-black/60 z-50 hidden" style="backdrop-filter:blur(4px)"></div>
 <aside id="myOrdersPanel" class="fixed bottom-0 left-0 right-0 sm:top-0 sm:left-auto sm:right-0 sm:h-full sm:w-[400px] bg-[var(--sur)] z-50 flex flex-col shadow-2xl border-t sm:border-t-0 sm:border-l border-[var(--bdr)] rounded-t-3xl sm:rounded-none max-h-[85vh] sm:max-h-full" style="transform:translateY(100%)">
   <div class="px-5 py-4 border-b border-[var(--bdr)] flex items-center justify-between">
     <h2 class="serif text-2xl text-[var(--gold)]" id="mo-title">My Orders</h2>
-    <button onclick="closeMyOrders()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl cursor-pointer">×</button>
+    <button onclick="closePanels()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl cursor-pointer">×</button>
   </div>
-  <div id="myOrdersList" class="flex-1 overflow-y-auto px-5 py-4 space-y-3"></div>
+  <div id="myOrdersList" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
 </aside>
+
+<!-- CUSTOMIZE PANEL (Slides in beautifully) -->
+<aside id="customPanel" class="fixed bottom-0 left-0 right-0 sm:top-0 sm:left-auto sm:right-0 sm:h-full sm:w-[400px] bg-[var(--sur)] z-[60] flex flex-col shadow-2xl border-t sm:border-t-0 sm:border-l border-[var(--bdr)] rounded-t-3xl sm:rounded-none max-h-[90vh] sm:max-h-full translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform duration-300">
+  <div class="px-5 pt-5 pb-3 border-b border-[var(--bdr)] flex justify-between items-start shrink-0">
+    <div>
+      <h3 class="serif text-2xl text-[var(--gold)] leading-tight" id="cm-title">Drink Name</h3>
+      <p class="text-xs text-[var(--muted)] mt-1 tracking-wide" id="cm-subtitle">Customize your drink</p>
+    </div>
+    <button onclick="closeCustomPanel()" class="text-3xl text-[var(--muted)] hover:text-[var(--txt)] leading-none">&times;</button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-5 py-4 space-y-6 bg-[var(--bg)]" style="scrollbar-width:none">
+    <!-- Temperature with Dynamic Pricing -->
+    <div id="cm-temp-wrap">
+      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-temp-lbl">Temperature</label>
+      <div class="flex gap-2">
+        <button onclick="setTemp('ice')" id="temp-ice" class="temp-btn flex-1 hidden flex-col items-center justify-center py-2.5">
+          <span class="text-lg mb-0.5">🧊</span>
+          <span class="font-bold text-xs" id="temp-ice-lbl">Iced</span>
+          <span class="text-[10px] font-bold text-[var(--gold)] mt-0.5" id="price-lbl-ice"></span>
+        </button>
+        <button onclick="setTemp('hot')" id="temp-hot" class="temp-btn flex-1 hidden flex-col items-center justify-center py-2.5">
+          <span class="text-lg mb-0.5">☕</span>
+          <span class="font-bold text-xs" id="temp-hot-lbl">Hot</span>
+          <span class="text-[10px] font-bold text-[var(--gold)] mt-0.5" id="price-lbl-hot"></span>
+        </button>
+        <button onclick="setTemp('frappe')" id="temp-frappe" class="temp-btn flex-1 hidden flex-col items-center justify-center py-2.5">
+          <span class="text-lg mb-0.5">🥤</span>
+          <span class="font-bold text-xs" id="temp-frappe-lbl">Frappe</span>
+          <span class="text-[10px] font-bold text-[var(--gold)] mt-0.5" id="price-lbl-frappe"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sugar -->
+    <div>
+      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
+      <div class="flex gap-2">
+        <button onclick="setSugar('0%')" id="sug-0" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">0%</button>
+        <button onclick="setSugar('25%')" id="sug-25" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">25%</button>
+        <button onclick="setSugar('50%')" id="sug-50" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">50%</button>
+        <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">100%</button>
+      </div>
+    </div>
+
+    <!-- Ice Level -->
+    <div id="cm-ice-section">
+      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
+      <div class="flex gap-2">
+        <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">0%</button>
+        <button onclick="setIce('50%')" id="ice-50" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">50%</button>
+        <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">100%</button>
+      </div>
+    </div>
+
+    <!-- Toppings -->
+    <div>
+      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
+      <div class="space-y-2" id="cm-top-list"></div>
+    </div>
+  </div>
+
+  <div class="p-5 border-t border-[var(--bdr)] bg-[var(--sur)] shrink-0">
+    <button onclick="saveCustomization()" class="g-btn w-full py-4 rounded-xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/10">
+      <span id="cm-add-btn-txt" class="tracking-wide">Save Changes</span>
+      <span class="font-bold text-lg" id="cm-price">$0.00</span>
+    </button>
+  </div>
+</aside>
+
 
 <!-- CONFIRM MODAL -->
 <div id="confirmModal" class="fixed inset-0 z-[998] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
@@ -302,9 +311,7 @@ select option{background:var(--sur);}
 </div>
 
 <!-- SOCIAL BAR -->
-<div id="socialBar" class="hidden-bar">
-  <!-- Injected by JS -->
-</div>
+<div id="socialBar" class="hidden-bar"></div>
 
 <!-- TOAST -->
 <div id="toast" class="fixed bottom-6 left-1/2 bg-[var(--sur2)] border border-[var(--bdr)] text-[var(--txt)] px-5 py-2.5 rounded-full text-xs shadow-2xl opacity-0 z-[9999] whitespace-nowrap pointer-events-none" style="transform:translateX(-50%) translateY(16px)"></div>
@@ -359,7 +366,8 @@ const T = {
     tableFor:"Table", outOfStock:"Out of Stock", sugar:"Sugar Level", ice:"Ice Level",
     toppings:"Add Toppings", saveChanges:"Save Changes", addTopping:"Customize", note:"Note",
     howToOrder:"How to Order", prev:"Prev", next:"Next", popular:"Popular",
-    tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe"
+    tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe",
+    ordersCount:"orders", customBtn:"Custom"
   },
   kh: {
     sub:"បញ្ជាទិញ", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
@@ -372,12 +380,14 @@ const T = {
     tableFor:"តុ", outOfStock:"អស់ស្តុក", sugar:"កម្រិតស្ករ", ice:"កម្រិតទឹកកក",
     toppings:"បន្ថែម Toppings", saveChanges:"រក្សាទុក", addTopping:"កំណត់ Toppings", note:"ចំណាំ",
     howToOrder:"របៀបបញ្ជាទិញ", prev:"ថយក្រោយ", next:"បន្ត", popular:"ពេញនិយម",
-    tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ"
+    tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ",
+    ordersCount:"ការបញ្ជា", customBtn:"កែច្នៃ"
   }
 };
 
 let lang = safeStorage.get("chafe_lang") || "kh";
 let cancelTargetId = null;
+let itemOrderCounts = {};
 
 window.setLang = function(l) {
   lang = l;
@@ -430,13 +440,34 @@ document.getElementById("cartTable").addEventListener("change", e => safeStorage
 // ── DATA ──
 let allItems=[], currentItems=[], currentCat="All", cart=[], allToppings=[], slides=[], currentSlide=0;
 
+async function loadOrderCounts() {
+  try {
+    if(!db) return;
+    const snap = await getDocs(collection(db,"orders"));
+    const counts = {};
+    snap.docs.forEach(d => {
+      const order = d.data();
+      if(order.status === 'completed') {
+        (order.items||[]).forEach(item => {
+          const key = item.name;
+          counts[key] = (counts[key] || 0) + (item.qty || 1);
+        });
+      }
+    });
+    itemOrderCounts = counts;
+  } catch(e) {}
+}
+
 async function loadData() {
   try {
     if(!db) throw new Error("No DB");
+    
     try {
       const tSnap = await getDocs(collection(db,"toppings"));
       allToppings = tSnap.docs.map(d=>({id:d.id,...d.data()}));
     } catch(e) {}
+
+    await loadOrderCounts();
 
     const snap = await Promise.race([
       getDocs(collection(db,"menu")),
@@ -444,9 +475,22 @@ async function loadData() {
     ]);
     allItems = snap.docs.map(d=>({id:d.id,...d.data()}));
 
-    // Load social links
+    onSnapshot(collection(db,"orders"), snap => {
+      const counts = {};
+      snap.docs.forEach(d => {
+        const order = d.data();
+        if(order.status === 'completed') {
+          (order.items||[]).forEach(item => {
+            const key = item.name;
+            counts[key] = (counts[key] || 0) + (item.qty || 1);
+          });
+        }
+      });
+      itemOrderCounts = counts;
+      if(currentItems.length > 0) { renderMenu(currentItems); renderPopular(); }
+    });
+
     await loadSocialLinks();
-    // Load slideshow
     await loadSlideshow();
 
   } catch(e) {
@@ -456,9 +500,9 @@ async function loadData() {
       {id:"t3",name:"Cheese Foam",nameKh:"ហ្វូមឈីស",price:0.75}
     ];
     allItems = [
-      {id:"1",name:"Thai Milk Tea",nameKh:"តែទឹកដោះគោថៃ",price:4.50,category:"Milk Tea",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Thai+Tea",inStock:true,discount:10,popular:true,temperature:"both"},
+      {id:"1",name:"Thai Milk Tea",nameKh:"តែទឹកដោះគោថៃ",price:4.50, priceHot: 4.00, category:"Milk Tea",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Thai+Tea",inStock:true,discount:10,popular:true,temperature:"both"},
       {id:"2",name:"Iced Coffee",nameKh:"កាហ្វេទឹកកក",price:3.50,category:"Coffee",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Coffee",inStock:true,temperature:"ice"},
-      {id:"3",name:"Matcha Latte",nameKh:"តែបៃតងទឹកដោះគោ",price:5.00,category:"Matcha",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Matcha",inStock:true,discount:15,popular:true,temperature:"both"}
+      {id:"3",name:"Matcha Latte",nameKh:"តែបៃតងទឹកដោះគោ",price:5.00, priceHot: 4.50, priceFrappe: 6.00, category:"Matcha",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Matcha",inStock:true,popular:true,temperature:"both"}
     ];
   } finally {
     buildCats();
@@ -500,6 +544,7 @@ async function loadSlideshow() {
     const snap = await getDocs(collection(db,"slideshow"));
     slides = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
     if(slides.length > 0) {
+      currentSlide = 0;
       renderSlideshow();
       document.getElementById("slideshow-section").classList.remove("hidden");
       startSlideshow();
@@ -509,8 +554,10 @@ async function loadSlideshow() {
 
 function startSlideshow() {
   clearInterval(_slideshowTimer);
+  if(slides.length <= 1) return;
   _slideshowTimer = setInterval(() => {
-    if(slides.length>1) { currentSlide=(currentSlide+1)%slides.length; updateSlideCounter(); }
+    currentSlide = (currentSlide + 1) % slides.length;
+    updateSlide();
   }, 5000);
 }
 
@@ -519,16 +566,16 @@ function renderSlideshow() {
   const dotsEl = document.getElementById("slide-dots");
   if(!container || !slides.length) return;
 
-  container.innerHTML = slides.map((slide,i) => `
-    <div class="slide ${i===currentSlide?'active':''} flex flex-col items-center text-center sm:text-left sm:flex-row gap-4 p-5">
-      <div class="w-full sm:w-48 flex-shrink-0 rounded-xl overflow-hidden border border-[var(--bdr)] bg-[var(--sur2)] relative" style="aspect-ratio:4/3">
-        ${slide.imageUrl 
-          ? `<img src="${slide.imageUrl}" alt="Step ${slide.step||(i+1)}" class="w-full h-full object-cover"/>` 
+  container.innerHTML = slides.map((slide, i) => `
+    <div class="slide-item w-full flex-shrink-0 flex flex-col items-center text-center sm:text-left sm:flex-row gap-4 p-5" data-index="${i}">
+      <div class="w-full sm:w-48 flex-shrink-0 rounded-xl overflow-hidden border border-[var(--bdr)] bg-[var(--sur2)] relative" style="aspect-ratio:16/9">
+        ${slide.imageUrl
+          ? `<img src="${slide.imageUrl}" alt="Step ${slide.step||(i+1)}" class="w-full h-full object-contain"/>`
           : `<div class="absolute inset-0 flex items-center justify-center text-4xl opacity-20">🖼️</div>`}
       </div>
-      <div class="flex-1">
+      <div class="flex-1 w-full">
         <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
-          <div class="step-badge">${slide.step||(i+1)}!</div>
+          <div class="step-badge">${slide.step||(i+1)}</div>
           <h3 class="font-bold text-[var(--txt)] text-lg">${lang==='kh'&&slide.titleKh ? slide.titleKh : (slide.title||'')}</h3>
         </div>
         <p class="text-sm text-[var(--muted)] leading-relaxed">${lang==='kh'&&slide.descKh ? slide.descKh : (slide.description||'')}</p>
@@ -536,22 +583,46 @@ function renderSlideshow() {
     </div>
   `).join('');
 
-  dotsEl.innerHTML = slides.map((_,i) =>
-    `<div class="slide-dot ${i===currentSlide?'on':''}" onclick="goToSlide(${i})"></div>`
+  dotsEl.innerHTML = slides.map((_, i) =>
+    `<div class="slide-dot ${i === currentSlide ? 'on' : ''}" onclick="goToSlide(${i})"></div>`
   ).join('');
 
   updateSlideCounter();
 }
 
-function updateSlideCounter() {
-  document.getElementById("slide-counter").textContent = `${currentSlide+1} / ${slides.length}`;
-  document.querySelectorAll('.slide').forEach((s,i) => s.classList.toggle('active', i===currentSlide));
-  document.querySelectorAll('.slide-dot').forEach((d,i) => d.classList.toggle('on', i===currentSlide));
+function updateSlide() {
+  const container = document.getElementById("slides-container");
+  if(container) {
+    container.style.transform = `translateX(-${currentSlide * 100}%)`;
+  }
+  document.querySelectorAll('.slide-dot').forEach((d, i) => d.classList.toggle('on', i === currentSlide));
+  updateSlideCounter();
 }
 
-window.goToSlide = i => { currentSlide=i; updateSlideCounter(); startSlideshow(); };
-window.nextSlide = () => { if(currentSlide<slides.length-1){currentSlide++;updateSlideCounter();startSlideshow();} };
-window.prevSlide = () => { if(currentSlide>0){currentSlide--;updateSlideCounter();startSlideshow();} };
+function updateSlideCounter() {
+  const el = document.getElementById("slide-counter");
+  if(el) el.textContent = `${currentSlide + 1} / ${slides.length}`;
+}
+
+window.goToSlide = function(i) {
+  currentSlide = i;
+  updateSlide();
+  startSlideshow();
+};
+
+window.nextSlide = function() {
+  if(slides.length === 0) return;
+  currentSlide = (currentSlide + 1) % slides.length;
+  updateSlide();
+  startSlideshow();
+};
+
+window.prevSlide = function() {
+  if(slides.length === 0) return;
+  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+  updateSlide();
+  startSlideshow();
+};
 
 // ── MENU ──
 function buildCats() {
@@ -576,6 +647,41 @@ function getTempBadgeHTML(temperature) {
   return '';
 }
 
+// Directly add item to cart without showing a popup
+window.addToCartDirect = function(item) {
+  const defaultTemp = item.temperature === 'both' ? 'ice' : (item.temperature || 'ice');
+  
+  let baseVar = item.price;
+  if(defaultTemp === 'ice') baseVar = item.priceIce || item.price;
+  if(defaultTemp === 'hot') baseVar = item.priceHot || item.price;
+  if(defaultTemp === 'frappe') baseVar = item.priceFrappe || item.price;
+  
+  const finalPrice = item.discount > 0 ? baseVar*(1-item.discount/100) : baseVar;
+  
+  // Find if exact item already in cart
+  const existing = cart.find(c => c.id === item.id && c.temperature === defaultTemp && c.toppingsData.length === 0 && c.sugar === "100%" && c.ice === "100%");
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({
+      cartId: 'cart_'+Date.now()+Math.random().toString(36).substr(2,5),
+      id: item.id, name: item.name, nameKh: item.nameKh||'',
+      imageUrl: item.imageUrl, basePrice: baseVar,
+      price: finalPrice, qty: 1, 
+      sugar: "100%", ice: "100%",
+      temperature: defaultTemp,
+      toppingsData: [],
+      originalPrice: item.price, priceHot: item.priceHot, priceFrappe: item.priceFrappe, discount: item.discount
+    });
+  }
+  renderCart();
+  showToast(t().addedToast);
+  
+  const b = document.getElementById("cartBadge");
+  b.classList.remove("hidden");
+  b.classList.add("pop-anim"); setTimeout(()=>b.classList.remove("pop-anim"),300);
+};
+
 function renderMenu(items) {
   const grid = document.getElementById("menuGrid");
   const empty = document.getElementById("emptyMenu");
@@ -589,18 +695,26 @@ function renderMenu(items) {
     const discount = item.discount||0;
     const calcPrice = discount>0 ? item.price*(1-discount/100) : item.price;
     const priceHTML = discount>0
-      ? `<div class="flex flex-col items-end leading-none"><span class="text-[10px] text-[var(--muted)] line-through">$${Number(item.price).toFixed(2)}</span><span class="text-[var(--gold)] font-semibold text-sm">$${calcPrice.toFixed(2)}</span></div>`
+      ? `<div class="flex flex-col items-start leading-none"><span class="text-[10px] text-[var(--muted)] line-through">$${Number(item.price).toFixed(2)}</span><span class="text-[var(--gold)] font-semibold text-sm">$${calcPrice.toFixed(2)}</span></div>`
       : `<span class="text-[var(--gold)] font-semibold text-sm">$${Number(item.price).toFixed(2)}</span>`;
     const tempBadge = getTempBadgeHTML(item.temperature);
 
+    const orderCount = itemOrderCounts[item.name] || 0;
+    const orderCountBadge = orderCount > 0 ? `<span class="order-count-badge">🛒 ${orderCount} ${tx.ordersCount}</span>` : '';
+
     return `<div class="m-card${outOfStock?" out-stock":""} rounded-2xl overflow-hidden flex flex-col fade-up" style="animation-delay:${idx*35}ms">
-      <div class="relative h-36 bg-[var(--sur2)] overflow-hidden">
+      <div class="relative h-36 bg-[var(--sur2)] overflow-hidden cursor-pointer" onclick='${!outOfStock ? `openCustomize(${JSON.stringify({
+                id:item.id, name:item.name, nameKh:item.nameKh||'',
+                imageUrl:item.imageUrl||'', price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,
+                temperature:item.temperature||'both'
+              }).replace(/'/g,"&#39;")})` : ''}'>
         <img src="${item.imageUrl||'https://placehold.co/300x200/f5ece3/3c2a21?text=☕'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/f5ece3/3c2a21?text=☕'"/>
         <div class="absolute inset-0 bg-gradient-to-t from-[#3c2a21]/60 to-transparent"></div>
         ${discount>0?`<span class="absolute top-2 left-2 bg-[var(--red)] text-[#faf6eb] text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">-${discount}%</span>`:''}
         ${item.popular?`<span class="popular-badge">🔥 Hot</span>`:''}
         <span class="absolute top-2 right-2 bg-[#3c2a21]/80 text-[#faf6eb] text-[9px] px-2 py-0.5 rounded-full border border-[var(--gold)]/50 uppercase tracking-wide" style="backdrop-filter:blur(4px)">${item.category||""}</span>
         ${outOfStock?`<div class="out-stock-badge"><span class="text-white text-xs font-bold tracking-wide uppercase bg-black/70 px-3 py-1 rounded-full">${tx.outOfStock}</span></div>`:""}
+        ${orderCountBadge}
       </div>
       <div class="p-3 flex flex-col flex-1">
         <h3 class="text-sm font-medium leading-snug flex-1 mb-1">${dName}</h3>
@@ -609,11 +723,18 @@ function renderMenu(items) {
           ${priceHTML}
           ${outOfStock
             ? `<span class="text-xs text-[var(--muted)] border border-[var(--bdr)] px-2 py-1 rounded-full">${tx.outOfStock}</span>`
-            : `<button class="add-btn px-4 py-1.5 rounded-full font-bold shadow-sm" onclick='openCustomize(${JSON.stringify({
+            : `<div class="flex items-center gap-1.5">
+                 <button class="text-[var(--gold)] border border-[var(--gold)] bg-transparent hover:bg-[var(--gold)] hover:text-[#faf6eb] px-2.5 py-1 rounded-full text-[10px] font-bold transition-all shadow-sm" onclick='openCustomize(${JSON.stringify({
                 id:item.id, name:item.name, nameKh:item.nameKh||'',
-                imageUrl:item.imageUrl||'', price:item.price, discount:item.discount||0,
+                imageUrl:item.imageUrl||'', price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,
                 temperature:item.temperature||'both'
-              }).replace(/'/g,"&#39;")})'>+ Add</button>`}
+              }).replace(/'/g,"&#39;")})'>+ ${tx.customBtn||"Custom"}</button>
+                 <button class="g-btn px-4 py-1 rounded-full font-bold shadow-sm text-xs" onclick='addToCartDirect(${JSON.stringify({
+                id:item.id, name:item.name, nameKh:item.nameKh||'',
+                imageUrl:item.imageUrl||'', price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,
+                temperature:item.temperature||'both'
+              }).replace(/'/g,"&#39;")})'>+ Add</button>
+               </div>`}
         </div>
       </div>
     </div>`;
@@ -631,12 +752,14 @@ function renderPopular() {
     const dName = lang==='kh'&&item.nameKh ? item.nameKh : item.name;
     const discount = item.discount||0;
     const calcPrice = discount>0 ? item.price*(1-discount/100) : item.price;
+    const orderCount = itemOrderCounts[item.name] || 0;
     return `
     <div class="flex-shrink-0 w-36 bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden cursor-pointer hover:border-[var(--gold)] transition-all hover:-translate-y-1 hover:shadow-lg"
-         onclick='openCustomize(${JSON.stringify({id:item.id,name:item.name,nameKh:item.nameKh||'',imageUrl:item.imageUrl||'',price:item.price,discount:item.discount||0,temperature:item.temperature||'both'}).replace(/'/g,"&#39;")})'>
+         onclick='addToCartDirect(${JSON.stringify({id:item.id,name:item.name,nameKh:item.nameKh||'',imageUrl:item.imageUrl||'',price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,temperature:item.temperature||'both'}).replace(/'/g,"&#39;")})'>
       <div class="h-24 bg-[var(--sur2)] overflow-hidden relative">
         <img src="${item.imageUrl||'https://placehold.co/200x150/f5ece3/3c2a21?text=☕'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x150/f5ece3/3c2a21?text=☕'"/>
         <span class="popular-badge" style="top:5px;left:5px">🔥</span>
+        ${orderCount>0?`<span class="order-count-badge">🛒 ${orderCount}</span>`:''}
       </div>
       <div class="p-2.5">
         <p class="text-xs font-semibold truncate">${dName}</p>
@@ -646,17 +769,24 @@ function renderPopular() {
   }).join('');
 }
 
-// ── CUSTOMIZE ──
+// ── PANELS ──
+window.closePanels = function() {
+  document.getElementById("cartPanel").classList.remove("show");
+  document.getElementById("myOrdersPanel").classList.remove("show");
+  document.getElementById("customPanel").classList.remove("show");
+  document.getElementById("cartOverlay").classList.add("hidden");
+};
+
+// ── CUSTOMIZE (SIDE PANEL) ──
 let editingCartId = null, customItem = null;
 let selectedSugar = "100%", selectedIce = "100%", selectedTemp = "ice", selectedTops = [];
 
 window.openCustomize = function(item) {
   editingCartId = null;
-  customItem = { ...item, basePrice: item.discount>0 ? item.price*(1-item.discount/100) : item.price };
+  customItem = { ...item };
   selectedSugar = "100%"; selectedIce = "100%"; selectedTops = [];
   selectedTemp = item.temperature==='hot' ? 'hot' : item.temperature==='frappe' ? 'frappe' : 'ice';
-
-  _openCustomModal();
+  _openCustomPanel();
 };
 
 window.editCartItem = function(cartId) {
@@ -668,46 +798,50 @@ window.editCartItem = function(cartId) {
   selectedIce = cartItem.ice;
   selectedTemp = cartItem.temperature||'ice';
   selectedTops = cartItem.toppingsData.map(t=>t.id);
-  _openCustomModal();
+  _openCustomPanel();
 };
 
-function _openCustomModal() {
+function _openCustomPanel() {
   const tx = t();
   const dName = lang==='kh'&&customItem.nameKh ? customItem.nameKh : customItem.name;
   document.getElementById("cm-title").textContent = dName;
   document.getElementById("cm-subtitle").textContent = tx.toppings;
 
   const tempWrap = document.getElementById("cm-temp-wrap");
-  const iceSec = document.getElementById("cm-ice-section");
-  
   const btnIce = document.getElementById("temp-ice");
   const btnHot = document.getElementById("temp-hot");
   const btnFrappe = document.getElementById("temp-frappe");
+  
+  // Calculate dynamic variant prices considering discount
+  const discountMultiplier = 1 - ((customItem.discount || 0) / 100);
+  const pIce = (customItem.priceIce || customItem.originalPrice || customItem.price) * discountMultiplier;
+  const pHot = (customItem.priceHot || customItem.originalPrice || customItem.price) * discountMultiplier;
+  const pFrap = (customItem.priceFrappe || customItem.originalPrice || customItem.price) * discountMultiplier;
 
-  // Always show wrapper
+  document.getElementById("price-lbl-ice").textContent = `$${pIce.toFixed(2)}`;
+  document.getElementById("price-lbl-hot").textContent = `$${pHot.toFixed(2)}`;
+  document.getElementById("price-lbl-frappe").textContent = `$${pFrap.toFixed(2)}`;
+
   tempWrap.style.display = 'block';
   btnIce.style.display = 'none';
   btnHot.style.display = 'none';
   btnFrappe.style.display = 'none';
 
-  // Toggle available buttons based on admin's settings
   if(customItem.temperature === 'ice') {
-    btnIce.style.display = 'block';
+    btnIce.style.display = 'flex';
     selectedTemp = 'ice';
   } else if(customItem.temperature === 'hot') {
-    btnHot.style.display = 'block';
+    btnHot.style.display = 'flex';
     selectedTemp = 'hot';
   } else if(customItem.temperature === 'frappe') {
-    btnFrappe.style.display = 'block';
+    btnFrappe.style.display = 'flex';
     selectedTemp = 'frappe';
   } else {
-    // Both allowed
-    btnIce.style.display = 'block';
-    btnHot.style.display = 'block';
+    btnIce.style.display = 'flex';
+    btnHot.style.display = 'flex';
     if(selectedTemp === 'frappe') selectedTemp = 'ice';
   }
 
-  // Render toppings
   document.getElementById("cm-top-list").innerHTML = allToppings.length ? allToppings.map(tp => {
     const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
     const isAct = selectedTops.includes(tp.id);
@@ -721,7 +855,7 @@ function _openCustomModal() {
         <p class="text-sm font-medium text-[var(--txt)]">${tName}</p>
       </div>
       <span class="text-xs text-[var(--gold)] font-semibold flex-shrink-0">+$${Number(tp.price).toFixed(2)}</span>
-      <div id="top-check-${tp.id}" class="w-5 h-5 rounded-full border-2 ${isAct?'bg-[var(--green)] border-[var(--green)]':'border-[var(--bdr)]'} flex items-center justify-center flex-shrink-0">
+      <div id="top-check-${tp.id}" class="w-5 h-5 rounded-full border-2 ${isAct?'bg-[var(--green)] border-[var(--green)]':'border-[var(--bdr)]'} flex items-center justify-center flex-shrink-0 transition-colors">
         ${isAct?`<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`:''}
       </div>
     </div>`;
@@ -729,15 +863,15 @@ function _openCustomModal() {
 
   setTemp(selectedTemp); setSugar(selectedSugar); setIce(selectedIce);
   updateCustomPrice();
-  
-  const m = document.getElementById("customModal");
-  m.classList.remove("hidden"); m.style.display = "flex";
+
+  document.getElementById("cartOverlay").classList.remove("hidden");
+  document.getElementById("customPanel").classList.add("show");
 }
 
-window.closeCustomModal = function() {
+window.closeCustomPanel = function() {
   editingCartId = null;
-  const m = document.getElementById("customModal");
-  m.classList.add("hidden"); m.style.display = "none";
+  document.getElementById("customPanel").classList.remove("show");
+  document.getElementById("cartOverlay").classList.add("hidden");
 };
 
 window.setTemp = function(val) {
@@ -747,7 +881,6 @@ window.setTemp = function(val) {
     const btn = document.getElementById(`temp-${v}`);
     if(btn) btn.classList.toggle('active', v===val);
   });
-  // Hide ice options if Hot
   if(val==='hot') { iceSec.style.display='none'; }
   else { iceSec.style.display='block'; }
   updateCustomPrice();
@@ -775,23 +908,42 @@ window.toggleTop = function(tid) {
   if(selectedTops.includes(tid)) {
     selectedTops = selectedTops.filter(id=>id!==tid);
     el.classList.remove('active');
-    if(check) { check.className='w-5 h-5 rounded-full border-2 border-[var(--bdr)] flex items-center justify-center flex-shrink-0'; check.innerHTML=''; }
+    if(check) { check.className='w-5 h-5 rounded-full border-2 border-[var(--bdr)] flex items-center justify-center flex-shrink-0 transition-colors'; check.innerHTML=''; }
   } else {
     selectedTops.push(tid);
     el.classList.add('active');
-    if(check) { check.className='w-5 h-5 rounded-full border-2 bg-[var(--green)] border-[var(--green)] flex items-center justify-center flex-shrink-0'; check.innerHTML=`<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`; }
+    if(check) { check.className='w-5 h-5 rounded-full border-2 bg-[var(--green)] border-[var(--green)] flex items-center justify-center flex-shrink-0 transition-colors'; check.innerHTML=`<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`; }
   }
   updateCustomPrice();
 };
 
 function updateCustomPrice() {
   const topPrice = selectedTops.reduce((sum,tid)=>sum+(allToppings.find(t=>t.id===tid)?.price||0), 0);
-  document.getElementById("cm-price").textContent = "$"+(customItem.basePrice+topPrice).toFixed(2);
+  
+  let baseVar = customItem.originalPrice || customItem.price;
+  if(selectedTemp === 'ice') baseVar = customItem.priceIce || baseVar;
+  if(selectedTemp === 'hot') baseVar = customItem.priceHot || baseVar;
+  if(selectedTemp === 'frappe') baseVar = customItem.priceFrappe || baseVar;
+
+  const discountMultiplier = 1 - ((customItem.discount || 0) / 100);
+  const discountedBase = baseVar * discountMultiplier;
+
+  const finalPrice = discountedBase + topPrice;
+  document.getElementById("cm-price").textContent = "$"+finalPrice.toFixed(2);
 }
 
 window.saveCustomization = function() {
   const topPrice = selectedTops.reduce((sum,tid)=>sum+(allToppings.find(t=>t.id===tid)?.price||0), 0);
-  const finalPrice = customItem.basePrice + topPrice;
+  
+  let baseVar = customItem.originalPrice || customItem.price;
+  if(selectedTemp === 'ice') baseVar = customItem.priceIce || baseVar;
+  if(selectedTemp === 'hot') baseVar = customItem.priceHot || baseVar;
+  if(selectedTemp === 'frappe') baseVar = customItem.priceFrappe || baseVar;
+  
+  const discountMultiplier = 1 - ((customItem.discount || 0) / 100);
+  const discountedBase = baseVar * discountMultiplier;
+
+  const finalPrice = discountedBase + topPrice;
   const tops = selectedTops.map(tid=>allToppings.find(t=>t.id===tid)).filter(Boolean);
 
   if(editingCartId) {
@@ -805,19 +957,22 @@ window.saveCustomization = function() {
     cart.push({
       cartId: 'cart_'+Date.now()+Math.random().toString(36).substr(2,5),
       id: customItem.id, name: customItem.name, nameKh: customItem.nameKh||'',
-      imageUrl: customItem.imageUrl, basePrice: customItem.basePrice,
+      imageUrl: customItem.imageUrl, basePrice: discountedBase,
       price: finalPrice, qty: 1, sugar: selectedSugar, ice: selectedIce,
-      temperature: selectedTemp, toppingsData: tops
+      temperature: selectedTemp, toppingsData: tops,
+      originalPrice: customItem.originalPrice || customItem.price,
+      priceHot: customItem.priceHot, priceFrappe: customItem.priceFrappe, discount: customItem.discount
     });
-    const dName = lang==='kh'&&customItem.nameKh ? customItem.nameKh : customItem.name;
-    showToast(`✓ ${dName} ${t().addedToast}`);
     const b = document.getElementById("cartBadge");
+    b.classList.remove("hidden");
     b.classList.add("pop-anim"); setTimeout(()=>b.classList.remove("pop-anim"),300);
   }
   renderCart();
-  closeCustomModal();
+  closeCustomPanel();
 };
 
+// ── CART ──
+window.openCart = function() { document.getElementById("cartOverlay").classList.remove("hidden"); document.getElementById("cartPanel").classList.add("show"); buildTableOptions(); };
 window.changeQty = function(cId, d) {
   const item = cart.find(c=>c.cartId===cId);
   if(!item) return;
@@ -854,13 +1009,14 @@ function renderCart() {
         return `<span class="inline-flex items-center gap-0.5 bg-[var(--sur)] px-1.5 py-0.5 rounded border border-[var(--bdr)] text-[10px]">${tName}</span>`;
       }).join('');
     }
+    
     return `
     <div class="bg-[var(--sur)] rounded-2xl p-3 flex flex-col gap-3 shadow-sm border border-[var(--bdr)]">
       <div class="flex items-center gap-3">
         <img src="${c.imageUrl||'https://placehold.co/48/f5ece3/3c2a21?text=☕'}" class="w-14 h-14 rounded-xl object-cover shrink-0" onerror="this.src='https://placehold.co/48/f5ece3/3c2a21?text=☕'"/>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-semibold truncate text-[var(--txt)]">${dName}</p>
-          <p class="text-[11px] text-[var(--muted)] mt-1 bg-[var(--sur2)] px-2 py-1 rounded-lg border border-[var(--bdr)]">${opts}</p>
+          <p class="text-[11px] text-[var(--muted)] mt-1 bg-[var(--sur2)] px-2 py-1 rounded-lg border border-[var(--bdr)] w-max">${opts}</p>
           ${toppingsList ? `<div class="flex flex-wrap gap-1 mt-1.5">${toppingsList}</div>` : ''}
         </div>
         <p class="text-[var(--gold)] font-bold text-sm shrink-0">$${(c.price*c.qty).toFixed(2)}</p>
@@ -914,7 +1070,7 @@ window.placeOrder = async function() {
     safeStorage.set("chafe_orders", JSON.stringify(orders));
 
     cart = []; document.getElementById("cartNote").value = "";
-    renderCart(); closeCart();
+    renderCart(); closePanels();
     document.getElementById("conf-id").textContent = `#${orderId.slice(-8).toUpperCase()}`;
     showConfirm();
   } catch(e) {
@@ -928,15 +1084,9 @@ function loadMyOrders() { try { return JSON.parse(safeStorage.get("chafe_orders"
 
 window.openMyOrders = function() {
   renderMyOrders();
-  document.getElementById("myOrdersOverlay").classList.remove("hidden");
-  document.getElementById("myOrdersPanel").style.transform="translateY(0)";
+  document.getElementById("cartOverlay").classList.remove("hidden");
   document.getElementById("myOrdersPanel").classList.add("show");
   if(db) { loadMyOrders().forEach(o=>{if(o.status==="pending"&&!o.id.startsWith("OFFLINE"))listenOrderStatus(o.id);}); }
-};
-window.closeMyOrders = function() {
-  document.getElementById("myOrdersOverlay").classList.add("hidden");
-  document.getElementById("myOrdersPanel").style.transform="translateY(100%)";
-  document.getElementById("myOrdersPanel").classList.remove("show");
 };
 
 function renderMyOrders() {
@@ -948,7 +1098,6 @@ function renderMyOrders() {
     const sc = o.status==="completed"?"text-[var(--green)]":o.status==="cancelled"?"text-[var(--red)]":"text-[var(--gold)]";
     const st = tx.status[o.status]||o.status;
     const ts = o.createdAt ? new Date(o.createdAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "";
-    // Status progress bar
     const prog = o.status==='cancelled' ? '' : `
     <div class="flex items-center gap-1 my-2">
       ${['pending','completed'].map(s=>`
@@ -1002,8 +1151,6 @@ window.confirmCancel = async function() {
   closeCancelModal();
 };
 
-window.openCart = function() { document.getElementById("cartPanel").classList.add("show"); document.getElementById("cartOverlay").classList.remove("hidden"); buildTableOptions(); };
-window.closeCart = function() { document.getElementById("cartPanel").classList.remove("show"); document.getElementById("cartOverlay").classList.add("hidden"); };
 function showConfirm() { const m=document.getElementById("confirmModal"); m.classList.remove("hidden"); m.style.display="flex"; }
 window.closeConfirm = function() { const m=document.getElementById("confirmModal"); m.classList.add("hidden"); m.style.display="none"; };
 

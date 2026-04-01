@@ -49,6 +49,18 @@ select option{background:var(--sur);}
 /* Customizer styles */
 .opt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
 .top-box.active{border-color:var(--green);background:rgba(72,168,99,0.05);}
+
+/* ── SLIDESHOW ── */
+#slideshow-section{position:relative;overflow:hidden;}
+.slide{display:none;position:absolute;inset:0;transition:opacity .5s ease;}
+.slide.active{display:flex;position:relative;}
+.slide-dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);cursor:pointer;transition:all .2s;}
+.slide-dot.on{background:var(--gold);width:20px;border-radius:4px;}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.slide.active{animation:slideIn .4s ease;}
+
+/* Step number badge */
+.step-badge{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#faf6eb;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -62,7 +74,6 @@ select option{background:var(--sur);}
       <p class="hidden sm:block text-xs text-[var(--muted)] tracking-widest uppercase" id="h-sub">Order</p>
     </div>
     <div class="flex items-center gap-2">
-      <!-- Language switcher -->
       <div class="relative" id="langWrap">
         <button onclick="toggleLangDropdown()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] transition-colors border border-[var(--bdr)] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer">
           <span id="langFlag">🇬🇧</span>
@@ -94,6 +105,35 @@ select option{background:var(--sur);}
     <div class="w-10 h-px bg-[var(--gold)] opacity-30"></div>
     <div class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] opacity-60"></div>
     <div class="w-10 h-px bg-[var(--gold)] opacity-30"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HOW TO ORDER SLIDESHOW
+══════════════════════════════════════ -->
+<div id="slideshow-section" class="hidden max-w-4xl mx-auto px-4 mb-6">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden shadow-sm">
+    <!-- Header -->
+    <div class="px-5 pt-4 pb-3 border-b border-[var(--bdr)] flex items-center justify-between">
+      <h2 class="serif text-lg text-[var(--gold)] font-bold" id="slideshow-title">How to Order</h2>
+      <div class="flex items-center gap-1.5" id="slide-dots"></div>
+    </div>
+    <!-- Slides Container -->
+    <div id="slides-container" class="relative min-h-[200px]">
+      <!-- Injected by JS -->
+    </div>
+    <!-- Nav -->
+    <div class="px-5 py-3 flex items-center justify-between border-t border-[var(--bdr)]">
+      <button onclick="prevSlide()" id="slide-prev" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <span id="slide-prev-lbl">Prev</span>
+      </button>
+      <p class="text-xs text-[var(--muted)]" id="slide-counter">1 / 1</p>
+      <button onclick="nextSlide()" id="slide-next" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
+        <span id="slide-next-lbl">Next</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -165,11 +205,16 @@ select option{background:var(--sur);}
   </div>
 </aside>
 
-<!-- CUSTOMIZE MODAL -->
+<!-- ══════════════════════════════════════
+     ADD TOPPING MODAL (replaces customize)
+══════════════════════════════════════ -->
 <div id="customModal" class="fixed inset-0 z-[998] bg-black/60 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
   <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-5 w-full max-w-sm mx-4 shadow-2xl fade-up flex flex-col max-h-[85vh]">
     <div class="flex justify-between items-center mb-4">
-      <h3 class="serif text-2xl text-[var(--gold)]" id="cm-title">Drink Name</h3>
+      <div>
+        <h3 class="serif text-2xl text-[var(--gold)]" id="cm-title">Drink Name</h3>
+        <p class="text-xs text-[var(--muted)] mt-0.5" id="cm-subtitle">Customize your drink</p>
+      </div>
       <button onclick="closeCustomModal()" class="text-2xl text-[var(--muted)] hover:text-[var(--txt)]">&times;</button>
     </div>
     
@@ -193,9 +238,9 @@ select option{background:var(--sur);}
           <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-xs rounded-xl border border-[var(--bdr)] text-[var(--muted)] transition-colors">100%</button>
         </div>
       </div>
-      <!-- Toppings -->
+      <!-- Toppings with images -->
       <div>
-        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-top-lbl">Toppings</label>
+        <label class="text-sm font-semibold mb-2 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
         <div class="space-y-2" id="cm-top-list">
           <!-- Injected by JS -->
         </div>
@@ -288,11 +333,11 @@ const TG_CHAT = "-1003706744326";
 async function sendTelegramAlert(order, orderId) {
   try {
     const itemLines = order.items.map(i => {
-      let opts = `S: ${i.sugar} | I: ${i.ice}`;
+      let opts = `Sugar: ${i.sugar} | Ice: ${i.ice}`;
       if(i.toppingsData && i.toppingsData.length) {
-        opts += ` | T: ${i.toppingsData.map(t=> lang==='kh' && t.nameKh ? t.nameKh : t.name).join(', ')}`;
+        opts += ` | Tops: ${i.toppingsData.map(t=> lang==='kh' && t.nameKh ? t.nameKh : t.name).join(', ')}`;
       }
-      return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i style="color:gray;font-size:12px">[${opts}]</i>`;
+      return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i>[${opts}]</i>`;
     }).join("\n");
 
     const noteText = order.note ? `\n📝 <b>Note:</b> ${order.note}\n` : "";
@@ -316,7 +361,8 @@ const T = {
     cancelTitle:"Cancel Order?", cancelMsg:"This will remove your order from the queue.", cancelNo:"No, keep it", cancelYes:"Cancel Order",
     moTitle:"My Orders", status:{pending:"Pending ⏳", completed:"Completed ✓", cancelled:"Cancelled ✗"},
     addedToast:"added to cart", cancelToast:"Order cancelled.", noItems:"No items in this category.", tableFor:"Table", outOfStock:"Out of Stock",
-    sugar: "Sugar Level", ice: "Ice Level", toppings: "Toppings", saveChanges: "Save Changes", customize: "Customize", note: "Note"
+    sugar: "Sugar Level", ice: "Ice Level", toppings: "Add Toppings", saveChanges: "Save Changes", addTopping: "Add Topping", note: "Note",
+    howToOrder: "How to Order", prev: "Prev", next: "Next"
   },
   kh: {
     sub:"បញ្ជាទិញ", welcome:"សូមស្វាគមន៍", tagline:"ភេសជ្ជៈស្រស់ · ផលិតដោយចិត្ត", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
@@ -326,7 +372,8 @@ const T = {
     cancelTitle:"លុបការបញ្ជា?", cancelMsg:"ការបញ្ជារបស់អ្នកនឹងត្រូវដក។", cancelNo:"ទេ", cancelYes:"លុបចោល",
     moTitle:"ការបញ្ជារបស់ខ្ញុំ", status:{pending:"រង់ចាំ ⏳", completed:"បានបញ្ចប់ ✓", cancelled:"បានលុប ✗"},
     addedToast:"បានបន្ថែម", cancelToast:"បានលុបការបញ្ជា", noItems:"មិនមានទំនិញ", tableFor:"តុ", outOfStock:"អស់ស្តុក",
-    sugar: "កម្រិតស្ករ", ice: "កម្រិតទឹកកក", toppings: "ថែម (Toppings)", saveChanges: "រក្សាទុក", customize: "កែតម្រូវ", note: "ចំណាំ"
+    sugar: "កម្រិតស្ករ", ice: "កម្រិតទឹកកក", toppings: "បន្ថែម Toppings", saveChanges: "រក្សាទុក", addTopping: "បន្ថែម Topping", note: "ចំណាំ",
+    howToOrder: "របៀបបញ្ជាទិញ", prev: "ថយក្រោយ", next: "បន្ត"
   }
 };
 
@@ -356,7 +403,7 @@ function t() { return T[lang || "en"]; }
 function applyLang() {
   const tx = t();
   const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-  set("h-sub", tx.sub); set("h-welcome", tx.welcome); set("h-tagline", tx.tagline);
+  set("h-sub", tx.sub);
   set("h-cart", tx.cart); set("h-myorders", tx.myorders);
   set("c-table-lbl", tx.tableLbl); set("c-title", tx.cartTitle); set("c-sub", tx.cartSub);
   set("c-total-lbl", tx.totalLbl); set("placeBtn", tx.place); set("c-clear", tx.clear);
@@ -364,9 +411,10 @@ function applyLang() {
   set("conf-btn", tx.confirmBtn); set("can-title", tx.cancelTitle); set("can-msg", tx.cancelMsg);
   set("can-no", tx.cancelNo); set("can-yes", tx.cancelYes); set("mo-title", tx.moTitle);
   set("c-table-ph", tx.tablePH); set("emptyMenu", tx.noItems);
-  
   set("cm-sugar-lbl", tx.sugar); set("cm-ice-lbl", tx.ice); set("cm-top-lbl", tx.toppings);
   set("cm-add-btn-txt", tx.saveChanges); set("c-note-lbl", tx.note);
+  set("slideshow-title", tx.howToOrder);
+  set("slide-prev-lbl", tx.prev); set("slide-next-lbl", tx.next);
 
   if(currentItems.length > 0) renderMenu(currentItems);
   renderCart();
@@ -402,6 +450,9 @@ async function loadData() {
     ]);
     allItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+    // Load slideshow
+    await loadSlideshow();
+
   } catch (error) {
     console.warn("Using Fallback Mock Data");
     allToppings = [
@@ -421,6 +472,83 @@ async function loadData() {
   }
 }
 
+// ==========================================
+// SLIDESHOW LOGIC
+// ==========================================
+let slides = [];
+let currentSlide = 0;
+
+async function loadSlideshow() {
+  try {
+    const snap = await getDocs(collection(db, "slideshow"));
+    slides = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
+    if (slides.length > 0) {
+      renderSlideshow();
+      document.getElementById("slideshow-section").classList.remove("hidden");
+    }
+  } catch(e) {
+    console.warn("No slideshow data");
+  }
+}
+
+function renderSlideshow() {
+  const container = document.getElementById("slides-container");
+  const dotsEl = document.getElementById("slide-dots");
+  
+  container.innerHTML = slides.map((slide, i) => `
+    <div class="slide ${i === 0 ? 'active' : ''} flex flex-col sm:flex-row items-center gap-4 p-5">
+      ${slide.imageUrl ? `
+        <div class="w-full sm:w-48 flex-shrink-0 rounded-xl overflow-hidden border border-[var(--bdr)] bg-[var(--sur2)]" style="aspect-ratio:4/3">
+          <img src="${slide.imageUrl}" alt="Step ${i+1}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/>
+        </div>
+      ` : ''}
+      <div class="flex-1 text-left">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="step-badge">${slide.step || (i+1)}</div>
+          <h3 class="font-semibold text-[var(--txt)] text-sm">${lang === 'kh' && slide.titleKh ? slide.titleKh : (slide.title || '')}</h3>
+        </div>
+        <p class="text-xs text-[var(--muted)] leading-relaxed">${lang === 'kh' && slide.descKh ? slide.descKh : (slide.description || '')}</p>
+      </div>
+    </div>
+  `).join('');
+
+  dotsEl.innerHTML = slides.map((_, i) => `
+    <div class="slide-dot ${i === 0 ? 'on' : ''}" onclick="goToSlide(${i})"></div>
+  `).join('');
+
+  updateSlideCounter();
+}
+
+function updateSlideCounter() {
+  document.getElementById("slide-counter").textContent = `${currentSlide + 1} / ${slides.length}`;
+  const allSlides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.slide-dot');
+  allSlides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+  dots.forEach((d, i) => d.classList.toggle('on', i === currentSlide));
+}
+
+window.goToSlide = function(i) {
+  currentSlide = i;
+  updateSlideCounter();
+};
+window.nextSlide = function() {
+  if (currentSlide < slides.length - 1) { currentSlide++; updateSlideCounter(); }
+};
+window.prevSlide = function() {
+  if (currentSlide > 0) { currentSlide--; updateSlideCounter(); }
+};
+
+// Auto-advance slideshow every 5s
+setInterval(() => {
+  if (slides.length > 1) {
+    currentSlide = (currentSlide + 1) % slides.length;
+    updateSlideCounter();
+  }
+}, 5000);
+
+// ==========================================
+// MENU
+// ==========================================
 function buildCats() {
   const cats = ["All", ...new Set(allItems.map(i => i.category || "Other"))];
   document.getElementById("catRow").innerHTML = cats.map(c => 
@@ -474,7 +602,7 @@ function renderMenu(items) {
 }
 
 // ==========================================
-// 5. CART & CUSTOMIZE LOGIC (NEW SIMPLE ADD)
+// 5. CART & CUSTOMIZE LOGIC
 // ==========================================
 window.quickAddToCart = function(itemStr) {
    const item = typeof itemStr === 'string' ? JSON.parse(itemStr) : itemStr;
@@ -487,8 +615,8 @@ window.quickAddToCart = function(itemStr) {
       name: item.name,
       nameKh: item.nameKh,
       imageUrl: item.imageUrl,
-      basePrice: basePrice, // Store original base price without toppings
-      price: basePrice,     // Current final price
+      basePrice: basePrice,
+      price: basePrice,
       qty: 1,
       sugar: "100%",
       ice: "100%",
@@ -520,17 +648,28 @@ window.editCartItem = function(cartId) {
 
    const dName = lang === 'kh' && cartItem.nameKh ? cartItem.nameKh : cartItem.name;
    document.getElementById("cm-title").textContent = dName;
+   document.getElementById("cm-subtitle").textContent = t().toppings;
    
-   // Render toppings list
-   document.getElementById("cm-top-list").innerHTML = allToppings.map(t => {
-     const tName = lang === 'kh' && t.nameKh ? t.nameKh : t.name;
-     const isAct = selectedTops.includes(t.id) ? "active" : "";
+   // Render toppings list WITH images
+   document.getElementById("cm-top-list").innerHTML = allToppings.length ? allToppings.map(tp => {
+     const tName = lang === 'kh' && tp.nameKh ? tp.nameKh : tp.name;
+     const isAct = selectedTops.includes(tp.id) ? "active" : "";
+     const imgHTML = tp.imageUrl
+       ? `<img src="${tp.imageUrl}" alt="${tName}" class="w-10 h-10 rounded-lg object-cover border border-[var(--bdr)] flex-shrink-0" onerror="this.style.display='none'"/>`
+       : `<div class="w-10 h-10 rounded-lg bg-[var(--sur2)] border border-[var(--bdr)] flex items-center justify-center flex-shrink-0 text-lg">🧁</div>`;
      return `
-     <div onclick="toggleTop('${t.id}')" id="top-${t.id}" class="top-box ${isAct} flex justify-between items-center p-3 border border-[var(--bdr)] rounded-xl cursor-pointer hover:border-[var(--gold)] transition-colors">
-       <span class="text-sm">${tName}</span>
-       <span class="text-xs text-[var(--gold)] font-medium">+$${Number(t.price).toFixed(2)}</span>
+     <div onclick="toggleTop('${tp.id}')" id="top-${tp.id}" class="top-box ${isAct} flex items-center gap-3 p-3 border border-[var(--bdr)] rounded-xl cursor-pointer hover:border-[var(--gold)] transition-colors">
+       ${imgHTML}
+       <div class="flex-1 min-w-0">
+         <p class="text-sm font-medium text-[var(--txt)]">${tName}</p>
+         ${tp.nameKh && lang !== 'kh' ? `<p class="text-[10px] text-[var(--muted)]">${tp.nameKh}</p>` : ''}
+       </div>
+       <span class="text-xs text-[var(--gold)] font-semibold flex-shrink-0">+$${Number(tp.price).toFixed(2)}</span>
+       <div class="w-5 h-5 rounded-full border-2 border-[var(--bdr)] flex items-center justify-center flex-shrink-0 ${isAct ? 'bg-[var(--green)] border-[var(--green)]' : ''}">
+         ${isAct ? `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>` : ''}
+       </div>
      </div>`;
-   }).join('');
+   }).join('') : `<p class="text-sm text-[var(--muted)] text-center py-4">No toppings available</p>`;
 
    setSugar(selectedSugar);
    setIce(selectedIce);
@@ -568,8 +707,18 @@ window.setIce = function(lvl) {
 };
 window.toggleTop = function(tid) {
   const el = document.getElementById(`top-${tid}`);
-  if(selectedTops.includes(tid)) { selectedTops = selectedTops.filter(id => id !== tid); el.classList.remove('active'); } 
-  else { selectedTops.push(tid); el.classList.add('active'); }
+  if(selectedTops.includes(tid)) { 
+    selectedTops = selectedTops.filter(id => id !== tid); 
+    el.classList.remove('active');
+    // update check icon
+    const check = el.querySelector('.rounded-full.border-2');
+    if(check) { check.classList.remove('bg-[var(--green)]','border-[var(--green)]'); check.innerHTML = ''; }
+  } else { 
+    selectedTops.push(tid); 
+    el.classList.add('active');
+    const check = el.querySelector('.rounded-full.border-2');
+    if(check) { check.classList.add('bg-[var(--green)]','border-[var(--green)]'); check.innerHTML = `<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`; }
+  }
   updateCustomPrice();
 };
 
@@ -618,9 +767,14 @@ function renderCart() {
   empty.classList.add("hidden"); empty.style.display = "none";
   el.innerHTML = cart.map(c => {
     const dName = lang === 'kh' && c.nameKh ? c.nameKh : c.name;
-    let opts = `S: ${c.sugar} | I: ${c.ice}`;
+    // ── CHANGED: Full labels Sugar / Ice ──
+    let sugarIce = `Sugar: ${c.sugar} | Ice: ${c.ice}`;
+    let toppingsList = '';
     if(c.toppingsData && c.toppingsData.length > 0) {
-       opts += ` | +${c.toppingsData.length} ${tx.toppings}`;
+       toppingsList = c.toppingsData.map(tp => {
+         const tName = lang === 'kh' && tp.nameKh ? tp.nameKh : tp.name;
+         return `<span class="inline-flex items-center gap-0.5 bg-[var(--sur)] px-1.5 py-0.5 rounded border border-[var(--bdr)]">${tp.imageUrl ? `<img src="${tp.imageUrl}" class="w-3.5 h-3.5 rounded object-cover" onerror="this.style.display='none'"/>` : ''}${tName}</span>`;
+       }).join('');
     }
 
     return `
@@ -629,7 +783,9 @@ function renderCart() {
         <img src="${c.imageUrl || 'https://placehold.co/48/f5ece3/3c2a21?text=☕'}" class="w-14 h-14 rounded-xl object-cover shrink-0" onerror="this.src='https://placehold.co/48/f5ece3/3c2a21?text=☕'"/>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-semibold truncate text-[var(--txt)]">${dName}</p>
-          <p class="text-[11px] text-[var(--muted)] mt-1 break-words leading-tight bg-[var(--sur2)] p-1.5 rounded-lg border border-[var(--bdr)]">${opts}</p>
+          <!-- Sugar & Ice with full names -->
+          <p class="text-[11px] text-[var(--muted)] mt-1 bg-[var(--sur2)] px-2 py-1 rounded-lg border border-[var(--bdr)]">${sugarIce}</p>
+          ${toppingsList ? `<div class="flex flex-wrap gap-1 mt-1.5 text-[10px] text-[var(--muted)]">${toppingsList}</div>` : ''}
         </div>
         <div class="flex flex-col items-end gap-2 shrink-0">
           <p class="text-[var(--gold)] font-bold text-sm">$${(c.price * c.qty).toFixed(2)}</p>
@@ -637,9 +793,10 @@ function renderCart() {
       </div>
       
       <div class="flex items-center justify-between border-t border-[var(--sur2)] pt-2 mt-1">
-        <button onclick="editCartItem('${c.cartId}')" class="text-xs text-[var(--gold)] font-medium flex items-center gap-1 hover:underline">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-          ${tx.customize}
+        <!-- CHANGED: "Add Topping" button -->
+        <button onclick="editCartItem('${c.cartId}')" class="text-xs text-[var(--gold)] font-semibold flex items-center gap-1.5 bg-[var(--sur2)] px-3 py-1.5 rounded-full border border-[var(--bdr)] hover:border-[var(--gold)] transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          ${tx.addTopping}
         </button>
         <div class="flex items-center gap-2 bg-[var(--sur2)] rounded-full border border-[var(--bdr)] p-0.5">
           <button onclick="changeQty('${c.cartId}',-1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)] hover:text-[var(--txt)]">−</button>
@@ -663,7 +820,7 @@ window.placeOrder = async function() {
   
   const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
   const items = cart.map(c => ({ 
-    id: c.id, name: c.name, price: c.price, qty: c.qty, imageUrl: c.imageUrl || "", 
+    id: c.id, name: c.name, nameKh: c.nameKh || '', price: c.price, qty: c.qty, imageUrl: c.imageUrl || "", 
     sugar: c.sugar, ice: c.ice, toppingsData: c.toppingsData 
   }));
   

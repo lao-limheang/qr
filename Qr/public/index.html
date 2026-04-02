@@ -22,10 +22,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;bac
 .out-stock-badge{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;border-radius:inherit;}
 
 /* Panel Slide Animations */
-#cartPanel, #myOrdersPanel, #customPanel { transition: transform .35s cubic-bezier(.4,0,.2,1); }
+#cartPanel, #myOrdersPanel { transition: transform .35s cubic-bezier(.4,0,.2,1); }
 #cartPanel.show { transform: translateX(0) !important; }
 #myOrdersPanel.show { transform: translateY(0) !important; }
-#customPanel.show { transform: translate(0, 0) !important; }
 
 .g-btn{background:var(--gold);color:#faf6eb;font-weight:700;cursor:pointer;transition:background .18s,transform .1s;border:none;}
 .g-btn:hover{background:var(--gold2);}
@@ -46,11 +45,11 @@ select option{background:var(--sur);}
 .lang-opt:hover{background:var(--sur2);}
 .lang-opt.active{color:var(--gold);}
 
-/* Customize Buttons */
+/* Customize Modal Buttons */
 .opt-btn { transition: all 0.15s; background: transparent; }
 .opt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
-.top-box.active{border-color:var(--green);background:rgba(72,168,99,0.05);}
-.temp-btn{padding:8px;border-radius:12px;border:1px solid var(--bdr);color:var(--muted);cursor:pointer;transition:all .15s;background:transparent;font-family:'Outfit',sans-serif;}
+.top-box.active{border-color:var(--gold);background:rgba(191,60,55,0.03);}
+.temp-btn{transition:all .15s;background:transparent;border:1px solid var(--bdr);color:var(--txt);}
 .temp-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(191,60,55,.05);}
 
 /* SLIDESHOW */
@@ -58,12 +57,15 @@ select option{background:var(--sur);}
 .slide-dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);cursor:pointer;transition:all .2s;}
 .slide-dot.on{background:var(--gold);width:20px;border-radius:4px;}
 .step-badge{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#faf6eb;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
 /* BADGES */
 .popular-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;box-shadow:0 2px 8px rgba(239,68,68,.4);}
 .temp-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600;letter-spacing:.3px;}
 .temp-ice{background:#dbeafe;color:#1d4ed8;}
 .temp-hot{background:#fee2e2;color:#b91c1c;}
 .temp-frappe{background:#e0e7ff;color:#4338ca;}
+.order-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(60,42,33,0.85);color:#f5ece3;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;backdrop-filter:blur(4px);border:1px solid rgba(191,60,55,.4);}
+
 /* SOCIAL BAR */
 #socialBar{position:fixed;bottom:24px;right:24px;z-index:45;background:transparent;border:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;}
 #socialBar.hidden-bar{display:none;}
@@ -182,6 +184,16 @@ select option{background:var(--sur);}
     <p class="text-[var(--muted)] text-sm" id="c-empty">Your cart is empty</p>
   </div>
   <div class="border-t border-[var(--bdr)] bg-[var(--sur2)]">
+    <div class="px-5 py-3 border-b border-[var(--bdr)]">
+      <div class="flex gap-2" id="coupon-input-box">
+        <input type="text" id="cartCoupon" placeholder="Promo code" class="flex-1 bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-3 py-2 text-sm focus:border-[var(--gold)] uppercase outline-none shadow-sm transition"/>
+        <button onclick="applyCoupon()" class="g-btn px-4 rounded-lg text-sm font-bold shadow-sm" id="c-apply-btn">Apply</button>
+      </div>
+      <div id="applied-coupon-box" class="hidden flex justify-between items-center bg-[var(--green)]/10 border border-[var(--green)]/30 rounded-lg px-3 py-2">
+        <span class="text-[var(--green)] text-sm font-bold flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> <span id="ac-code"></span></span>
+        <button onclick="removeCoupon()" class="text-[var(--muted)] hover:text-[var(--red)] transition-colors text-xs font-bold uppercase tracking-wider" id="c-remove-btn">Remove</button>
+      </div>
+    </div>
     <div class="px-5 py-4 border-b border-[var(--bdr)] flex gap-4">
       <div class="w-1/3">
         <label class="text-[10px] text-[var(--muted)] uppercase font-semibold tracking-wide block mb-1" id="c-table-lbl">Table No.</label>
@@ -195,8 +207,16 @@ select option{background:var(--sur);}
       </div>
     </div>
     <div class="px-5 py-4">
-      <div class="flex justify-between items-center mb-4">
-        <span class="text-[var(--muted)] text-sm font-semibold" id="c-total-lbl">Total</span>
+      <div id="cart-subtotal-row" class="flex justify-between items-center mb-2 hidden text-[var(--muted)] text-sm">
+        <span id="c-subtotal-lbl">Subtotal</span>
+        <span id="cartSubtotal" class="font-semibold">$0.00</span>
+      </div>
+      <div id="cart-discount-row" class="flex justify-between items-center mb-3 hidden text-[var(--green)] text-sm">
+        <span id="c-discount-lbl">Discount</span>
+        <span id="cartDiscountAmt" class="font-bold">-$0.00</span>
+      </div>
+      <div class="flex justify-between items-center mb-4 pt-1">
+        <span class="text-[var(--txt)] text-base font-bold" id="c-total-lbl">Total</span>
         <span id="cartTotal" class="text-3xl serif font-bold text-[var(--gold)]">$0.00</span>
       </div>
       <button onclick="placeOrder()" id="placeBtn" class="g-btn w-full py-4 rounded-xl text-sm tracking-wide font-bold shadow-lg shadow-red-900/10">Place Order</button>
@@ -214,74 +234,71 @@ select option{background:var(--sur);}
   <div id="myOrdersList" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
 </aside>
 
-<!-- CUSTOMIZE PANEL (Slides in beautifully) -->
-<aside id="customPanel" class="fixed bottom-0 left-0 right-0 sm:top-0 sm:left-auto sm:right-0 sm:h-full sm:w-[400px] bg-[var(--sur)] z-[60] flex flex-col shadow-2xl border-t sm:border-t-0 sm:border-l border-[var(--bdr)] rounded-t-3xl sm:rounded-none max-h-[90vh] sm:max-h-full translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform duration-300">
-  <div class="px-5 pt-5 pb-3 border-b border-[var(--bdr)] flex justify-between items-start shrink-0">
-    <div>
-      <h3 class="serif text-2xl text-[var(--gold)] leading-tight" id="cm-title">Drink Name</h3>
-      <p class="text-xs text-[var(--muted)] mt-1 tracking-wide" id="cm-subtitle">Customize your drink</p>
+<!-- CUSTOMIZE MODAL (Centered Popup) -->
+<div id="customModal" class="fixed inset-0 z-[998] bg-black/60 items-center justify-center hidden" style="backdrop-filter:blur(4px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-[2rem] p-6 w-full max-w-[360px] mx-4 shadow-2xl fade-up flex flex-col max-h-[90vh]">
+    <div class="flex justify-between items-start shrink-0 mb-4 border-b border-[var(--bdr)] pb-4">
+      <div>
+        <h3 class="serif text-[22px] text-[var(--gold)] leading-tight font-bold" id="cm-title">Drink Name</h3>
+        <p class="text-xs text-[var(--muted)] mt-1 tracking-wide" id="cm-subtitle">Add Toppings</p>
+      </div>
+      <button onclick="closeCustomModal()" class="text-2xl text-[var(--muted)] hover:text-[var(--txt)] leading-none">&times;</button>
     </div>
-    <button onclick="closeCustomPanel()" class="text-3xl text-[var(--muted)] hover:text-[var(--txt)] leading-none">&times;</button>
-  </div>
 
-  <div class="flex-1 overflow-y-auto px-5 py-4 space-y-6 bg-[var(--bg)]" style="scrollbar-width:none">
-    <!-- Temperature with Dynamic Pricing -->
-    <div id="cm-temp-wrap">
-      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-temp-lbl">Temperature</label>
-      <div class="flex gap-2">
-        <button onclick="setTemp('ice')" id="temp-ice" class="temp-btn flex-1 hidden flex-col items-center justify-center py-2.5">
-          <span class="text-lg mb-0.5">🧊</span>
-          <span class="font-bold text-xs" id="temp-ice-lbl">Iced</span>
-          <span class="text-[10px] font-bold text-[var(--gold)] mt-0.5" id="price-lbl-ice"></span>
-        </button>
-        <button onclick="setTemp('hot')" id="temp-hot" class="temp-btn flex-1 hidden flex-col items-center justify-center py-2.5">
-          <span class="text-lg mb-0.5">☕</span>
-          <span class="font-bold text-xs" id="temp-hot-lbl">Hot</span>
-          <span class="text-[10px] font-bold text-[var(--gold)] mt-0.5" id="price-lbl-hot"></span>
-        </button>
-        <button onclick="setTemp('frappe')" id="temp-frappe" class="temp-btn flex-1 hidden flex-col items-center justify-center py-2.5">
-          <span class="text-lg mb-0.5">🥤</span>
-          <span class="font-bold text-xs" id="temp-frappe-lbl">Frappe</span>
-          <span class="text-[10px] font-bold text-[var(--gold)] mt-0.5" id="price-lbl-frappe"></span>
-        </button>
+    <div class="flex-1 overflow-y-auto space-y-6 pr-2" style="scrollbar-width:none">
+      <!-- Temperature -->
+      <div id="cm-temp-wrap">
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-temp-lbl">Temperature</label>
+        <div class="flex gap-3">
+          <button onclick="setTemp('ice')" id="temp-ice" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">🧊</span> <span id="temp-ice-lbl">Iced</span> <span class="text-[10px] ml-1" id="price-lbl-ice"></span>
+          </button>
+          <button onclick="setTemp('hot')" id="temp-hot" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">☕</span> <span id="temp-hot-lbl">Hot</span> <span class="text-[10px] ml-1" id="price-lbl-hot"></span>
+          </button>
+          <button onclick="setTemp('frappe')" id="temp-frappe" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">🥤</span> <span id="temp-frappe-lbl">Frappe</span> <span class="text-[10px] ml-1" id="price-lbl-frappe"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sugar -->
+      <div>
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
+        <div class="flex gap-2">
+          <button onclick="setSugar('0%')" id="sug-0" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">0%</button>
+          <button onclick="setSugar('30%')" id="sug-30" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">30%</button>
+          <button onclick="setSugar('50%')" id="sug-50" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">50%</button>
+          <button onclick="setSugar('70%')" id="sug-70" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">70%</button>
+          <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">100%</button>
+        </div>
+      </div>
+
+      <!-- Ice Level -->
+      <div id="cm-ice-section">
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
+        <div class="flex gap-2">
+          <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">0%</button>
+          <button onclick="setIce('50%')" id="ice-50" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">50%</button>
+          <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">100%</button>
+        </div>
+      </div>
+
+      <!-- Toppings -->
+      <div>
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
+        <div class="space-y-3" id="cm-top-list"></div>
       </div>
     </div>
 
-    <!-- Sugar -->
-    <div>
-      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
-      <div class="flex gap-2">
-        <button onclick="setSugar('0%')" id="sug-0" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">0%</button>
-        <button onclick="setSugar('25%')" id="sug-25" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">25%</button>
-        <button onclick="setSugar('50%')" id="sug-50" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">50%</button>
-        <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">100%</button>
-      </div>
-    </div>
-
-    <!-- Ice Level -->
-    <div id="cm-ice-section">
-      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
-      <div class="flex gap-2">
-        <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">0%</button>
-        <button onclick="setIce('50%')" id="ice-50" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">50%</button>
-        <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-xs font-medium rounded-xl border border-[var(--bdr)] text-[var(--muted)]">100%</button>
-      </div>
-    </div>
-
-    <!-- Toppings -->
-    <div>
-      <label class="text-xs font-bold uppercase tracking-wider mb-2 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
-      <div class="space-y-2" id="cm-top-list"></div>
+    <div class="pt-5 shrink-0 mt-2 border-t border-[var(--sur2)]">
+      <button onclick="saveCustomization()" class="g-btn w-full py-4 rounded-2xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/20">
+        <span id="cm-add-btn-txt" class="font-bold tracking-wide">Save Changes</span>
+        <span class="font-bold text-[17px]" id="cm-price">$0.00</span>
+      </button>
     </div>
   </div>
-
-  <div class="p-5 border-t border-[var(--bdr)] bg-[var(--sur)] shrink-0">
-    <button onclick="saveCustomization()" class="g-btn w-full py-4 rounded-xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/10">
-      <span id="cm-add-btn-txt" class="tracking-wide">Save Changes</span>
-      <span class="font-bold text-lg" id="cm-price">$0.00</span>
-    </button>
-  </div>
-</aside>
+</div>
 
 
 <!-- CONFIRM MODAL -->
@@ -301,7 +318,8 @@ select option{background:var(--sur);}
 <div id="cancelModal" class="fixed inset-0 z-[998] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
   <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-sm mx-4 shadow-2xl fade-up">
     <h3 class="serif text-2xl text-[var(--red)] mb-2" id="can-title">Cancel Order?</h3>
-    <p class="text-[var(--muted)] text-sm mb-6" id="can-msg">This will remove your order from the queue.</p>
+    <p class="text-[var(--muted)] text-sm mb-4" id="can-msg">This will remove your order from the queue.</p>
+    <input type="text" id="cancelReason" placeholder="Reason (optional)" class="w-full bg-[var(--sur2)] border border-[var(--bdr)] rounded-xl px-3 py-2.5 text-sm outline-none transition mb-6 text-[var(--txt)] focus:border-[#bf3c37]" />
     <div class="flex gap-3">
       <button onclick="closeCancelModal()" class="flex-1 py-3 rounded-2xl border border-[var(--bdr)] text-sm text-[var(--muted)] hover:text-[var(--txt)] transition-colors cursor-pointer" id="can-no">No, keep it</button>
       <button onclick="confirmCancel()" class="flex-1 py-3 rounded-2xl bg-[var(--red)] text-[#faf6eb] text-sm font-semibold hover:bg-[#a6332f] transition-colors cursor-pointer" id="can-yes">Yes, cancel</button>
@@ -347,7 +365,8 @@ async function sendTelegramAlert(order, orderId) {
       return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i>[${opts}]</i>`;
     }).join("\n");
     const noteText = order.note ? `\n📝 <b>Note:</b> ${order.note}\n` : "";
-    const msg = `🛍️ <b>New Order!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`;
+    const discountLine = order.couponCode ? `\n🏷️ <b>Coupon:</b> ${order.couponCode} (-$${order.discountAmt.toFixed(2)})` : "";
+    const msg = `🛍️ <b>New Order!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}${discountLine}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`;
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
   } catch(e) {}
 }
@@ -366,7 +385,11 @@ const T = {
     toppings:"Add Toppings", saveChanges:"Save Changes", addTopping:"Customize", note:"Note",
     howToOrder:"How to Order", prev:"Prev", next:"Next", popular:"Popular",
     tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe",
-    ordersCount:"orders", customBtn:"Custom", totalOrders:"Total Orders"
+    ordersCount:"orders", customBtn:"Custom", totalOrders:"Total Orders",
+    cancelReasonPlaceholder: "Reason for cancellation (optional)",
+    promoPlaceholder: "Promo code", apply: "Apply", remove: "Remove",
+    couponApplied: "Coupon applied!", invalidCoupon: "Invalid or inactive coupon",
+    subtotal: "Subtotal", discount: "Discount"
   },
   kh: {
     sub:"បញ្ជាទិញ", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
@@ -380,7 +403,11 @@ const T = {
     toppings:"បន្ថែម Toppings", saveChanges:"រក្សាទុក", addTopping:"កំណត់ Toppings", note:"ចំណាំ",
     howToOrder:"របៀបបញ្ជាទិញ", prev:"ថយក្រោយ", next:"បន្ត", popular:"ពេញនិយម",
     tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ",
-    ordersCount:"ការបញ្ជា", customBtn:"កែច្នៃ", totalOrders:"ការកាម្មងសរុប"
+    ordersCount:"ការបញ្ជា", customBtn:"កែច្នៃ", totalOrders:"ការកាម្មងសរុប",
+    cancelReasonPlaceholder: "មូលហេតុនៃការលុបចោល (ជម្រើស)",
+    promoPlaceholder: "លេខកូដបញ្ចុះតម្លៃ", apply: "ប្រើប្រាស់", remove: "លុបចេញ",
+    couponApplied: "បានប្រើប្រាស់កូដ!", invalidCoupon: "កូដមិនត្រឹមត្រូវ",
+    subtotal: "សរុបរង", discount: "បញ្ចុះតម្លៃ"
   }
 };
 
@@ -422,6 +449,14 @@ function applyLang() {
   set("slide-prev-lbl",tx.prev); set("slide-next-lbl",tx.next);
   set("popular-title",tx.popular); set("cm-temp-lbl",tx.tempLbl);
   set("temp-ice-lbl",tx.tempIce); set("temp-hot-lbl",tx.tempHot); set("temp-frappe-lbl",tx.tempFrappe);
+  set("c-apply-btn",tx.apply); set("c-remove-btn",tx.remove); 
+  set("c-subtotal-lbl",tx.subtotal); set("c-discount-lbl",tx.discount);
+  
+  const cancelReasonInput = document.getElementById("cancelReason");
+  if (cancelReasonInput) cancelReasonInput.placeholder = tx.cancelReasonPlaceholder;
+  const couponInput = document.getElementById("cartCoupon");
+  if (couponInput) couponInput.placeholder = tx.promoPlaceholder;
+
   if(currentItems.length > 0) { renderMenu(currentItems); renderPopular(); }
   renderCart(); renderMyOrders();
 }
@@ -438,6 +473,7 @@ document.getElementById("cartTable").addEventListener("change", e => safeStorage
 
 // ── DATA ──
 let allItems=[], currentItems=[], currentCat="All", cart=[], allToppings=[], slides=[], currentSlide=0;
+let dbCoupons = [], appliedCoupon = null;
 
 async function loadOrderCounts() {
   try {
@@ -473,6 +509,14 @@ async function loadData() {
       new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),8000))
     ]);
     allItems = snap.docs.map(d=>({id:d.id,...d.data()}));
+
+    onSnapshot(collection(db,"coupons"), snap => {
+      dbCoupons = snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(appliedCoupon) {
+        const stillValid = dbCoupons.find(c => c.code === appliedCoupon.code && c.active);
+        if(!stillValid) { appliedCoupon = null; renderCart(); }
+      }
+    });
 
     onSnapshot(collection(db,"orders"), snap => {
       const counts = {};
@@ -657,7 +701,6 @@ window.addToCartDirect = function(item) {
   
   const finalPrice = item.discount > 0 ? baseVar*(1-item.discount/100) : baseVar;
   
-  // Find if exact item already in cart
   const existing = cart.find(c => c.id === item.id && c.temperature === defaultTemp && c.toppingsData.length === 0 && c.sugar === "100%" && c.ice === "100%");
   if (existing) {
     existing.qty += 1;
@@ -770,11 +813,10 @@ function renderPopular() {
 window.closePanels = function() {
   document.getElementById("cartPanel").classList.remove("show");
   document.getElementById("myOrdersPanel").classList.remove("show");
-  document.getElementById("customPanel").classList.remove("show");
   document.getElementById("cartOverlay").classList.add("hidden");
 };
 
-// ── CUSTOMIZE (SIDE PANEL) ──
+// ── CUSTOMIZE (MODAL) ──
 let editingCartId = null, customItem = null;
 let selectedSugar = "100%", selectedIce = "100%", selectedTemp = "ice", selectedTops = [];
 
@@ -783,7 +825,7 @@ window.openCustomize = function(item) {
   customItem = { ...item };
   selectedSugar = "100%"; selectedIce = "100%"; selectedTops = [];
   selectedTemp = item.temperature==='hot' ? 'hot' : item.temperature==='frappe' ? 'frappe' : 'ice';
-  _openCustomPanel();
+  _openCustomModal();
 };
 
 window.editCartItem = function(cartId) {
@@ -795,10 +837,10 @@ window.editCartItem = function(cartId) {
   selectedIce = cartItem.ice;
   selectedTemp = cartItem.temperature||'ice';
   selectedTops = cartItem.toppingsData.map(t=>t.id);
-  _openCustomPanel();
+  _openCustomModal();
 };
 
-function _openCustomPanel() {
+function _openCustomModal() {
   const tx = t();
   const dName = lang==='kh'&&customItem.nameKh ? customItem.nameKh : customItem.name;
   document.getElementById("cm-title").textContent = dName;
@@ -815,9 +857,9 @@ function _openCustomPanel() {
   const pHot = (customItem.priceHot || customItem.originalPrice || customItem.price) * discountMultiplier;
   const pFrap = (customItem.priceFrappe || customItem.originalPrice || customItem.price) * discountMultiplier;
 
-  document.getElementById("price-lbl-ice").textContent = `$${pIce.toFixed(2)}`;
-  document.getElementById("price-lbl-hot").textContent = `$${pHot.toFixed(2)}`;
-  document.getElementById("price-lbl-frappe").textContent = `$${pFrap.toFixed(2)}`;
+  document.getElementById("price-lbl-ice").textContent = `+$${pIce.toFixed(2)}`;
+  document.getElementById("price-lbl-hot").textContent = `+$${pHot.toFixed(2)}`;
+  document.getElementById("price-lbl-frappe").textContent = `+$${pFrap.toFixed(2)}`;
 
   tempWrap.style.display = 'block';
   btnIce.style.display = 'none';
@@ -845,17 +887,17 @@ function _openCustomPanel() {
     const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
     const isAct = selectedTops.includes(tp.id);
     const imgHTML = tp.imageUrl
-      ? `<img src="${tp.imageUrl}" alt="${tName}" class="w-10 h-10 rounded-lg object-cover border border-[var(--bdr)] flex-shrink-0" onerror="this.style.display='none'"/>`
-      : `<div class="w-10 h-10 rounded-lg bg-[var(--sur2)] border border-[var(--bdr)] flex items-center justify-center flex-shrink-0 text-lg">🧁</div>`;
+      ? `<img src="${tp.imageUrl}" alt="${tName}" class="w-10 h-10 rounded-full object-cover border border-[var(--bdr)] flex-shrink-0" onerror="this.style.display='none'"/>`
+      : `<div class="w-10 h-10 rounded-full bg-[var(--sur2)] border border-[var(--bdr)] flex items-center justify-center flex-shrink-0 text-lg">🧁</div>`;
     return `
-    <div onclick="toggleTop('${tp.id}')" id="top-${tp.id}" class="top-box ${isAct?'active':''} flex items-center gap-3 p-3 border border-[var(--bdr)] rounded-xl cursor-pointer hover:border-[var(--gold)] transition-colors">
+    <div onclick="toggleTop('${tp.id}')" id="top-${tp.id}" class="top-box ${isAct?'active':''} flex items-center gap-3 p-3 border border-[var(--bdr)] rounded-[1.25rem] cursor-pointer hover:border-[var(--gold)] transition-colors">
       ${imgHTML}
       <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-[var(--txt)]">${tName}</p>
+        <p class="text-sm font-bold text-[var(--txt)]">${tName}</p>
       </div>
-      <span class="text-xs text-[var(--gold)] font-semibold flex-shrink-0">+$${Number(tp.price).toFixed(2)}</span>
-      <div id="top-check-${tp.id}" class="w-5 h-5 rounded-full border-2 ${isAct?'bg-[var(--green)] border-[var(--green)]':'border-[var(--bdr)]'} flex items-center justify-center flex-shrink-0 transition-colors">
-        ${isAct?`<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`:''}
+      <span class="text-xs text-[var(--gold)] font-bold flex-shrink-0">+$${Number(tp.price).toFixed(2)}</span>
+      <div id="top-check-${tp.id}" class="w-[22px] h-[22px] rounded-full border-2 ${isAct?'border-[var(--gold)] flex items-center justify-center':'border-[var(--bdr)]'} transition-colors shrink-0">
+        ${isAct?`<div class="w-2.5 h-2.5 bg-[var(--gold)] rounded-full"></div>`:''}
       </div>
     </div>`;
   }).join('') : `<p class="text-sm text-[var(--muted)] text-center py-4">No toppings available</p>`;
@@ -863,14 +905,14 @@ function _openCustomPanel() {
   setTemp(selectedTemp); setSugar(selectedSugar); setIce(selectedIce);
   updateCustomPrice();
 
-  document.getElementById("cartOverlay").classList.remove("hidden");
-  document.getElementById("customPanel").classList.add("show");
+  document.getElementById("customModal").classList.remove("hidden");
+  document.getElementById("customModal").style.display = "flex";
 }
 
-window.closeCustomPanel = function() {
+window.closeCustomModal = function() {
   editingCartId = null;
-  document.getElementById("customPanel").classList.remove("show");
-  document.getElementById("cartOverlay").classList.add("hidden");
+  document.getElementById("customModal").classList.add("hidden");
+  document.getElementById("customModal").style.display = "none";
 };
 
 window.setTemp = function(val) {
@@ -887,7 +929,7 @@ window.setTemp = function(val) {
 
 window.setSugar = function(lvl) {
   selectedSugar = lvl;
-  ['0','25','50','100'].forEach(v => {
+  ['0','30','50','70','100'].forEach(v => {
     const el = document.getElementById(`sug-${v}`);
     if(el) el.classList.toggle('active', v+'%'===lvl);
   });
@@ -907,11 +949,11 @@ window.toggleTop = function(tid) {
   if(selectedTops.includes(tid)) {
     selectedTops = selectedTops.filter(id=>id!==tid);
     el.classList.remove('active');
-    if(check) { check.className='w-5 h-5 rounded-full border-2 border-[var(--bdr)] flex items-center justify-center flex-shrink-0 transition-colors'; check.innerHTML=''; }
+    if(check) { check.className='w-[22px] h-[22px] rounded-full border-2 border-[var(--bdr)] transition-colors shrink-0'; check.innerHTML=''; }
   } else {
     selectedTops.push(tid);
     el.classList.add('active');
-    if(check) { check.className='w-5 h-5 rounded-full border-2 bg-[var(--green)] border-[var(--green)] flex items-center justify-center flex-shrink-0 transition-colors'; check.innerHTML=`<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`; }
+    if(check) { check.className='w-[22px] h-[22px] rounded-full border-2 border-[var(--gold)] flex items-center justify-center transition-colors shrink-0'; check.innerHTML=`<div class="w-2.5 h-2.5 bg-[var(--gold)] rounded-full"></div>`; }
   }
   updateCustomPrice();
 };
@@ -967,7 +1009,7 @@ window.saveCustomization = function() {
     b.classList.add("pop-anim"); setTimeout(()=>b.classList.remove("pop-anim"),300);
   }
   renderCart();
-  closeCustomPanel();
+  closeCustomModal();
 };
 
 // ── CART ──
@@ -979,19 +1021,70 @@ window.changeQty = function(cId, d) {
   if(item.qty <= 0) cart = cart.filter(c=>c.cartId!==cId);
   renderCart();
 };
-window.clearCart = function() { cart=[]; renderCart(); };
+window.clearCart = function() { cart=[]; appliedCoupon=null; document.getElementById("cartCoupon").value=""; renderCart(); };
+
+window.applyCoupon = function() {
+  const code = document.getElementById("cartCoupon").value.trim().toUpperCase();
+  if(!code) return;
+  const valid = dbCoupons.find(c => c.code === code && c.active);
+  if(valid) {
+    appliedCoupon = valid;
+    document.getElementById("cartCoupon").value = "";
+    showToast(t().couponApplied);
+    renderCart();
+  } else {
+    showToast(t().invalidCoupon);
+  }
+};
+
+window.removeCoupon = function() {
+  appliedCoupon = null;
+  renderCart();
+};
 
 function renderCart() {
   const el = document.getElementById("cartItems");
   const empty = document.getElementById("cartEmpty");
   const badge = document.getElementById("cartBadge");
-  const total = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  let discountAmt = 0;
+  if (appliedCoupon) discountAmt = subtotal * (appliedCoupon.discount / 100);
+  const total = subtotal - discountAmt;
+  
   const count = cart.reduce((s,c)=>s+c.qty, 0);
   const tx = t();
+
+  // Handle totals UI
+  const subRow = document.getElementById("cart-subtotal-row");
+  const discRow = document.getElementById("cart-discount-row");
+  if(appliedCoupon) {
+    subRow.classList.remove("hidden");
+    discRow.classList.remove("hidden");
+    document.getElementById("cartSubtotal").textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById("cartDiscountAmt").textContent = `-$${discountAmt.toFixed(2)}`;
+  } else {
+    subRow.classList.add("hidden");
+    discRow.classList.add("hidden");
+  }
 
   document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
   badge.textContent = count;
   count ? badge.classList.remove("hidden") : badge.classList.add("hidden");
+
+  // Handle Coupon Box UI
+  const inpBox = document.getElementById("coupon-input-box");
+  const appBox = document.getElementById("applied-coupon-box");
+  if (cart.length > 0) {
+    if(appliedCoupon) {
+      inpBox.classList.add("hidden"); appBox.classList.remove("hidden");
+      document.getElementById("ac-code").textContent = `${appliedCoupon.code} (-${appliedCoupon.discount}%)`;
+    } else {
+      inpBox.classList.remove("hidden"); appBox.classList.add("hidden");
+    }
+  } else {
+    inpBox.classList.add("hidden"); appBox.classList.add("hidden");
+  }
 
   if(!cart.length) { el.innerHTML=""; empty.classList.remove("hidden"); empty.style.display="flex"; return; }
   empty.classList.add("hidden"); empty.style.display="none";
@@ -1043,7 +1136,11 @@ window.placeOrder = async function() {
   if(!table) { showToast("⚠️ "+tx.tableLbl+" Required!"); return; }
   if(!cart.length) { showToast("⚠️ "+tx.emptyCart); return; }
 
-  const total = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  let discountAmt = 0;
+  if(appliedCoupon) discountAmt = subtotal * (appliedCoupon.discount/100);
+  const total = subtotal - discountAmt;
+  
   const items = cart.map(c=>({
     id:c.id, name:c.name, nameKh:c.nameKh||'', price:c.price, qty:c.qty,
     imageUrl:c.imageUrl||"", sugar:c.sugar, ice:c.ice, temperature:c.temperature,
@@ -1054,21 +1151,27 @@ window.placeOrder = async function() {
   btn.disabled=true; btn.textContent="…";
 
   try {
-    const orderData = { tableNumber:table, items, total, note, status:"pending", lang:lang||"kh", createdAt:serverTimestamp?serverTimestamp():new Date() };
+    const orderData = { 
+      tableNumber:table, items, total, subtotal, discountAmt, 
+      couponCode: appliedCoupon ? appliedCoupon.code : null,
+      note, status:"pending", lang:lang||"kh", createdAt:serverTimestamp?serverTimestamp():new Date() 
+    };
     let orderId = "OFFLINE-"+Math.floor(Math.random()*100000);
     if(db) {
       const ref = await addDoc(collection(db,"orders"), orderData);
       orderId = ref.id;
       listenOrderStatus(orderId);
     }
-    await sendTelegramAlert({tableNumber:table,items,total,note}, orderId);
+    await sendTelegramAlert(orderData, orderId);
 
     let orders = [];
     try { orders = JSON.parse(safeStorage.get("chafe_orders")||"[]"); } catch(e) {}
     orders.push({id:orderId,tableNumber:table,items,total,note,status:"pending",createdAt:new Date().toISOString()});
     safeStorage.set("chafe_orders", JSON.stringify(orders));
 
-    cart = []; document.getElementById("cartNote").value = "";
+    cart = []; appliedCoupon = null; 
+    document.getElementById("cartNote").value = "";
+    document.getElementById("cartCoupon").value = "";
     renderCart(); closePanels();
     document.getElementById("conf-id").textContent = `#${orderId.slice(-8).toUpperCase()}`;
     showConfirm();
@@ -1137,15 +1240,43 @@ function listenOrderStatus(orderId) {
   } catch(e) {}
 }
 
-window.showCancelModal = id => { cancelTargetId=id; const m=document.getElementById("cancelModal"); m.classList.remove("hidden"); m.style.display="flex"; };
-window.closeCancelModal = () => { cancelTargetId=null; const m=document.getElementById("cancelModal"); m.classList.add("hidden"); m.style.display="none"; };
+window.showCancelModal = id => { 
+  cancelTargetId=id; 
+  const m=document.getElementById("cancelModal"); 
+  m.classList.remove("hidden"); 
+  m.style.display="flex"; 
+};
+window.closeCancelModal = () => { 
+  cancelTargetId=null; 
+  const m=document.getElementById("cancelModal"); 
+  m.classList.add("hidden"); 
+  m.style.display="none"; 
+  document.getElementById("cancelReason").value = ""; 
+};
 window.confirmCancel = async function() {
   if(!cancelTargetId) return;
+  const reason = document.getElementById("cancelReason").value.trim();
   try {
-    if(db&&!cancelTargetId.startsWith("OFFLINE")) await updateDoc(doc(db,"orders",cancelTargetId),{status:"cancelled"});
+    if(db&&!cancelTargetId.startsWith("OFFLINE")) {
+      await updateDoc(doc(db,"orders",cancelTargetId),{
+        status:"cancelled",
+        cancelReason: reason
+      });
+    }
     let orders=loadMyOrders(); const idx=orders.findIndex(o=>o.id===cancelTargetId);
-    if(idx>=0){orders[idx].status="cancelled";safeStorage.set("chafe_orders",JSON.stringify(orders));}
+    let tableNum = "Unknown";
+    if(idx>=0){
+      tableNum = orders[idx].tableNumber;
+      orders[idx].status="cancelled";
+      safeStorage.set("chafe_orders",JSON.stringify(orders));
+    }
     renderMyOrders(); showToast(t().cancelToast);
+    
+    // Alert Telegram when customer cancels their order
+    let reasonText = reason ? `\n💬 Reason: <b>${reason}</b>` : "";
+    const msg = `❌ <b>Order Cancelled by Customer</b>\n\n🆔 #${cancelTargetId.slice(-8).toUpperCase()}\n🪑 Table: ${tableNum}\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}${reasonText}`;
+    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})}).catch(()=>{});
+
   } catch(e) { showToast("❌ Error cancelling order."); }
   closeCancelModal();
 };

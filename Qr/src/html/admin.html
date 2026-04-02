@@ -38,14 +38,6 @@
   @keyframes slideInRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
   @keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(60px)}}
   .notif-card.dismissing{animation:slideOutRight .3s ease forwards;}
-  .img-dropzone{border:2px dashed #5c453b;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:#3a2a24;}
-  .img-dropzone:hover,.img-dropzone.drag-over{border-color:#d44e43;background:#4e3b32;}
-  .img-dropzone input[type=file]{display:none;}
-  .img-preview-wrap{position:relative;display:inline-block;}
-  .img-preview-wrap img{width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid #5c453b;}
-  .img-preview-wrap .remove-img{position:absolute;top:-6px;right:-6px;background:#d44e43;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-  .upload-progress{height:4px;background:#5c453b;border-radius:2px;overflow:hidden;margin-top:8px;}
-  .upload-progress-bar{height:100%;background:linear-gradient(90deg,#d44e43,#d1a14a);border-radius:2px;transition:width .3s ease;width:0%;}
   #kitchenMode{display:none;position:fixed;inset:0;background:#1a0f0a;z-index:10000;overflow-y:auto;padding:20px;}
   #kitchenMode.active{display:block;}
   .kitchen-card{background:#2a1a14;border:2px solid #d1a14a;border-radius:20px;padding:20px;break-inside:avoid;}
@@ -54,8 +46,6 @@
   #liveChartCanvas{width:100%;height:200px;}
   .sound-on{color:#5db85b;}
   .sound-off{color:#d44e43;}
-  .upload-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #5c453b;color:#a3958f;transition:all .2s;}
-  .upload-tab.active{background:#d44e43;color:white;border-color:#d44e43;}
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -295,30 +285,11 @@
               <span class="text-sm text-gray-300">🔥 Popular</span>
             </label>
           </div>
-          <!-- Image Upload -->
+          <!-- Image URL Input -->
           <div class="col-span-12">
-            <label class="block text-[10px] text-gray-400 mb-2 uppercase tracking-wider font-bold">Drink Image</label>
-            <div class="flex gap-2 mb-3">
-              <button type="button" onclick="setImgTab('upload','add')" id="add-tab-upload" class="upload-tab active">📁 Upload File</button>
-              <button type="button" onclick="setImgTab('url','add')" id="add-tab-url" class="upload-tab">🔗 URL Link</button>
-            </div>
-            <div id="add-upload-panel">
-              <div class="img-dropzone rounded-xl" id="addDropzone" onclick="document.getElementById('addFileInput').click()" ondragover="handleDragOver(event,'addDropzone')" ondragleave="handleDragLeave(event,'addDropzone')" ondrop="handleDrop(event,'addFileInput','addDropzone','addImgPreviewWrap','addImageFinal')">
-                <input type="file" id="addFileInput" accept="image/*" onchange="handleFileSelect(this,'addImgPreviewWrap','addImageFinal')">
-                <div id="addImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
-                <div id="addDropzonePrompt" class="flex flex-col items-center gap-2">
-                  <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                  <p class="text-sm text-gray-400">Click or drag image here</p>
-                  <p class="text-[10px] text-gray-500">JPG, PNG, WEBP — max 5MB</p>
-                </div>
-                <div class="upload-progress hidden mt-2" id="addUploadProgress"><div class="upload-progress-bar" id="addProgressBar"></div></div>
-              </div>
-            </div>
-            <div id="add-url-panel" class="hidden">
-              <input type="text" id="addImage" placeholder="https://example.com/image.jpg" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]" oninput="previewUrlImg(this.value,'addUrlPreview')">
-              <img id="addUrlPreview" src="" class="hidden mt-2 w-20 h-20 object-cover rounded-xl border border-[#5c453b]" onerror="this.style.display='none'"/>
-            </div>
-            <input type="hidden" id="addImageFinal">
+            <label class="block text-[10px] text-gray-400 mb-2 uppercase tracking-wider font-bold">Drink Image URL</label>
+            <input type="text" id="addImage" placeholder="https://example.com/image.jpg" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]" oninput="previewUrlImg(this.value,'addUrlPreview')">
+            <img id="addUrlPreview" src="" class="hidden mt-2 w-20 h-20 object-cover rounded-xl border border-[#5c453b]" onerror="this.style.display='none'"/>
           </div>
           <div class="col-span-12 flex justify-end mt-2">
             <button onclick="addMenuItem()" class="w-full md:w-auto bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
@@ -381,23 +352,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Step Number</label><input type="number" id="slideStep" placeholder="1" min="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43]"></div>
           <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Slide Image</label>
-            <div class="flex gap-2 mb-2">
-              <button type="button" onclick="setImgTab('upload','slide')" id="slide-tab-upload" class="upload-tab active">📁 Upload</button>
-              <button type="button" onclick="setImgTab('url','slide')" id="slide-tab-url" class="upload-tab">🔗 URL</button>
-            </div>
-            <div id="slide-upload-panel">
-              <div class="img-dropzone rounded-xl" id="slideDropzone" onclick="document.getElementById('slideFileInput').click()">
-                <input type="file" id="slideFileInput" accept="image/*" onchange="handleFileSelect(this,'slideImgPreviewWrap','slideImageFinal')">
-                <div id="slideImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
-                <div id="slideDropzonePrompt" class="flex flex-col items-center gap-2 text-center"><p class="text-sm text-gray-400">Click or drag image</p></div>
-                <div class="upload-progress hidden mt-2" id="slideUploadProgress"><div class="upload-progress-bar" id="slideProgressBar"></div></div>
-              </div>
-            </div>
-            <div id="slide-url-panel" class="hidden">
-              <input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]">
-            </div>
-            <input type="hidden" id="slideImageFinal">
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Slide Image URL</label>
+            <input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]">
           </div>
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label><textarea id="slideTitleEn" placeholder="Scan the QR Code" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><textarea id="slideTitleKh" placeholder="ស្កែន QR" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
@@ -537,23 +493,9 @@
         <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPopular" class="w-4 h-4 accent-[#d44e43]"><span class="text-sm text-gray-300">🔥 Popular</span></label>
       </div>
       <div class="col-span-3">
-        <label class="text-xs text-gray-400 mb-1 block">Image</label>
-        <div class="flex gap-2 mb-2">
-          <button type="button" onclick="setImgTab('upload','edit')" id="edit-tab-upload" class="upload-tab active">📁 Upload</button>
-          <button type="button" onclick="setImgTab('url','edit')" id="edit-tab-url" class="upload-tab">🔗 URL</button>
-        </div>
-        <div id="edit-upload-panel">
-          <div class="img-dropzone" id="editDropzone" onclick="document.getElementById('editFileInput').click()">
-            <input type="file" id="editFileInput" accept="image/*" onchange="handleFileSelect(this,'editImgPreviewWrap','editImageFinal')">
-            <div id="editImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
-            <div id="editDropzonePrompt" class="text-center"><p class="text-sm text-gray-400">Click to replace image</p></div>
-            <div class="upload-progress hidden mt-2" id="editUploadProgress"><div class="upload-progress-bar" id="editProgressBar"></div></div>
-          </div>
-        </div>
-        <div id="edit-url-panel" class="hidden">
-          <input type="text" id="editImage" class="w-full" placeholder="https://...">
-        </div>
-        <input type="hidden" id="editImageFinal">
+        <label class="text-xs text-gray-400 mb-1 block">Image URL</label>
+        <input type="text" id="editImage" class="w-full" placeholder="https://..." oninput="previewUrlImg(this.value,'editUrlPreview')">
+        <img id="editUrlPreview" src="" class="hidden mt-2 w-16 h-16 object-cover rounded-xl border border-[#5c453b]" onerror="this.style.display='none'"/>
       </div>
     </div>
     <div class="flex gap-3">
@@ -572,17 +514,9 @@
       <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="topNameKh" placeholder="e.g. គុជ" class="w-full"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="topPrice" placeholder="0.50" step="0.01" class="w-full"></div>
       <div>
-        <label class="text-xs text-gray-400 mb-1 block">Photo</label>
-        <div class="img-dropzone" id="topDropzone" onclick="document.getElementById('topFileInput').click()">
-          <input type="file" id="topFileInput" accept="image/*" onchange="handleFileSelect(this,'topImgPreviewWrap','topImageFinal')">
-          <div id="topImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
-          <div id="topDropzonePrompt" class="text-center"><p class="text-sm text-gray-400">Upload photo (optional)</p></div>
-          <div class="upload-progress hidden mt-2" id="topUploadProgress"><div class="upload-progress-bar" id="topProgressBar"></div></div>
-        </div>
-        <p class="text-xs text-gray-500 mt-1 text-center">or</p>
+        <label class="text-xs text-gray-400 mb-1 block">Photo URL</label>
         <input type="text" id="topImage" placeholder="Paste URL..." class="w-full mt-1" oninput="previewImg('topImage','topUrlPreviewImg','topUrlPreview')">
         <div id="topUrlPreview" class="mt-2 hidden"><img id="topUrlPreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview"/></div>
-        <input type="hidden" id="topImageFinal">
       </div>
     </div>
     <div class="flex gap-3">
@@ -654,7 +588,6 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const FB = {
   apiKey:"AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
@@ -666,7 +599,6 @@ const FB = {
 };
 const app = initializeApp(FB);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
 const TG_CHAT = "-1003706744326";
@@ -734,61 +666,7 @@ function showOrderNotif(order) {
   setTimeout(() => { if(card.parentNode){card.classList.add('dismissing');setTimeout(()=>card.parentNode&&card.remove(),300);} }, 6000);
 }
 
-// ── IMAGE UPLOAD ──
-window.setImgTab = function(tab, prefix) {
-  const uploadTab=document.getElementById(`${prefix}-tab-upload`);
-  const urlTab=document.getElementById(`${prefix}-tab-url`);
-  const uploadPanel=document.getElementById(`${prefix}-upload-panel`);
-  const urlPanel=document.getElementById(`${prefix}-url-panel`);
-  if(tab==='upload'){ uploadTab.classList.add('active'); urlTab.classList.remove('active'); uploadPanel.classList.remove('hidden'); urlPanel.classList.add('hidden'); }
-  else { urlTab.classList.add('active'); uploadTab.classList.remove('active'); urlPanel.classList.remove('hidden'); uploadPanel.classList.add('hidden'); }
-};
-window.handleDragOver = function(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag-over'); };
-window.handleDragLeave = function(e,id){ document.getElementById(id).classList.remove('drag-over'); };
-window.handleDrop = function(e,fileInputId,dropzoneId,previewWrapId,finalInputId) {
-  e.preventDefault(); document.getElementById(dropzoneId).classList.remove('drag-over');
-  const file=e.dataTransfer.files[0]; if(!file) return;
-  handleFileSelect({files:[file]},previewWrapId,finalInputId);
-};
-window.handleFileSelect = async function(input,previewWrapId,finalInputId) {
-  const file=input.files?.[0]||(Array.isArray(input.files)?input.files[0]:null);
-  if(!file) return;
-  if(file.size>5*1024*1024){ showToast('File too large (max 5MB)',true); return; }
-  const previewWrap=document.getElementById(previewWrapId);
-  const finalInput=document.getElementById(finalInputId);
-  const prefix=previewWrapId.replace('ImgPreviewWrap','');
-  const progressWrap=document.getElementById(prefix+'UploadProgress');
-  const progressBar=document.getElementById(prefix+'ProgressBar');
-  const promptEl=document.getElementById(prefix+'DropzonePrompt');
-  if(promptEl) promptEl.style.display='none';
-  if(progressWrap) progressWrap.classList.remove('hidden');
-  try {
-    const ext=file.name.split('.').pop();
-    const path=`menu/${Date.now()}_${Math.random().toString(36).substr(2,6)}.${ext}`;
-    const sRef=storageRef(storage,path);
-    const uploadTask=uploadBytesResumable(sRef,file);
-    uploadTask.on('state_changed',
-      snap=>{ const pct=(snap.bytesTransferred/snap.totalBytes)*100; if(progressBar) progressBar.style.width=pct+'%'; },
-      err=>{ showToast('Upload failed: '+err.message,true); if(progressWrap) progressWrap.classList.add('hidden'); },
-      async()=>{
-        const url=await getDownloadURL(uploadTask.snapshot.ref);
-        finalInput.value=url;
-        if(progressWrap) progressWrap.classList.add('hidden');
-        if(previewWrap){
-          previewWrap.innerHTML=`<div class="img-preview-wrap"><img src="${url}" alt="Preview"/><button type="button" class="remove-img" onclick="clearImgPreview('${previewWrapId}','${finalInputId}','${prefix}')">×</button></div><p class="text-xs text-[#5db85b] font-bold mt-1">✓ Uploaded!</p>`;
-          previewWrap.classList.remove('hidden'); previewWrap.style.display='flex';
-        }
-        showToast('Image uploaded!');
-      }
-    );
-  } catch(err){ showToast('Upload error',true); }
-};
-window.clearImgPreview = function(previewWrapId,finalInputId,prefix) {
-  const pw=document.getElementById(previewWrapId); const fi=document.getElementById(finalInputId); const pr=document.getElementById(prefix+'DropzonePrompt');
-  if(pw){pw.innerHTML='';pw.classList.add('hidden');pw.style.display='none';}
-  if(fi) fi.value='';
-  if(pr) pr.style.display='flex';
-};
+// ── IMAGE PREVIEW ──
 window.previewUrlImg = function(url,previewId) {
   const img=document.getElementById(previewId); if(!img) return;
   if(url){img.src=url;img.classList.remove('hidden');img.style.display='block';}else{img.classList.add('hidden');}
@@ -1167,13 +1045,12 @@ window.addMenuItem = async function() {
   const temperature=document.getElementById('addTemperature').value;
   const popular=document.getElementById('addPopular').checked;
   if(!name||isNaN(price)){ showToast('Name and Price required',true); return; }
-  const imgUrl=document.getElementById('addImageFinal')?.value||document.getElementById('addImage')?.value.trim()||'';
+  const imgUrl=document.getElementById('addImage')?.value.trim()||'';
   try {
     await addDoc(collection(db,'menu'),{name,nameKh,price,priceHot,priceFrappe,category:cat||'Other',imageUrl:imgUrl,discount:0,inStock:true,temperature,popular});
     ['addName','addNameKh','addPrice','addPriceHot','addPriceFrappe','addCat','addImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    if(document.getElementById('addImageFinal')) document.getElementById('addImageFinal').value='';
     document.getElementById('addPopular').checked=false;
-    clearImgPreview('addImgPreviewWrap','addImageFinal','add');
+    previewUrlImg('','addUrlPreview');
     showToast('Item added!');
   } catch(e){ showToast('Error adding item',true); }
 };
@@ -1196,7 +1073,8 @@ window.openEditMenuModal = function(id) {
   document.getElementById('editName').value=item.name||''; document.getElementById('editNameKh').value=item.nameKh||'';
   document.getElementById('editPrice').value=item.price||0; document.getElementById('editPriceHot').value=item.priceHot||'';
   document.getElementById('editPriceFrappe').value=item.priceFrappe||''; document.getElementById('editCat').value=item.category||'';
-  document.getElementById('editImage').value=item.imageUrl||''; document.getElementById('editImageFinal').value=item.imageUrl||'';
+  document.getElementById('editImage').value=item.imageUrl||'';
+  previewUrlImg(item.imageUrl||'', 'editUrlPreview');
   document.getElementById('editTemperature').value=item.temperature||'both'; document.getElementById('editPopular').checked=!!item.popular;
   const m=document.getElementById('editMenuModal'); m.classList.remove('hidden'); m.style.display='flex';
 };
@@ -1208,7 +1086,7 @@ window.saveEditMenu = async function() {
   const priceFrappe=parseFloat(document.getElementById('editPriceFrappe').value)||null; const category=document.getElementById('editCat').value.trim()||'Other';
   const temperature=document.getElementById('editTemperature').value; const popular=document.getElementById('editPopular').checked;
   if(!name||isNaN(price)){ showToast('Name and Price required',true); return; }
-  const imageUrl=document.getElementById('editImageFinal')?.value||document.getElementById('editImage')?.value.trim()||'';
+  const imageUrl=document.getElementById('editImage')?.value.trim()||'';
   try{ await updateDoc(doc(db,'menu',editingMenuId),{name,nameKh,price,priceHot,priceFrappe,category,imageUrl,temperature,popular}); closeEditMenuModal(); showToast('Updated!'); }
   catch(e){ showToast('Error',true); }
 };
@@ -1256,14 +1134,13 @@ window.closeAddToppingModal = ()=>{ const m=document.getElementById('toppingModa
 window.saveTopping = async function() {
   const name=document.getElementById('topName').value.trim(); const nameKh=document.getElementById('topNameKh').value.trim();
   const price=parseFloat(document.getElementById('topPrice').value);
-  const imageUrl=document.getElementById('topImageFinal')?.value||document.getElementById('topImage').value.trim();
+  const imageUrl=document.getElementById('topImage').value.trim();
   if(!name){ showToast('Name required!',true); return; } if(isNaN(price)||price<0){ showToast('Valid price required!',true); return; }
   try {
     await addDoc(collection(db,'toppings'),{name,nameKh,price,imageUrl,inStock:true});
     closeAddToppingModal();
     ['topName','topNameKh','topPrice','topImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    if(document.getElementById('topImageFinal')) document.getElementById('topImageFinal').value='';
-    clearImgPreview('topImgPreviewWrap','topImageFinal','top');
+    previewImg('','topUrlPreviewImg','topUrlPreview');
     showToast('Topping added!');
   } catch(e){ showToast('Error: '+e.message,true); }
 };
@@ -1312,14 +1189,13 @@ function renderToppings() {
 // ── SLIDESHOW ──
 window.addSlide = async function() {
   const step=parseInt(document.getElementById('slideStep').value)||(slideshowItems.length+1);
-  const imageUrl=document.getElementById('slideImageFinal')?.value||document.getElementById('slideImage')?.value.trim()||'';
+  const imageUrl=document.getElementById('slideImage')?.value.trim()||'';
   const titleEn=document.getElementById('slideTitleEn').value.trim(); const titleKh=document.getElementById('slideTitleKh').value.trim();
   const descEn=document.getElementById('slideDescEn').value.trim(); const descKh=document.getElementById('slideDescKh').value.trim();
   if(!titleEn){ showToast('Title (EN) required',true); return; }
   try {
     await addDoc(collection(db,'slideshow'),{step,order:step,imageUrl,title:titleEn,titleKh,description:descEn,descKh});
     ['slideStep','slideImage','slideTitleEn','slideTitleKh','slideDescEn','slideDescKh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    if(document.getElementById('slideImageFinal')) document.getElementById('slideImageFinal').value='';
     showToast('Slide added!');
   } catch(e){ showToast('Error',true); }
 };

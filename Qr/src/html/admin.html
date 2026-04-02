@@ -19,34 +19,49 @@
   ::-webkit-scrollbar{width:6px;height:6px;}
   ::-webkit-scrollbar-track{background:#3a2a24;}
   ::-webkit-scrollbar-thumb{background:#5c453b;border-radius:4px;}
-
-  /* Status badges */
   .status-pending{background:#d1a14a22;color:#d1a14a;border:1px solid #d1a14a44;}
   .status-completed{background:#5db85b22;color:#5db85b;border:1px solid #5db85b44;}
   .status-cancelled{background:#d44e4322;color:#d44e43;border:1px solid #d44e4344;}
-
-  /* Order card status ring */
   .order-card-pending{border-color:#d1a14a60;}
   .order-card-completed{border-color:#5db85b60;opacity:.75;}
   .order-card-cancelled{border-color:#d44e4360;opacity:.6;}
-
-  /* Live timer */
   .order-timer{font-size:11px;font-weight:600;color:#d1a14a;}
-
-  /* Temp pills */
   .tp-ice{background:#1d4ed822;color:#60a5fa;border:1px solid #1d4ed844;}
   .tp-hot{background:#b91c1c22;color:#f87171;border:1px solid #b91c1c44;}
   .tp-frappe{background:#4f46e522;color:#818cf8;border:1px solid #4f46e544;}
   .tp-both{background:#37415122;color:#9ca3af;border:1px solid #37415144;}
-
-  /* Total order counter banner */
   #totalOrderBanner{background:linear-gradient(135deg,#d44e43,#a6332f);border-radius:16px;padding:20px 24px;}
-
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .fade-up{animation:fadeUp .3s ease both;}
+  #orderNotifPopup{position:fixed;top:20px;right:20px;z-index:9999;max-width:360px;pointer-events:none;}
+  .notif-card{background:#4e3b32;border:1px solid #d1a14a;border-left:4px solid #d1a14a;border-radius:16px;padding:16px 18px;margin-bottom:10px;box-shadow:0 8px 32px rgba(0,0,0,0.5);pointer-events:auto;animation:slideInRight .4s ease;}
+  @keyframes slideInRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(60px)}}
+  .notif-card.dismissing{animation:slideOutRight .3s ease forwards;}
+  .img-dropzone{border:2px dashed #5c453b;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:#3a2a24;}
+  .img-dropzone:hover,.img-dropzone.drag-over{border-color:#d44e43;background:#4e3b32;}
+  .img-dropzone input[type=file]{display:none;}
+  .img-preview-wrap{position:relative;display:inline-block;}
+  .img-preview-wrap img{width:80px;height:80px;object-fit:cover;border-radius:10px;border:2px solid #5c453b;}
+  .img-preview-wrap .remove-img{position:absolute;top:-6px;right:-6px;background:#d44e43;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .upload-progress{height:4px;background:#5c453b;border-radius:2px;overflow:hidden;margin-top:8px;}
+  .upload-progress-bar{height:100%;background:linear-gradient(90deg,#d44e43,#d1a14a);border-radius:2px;transition:width .3s ease;width:0%;}
+  #kitchenMode{display:none;position:fixed;inset:0;background:#1a0f0a;z-index:10000;overflow-y:auto;padding:20px;}
+  #kitchenMode.active{display:block;}
+  .kitchen-card{background:#2a1a14;border:2px solid #d1a14a;border-radius:20px;padding:20px;break-inside:avoid;}
+  .kitchen-card.urgent{border-color:#d44e43;animation:urgentPulse 1.5s ease infinite;}
+  @keyframes urgentPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,78,67,0)}50%{box-shadow:0 0 0 8px rgba(212,78,67,0.2)}}
+  #liveChartCanvas{width:100%;height:200px;}
+  .sound-on{color:#5db85b;}
+  .sound-off{color:#d44e43;}
+  .upload-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #5c453b;color:#a3958f;transition:all .2s;}
+  .upload-tab.active{background:#d44e43;color:white;border-color:#d44e43;}
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
+
+<!-- ORDER NOTIF POPUP -->
+<div id="orderNotifPopup"></div>
 
 <!-- MOBILE OVERLAY -->
 <div id="mobileOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
@@ -62,7 +77,7 @@
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
   </div>
-  <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
     <button onclick="switchTab('stats')" id="tab-stats" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors bg-[#8a382f]/20 text-[#d44e43] font-medium">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
       Statistics
@@ -70,6 +85,10 @@
     <button onclick="switchTab('orders')" id="tab-orders" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
       Live Orders <span id="pendingBadge" class="ml-auto bg-[#d44e43] text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
+    </button>
+    <button onclick="openKitchenMode()" id="tab-kitchen" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      Kitchen Display
     </button>
     <button onclick="switchTab('history')" id="tab-history" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -92,9 +111,15 @@
       Coupons
     </button>
   </nav>
+  <div class="p-4 border-t border-[#4a352a]">
+    <button onclick="toggleSound()" id="soundToggleBtn" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#3a2a24] border border-[#5c453b] text-sm font-medium transition hover:bg-[#4a352a]">
+      <svg id="soundIcon" class="w-4 h-4 sound-on" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072M6.464 8.464a7 7 0 000 10.072M17.536 6.464a7 7 0 010 10.072"/></svg>
+      <span id="soundLabel" class="text-[#5db85b]">Sound Alerts: ON</span>
+    </button>
+  </div>
 </div>
 
-<!-- MAIN CONTENT WRAPPER -->
+<!-- MAIN CONTENT -->
 <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
   <!-- MOBILE HEADER -->
   <div class="md:hidden flex items-center justify-between bg-[#3a2a24] p-4 border-b border-[#4a352a] shrink-0 z-30 shadow-md">
@@ -107,21 +132,25 @@
     <span id="pendingBadgeMobile" class="bg-[#d44e43] text-white text-xs px-2 py-0.5 rounded-full hidden">0 pending</span>
   </div>
 
-  <!-- SCROLLABLE CONTENT -->
   <div class="flex-1 overflow-y-auto p-4 md:p-8 relative" id="main-area">
 
-    <!-- ═══ TAB: STATISTICS ═══ -->
+    <!-- ═══ STATISTICS ═══ -->
     <div id="view-stats" class="max-w-6xl mx-auto block">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 class="text-3xl serif">Statistics</h2>
+        <div class="flex items-center gap-2 text-xs text-[#5db85b]">
+          <div class="w-2 h-2 rounded-full bg-[#5db85b] animate-pulse"></div>
+          Live Updates Active
+        </div>
       </div>
 
-      <!-- TOTAL ORDER COUNTER BANNER -->
       <div id="totalOrderBanner" class="mb-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-3 mb-1">
             <p class="text-xs uppercase tracking-widest opacity-70">Total Orders All Time</p>
-            <button onclick="sendTotalStatsToTelegram()" class="bg-white/20 hover:bg-white/40 text-white rounded px-2 py-0.5 flex items-center gap-1 transition text-[10px]" title="Send to Telegram"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send</button>
+            <button onclick="sendTotalStatsToTelegram()" class="bg-white/20 hover:bg-white/40 text-white rounded px-2 py-0.5 flex items-center gap-1 transition text-[10px]" title="Send to Telegram">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send
+            </button>
           </div>
           <p class="text-5xl font-bold" id="stat-all">0</p>
         </div>
@@ -141,22 +170,33 @@
         </div>
       </div>
 
-      <!-- TOP ITEMS -->
+      <!-- Hourly Chart -->
+      <div class="bg-[#4e3b32] p-5 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-sm uppercase tracking-wider text-gray-400 font-bold">📈 Today's Orders (Hourly)</h3>
+          <span id="todayTotal" class="text-[#d44e43] font-bold text-sm">0 today</span>
+        </div>
+        <canvas id="liveChartCanvas"></canvas>
+      </div>
+
+      <!-- Top Items -->
       <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
         <div class="flex justify-between items-center border-b border-[#5c453b] pb-2 mb-4">
           <h3 class="text-sm uppercase tracking-wider text-gray-400 font-bold">🔥 Most Ordered Items</h3>
-          <button onclick="sendTopItemsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send list</button>
+          <button onclick="sendTopItemsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send list
+          </button>
         </div>
-        <div id="topItemsList" class="space-y-2">
-          <p class="text-gray-500 text-sm">Loading...</p>
-        </div>
+        <div id="topItemsList" class="space-y-2"><p class="text-gray-500 text-sm">Loading...</p></div>
       </div>
 
       <!-- Period Calculation -->
       <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
         <div class="flex justify-between items-center border-b border-[#5c453b] pb-2 mb-4">
           <h3 class="text-sm uppercase tracking-wider text-gray-400 font-bold">Period Calculation</h3>
-          <button onclick="sendFilteredStatsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send report</button>
+          <button onclick="sendFilteredStatsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send report
+          </button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
           <div><label class="block text-xs text-gray-400 mb-2">Start Date</label><input type="date" id="statStartDate" onchange="calculateFilteredStats()" class="w-full"></div>
@@ -173,7 +213,7 @@
       </div>
     </div>
 
-    <!-- ═══ TAB: LIVE ORDERS ═══ -->
+    <!-- ═══ LIVE ORDERS ═══ -->
     <div id="view-orders" class="max-w-6xl mx-auto hidden">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <h2 class="text-3xl serif">Live Orders</h2>
@@ -182,13 +222,14 @@
           <button onclick="setOrderFilter('pending')" id="ofilter-pending" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">⏳ Pending</button>
           <button onclick="setOrderFilter('completed')" id="ofilter-completed" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✓ Completed</button>
           <button onclick="setOrderFilter('cancelled')" id="ofilter-cancelled" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✗ Cancelled</button>
+          <button onclick="openKitchenMode()" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#d1a14a]/20 text-[#d1a14a] border border-[#d1a14a]/40 hover:bg-[#d1a14a]/30 transition">🍳 Kitchen Mode</button>
         </div>
       </div>
       <div id="ordersGrid" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
       <p id="noOrders" class="text-center text-gray-400 py-10 hidden">No orders found.</p>
     </div>
 
-    <!-- ═══ TAB: ORDER HISTORY ═══ -->
+    <!-- ═══ ORDER HISTORY ═══ -->
     <div id="view-history" class="max-w-6xl mx-auto hidden">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 class="text-3xl serif">Order History</h2>
@@ -223,9 +264,8 @@
       </div>
     </div>
 
-    <!-- ═══ TAB: MENU MANAGER ═══ -->
+    <!-- ═══ MENU MANAGER ═══ -->
     <div id="view-menu" class="max-w-6xl mx-auto hidden space-y-10">
-      <!-- Add New Drink -->
       <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg relative overflow-hidden">
         <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-[#d44e43] to-transparent opacity-10 rounded-bl-full pointer-events-none"></div>
         <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-6 font-bold flex items-center gap-3">
@@ -235,32 +275,13 @@
           Create New Drink
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 relative z-10">
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (EN)</label>
-            <input type="text" id="addName" placeholder="Matcha Latte" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH)</label>
-            <input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Category</label>
-            <input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Ice/Base Price ($)</label>
-            <input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Hot Price ($)</label>
-            <input type="number" id="addPriceHot" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Frappe Price ($)</label>
-            <input type="number" id="addPriceFrappe" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Temperature Options</label>
+          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (EN)</label><input type="text" id="addName" placeholder="Matcha Latte" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
+          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH)</label><input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
+          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Category</label><input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
+          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Ice/Base Price ($)</label><input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
+          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Hot Price ($)</label><input type="number" id="addPriceHot" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
+          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Frappe Price ($)</label><input type="number" id="addPriceFrappe" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
+          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Temperature</label>
             <select id="addTemperature" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8]">
               <option value="both">🧊☕ Ice & Hot</option>
               <option value="ice">🧊 Iced Only</option>
@@ -274,9 +295,30 @@
               <span class="text-sm text-gray-300">🔥 Popular</span>
             </label>
           </div>
-          <div class="col-span-12 md:col-span-10">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label>
-            <input type="text" id="addImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+          <!-- Image Upload -->
+          <div class="col-span-12">
+            <label class="block text-[10px] text-gray-400 mb-2 uppercase tracking-wider font-bold">Drink Image</label>
+            <div class="flex gap-2 mb-3">
+              <button type="button" onclick="setImgTab('upload','add')" id="add-tab-upload" class="upload-tab active">📁 Upload File</button>
+              <button type="button" onclick="setImgTab('url','add')" id="add-tab-url" class="upload-tab">🔗 URL Link</button>
+            </div>
+            <div id="add-upload-panel">
+              <div class="img-dropzone rounded-xl" id="addDropzone" onclick="document.getElementById('addFileInput').click()" ondragover="handleDragOver(event,'addDropzone')" ondragleave="handleDragLeave(event,'addDropzone')" ondrop="handleDrop(event,'addFileInput','addDropzone','addImgPreviewWrap','addImageFinal')">
+                <input type="file" id="addFileInput" accept="image/*" onchange="handleFileSelect(this,'addImgPreviewWrap','addImageFinal')">
+                <div id="addImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
+                <div id="addDropzonePrompt" class="flex flex-col items-center gap-2">
+                  <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <p class="text-sm text-gray-400">Click or drag image here</p>
+                  <p class="text-[10px] text-gray-500">JPG, PNG, WEBP — max 5MB</p>
+                </div>
+                <div class="upload-progress hidden mt-2" id="addUploadProgress"><div class="upload-progress-bar" id="addProgressBar"></div></div>
+              </div>
+            </div>
+            <div id="add-url-panel" class="hidden">
+              <input type="text" id="addImage" placeholder="https://example.com/image.jpg" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]" oninput="previewUrlImg(this.value,'addUrlPreview')">
+              <img id="addUrlPreview" src="" class="hidden mt-2 w-20 h-20 object-cover rounded-xl border border-[#5c453b]" onerror="this.style.display='none'"/>
+            </div>
+            <input type="hidden" id="addImageFinal">
           </div>
           <div class="col-span-12 flex justify-end mt-2">
             <button onclick="addMenuItem()" class="w-full md:w-auto bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
@@ -325,24 +367,40 @@
       <div>
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl serif">Dynamic Toppings</h3>
-          <button onclick="openAddToppingModal()" class="btn-success px-4 py-2 rounded text-sm font-bold flex items-center gap-2">
-            <span>+</span> Add Topping
-          </button>
+          <button onclick="openAddToppingModal()" class="btn-success px-4 py-2 rounded text-sm font-bold flex items-center gap-2"><span>+</span> Add Topping</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="toppingsGrid"></div>
       </div>
     </div>
 
-    <!-- ═══ TAB: HOW-TO SLIDES ═══ -->
+    <!-- ═══ HOW-TO SLIDES ═══ -->
     <div id="view-slideshow" class="max-w-4xl mx-auto hidden space-y-8">
       <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg">
         <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-2 font-bold">Add How-to-Order Slide</h3>
         <p class="text-xs text-gray-400 mb-5">These slides appear on the ordering page to guide customers.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Step Number</label><input type="number" id="slideStep" placeholder="1" min="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label><input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label><input type="text" id="slideTitleEn" placeholder="Scan the QR Code" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><input type="text" id="slideTitleKh" placeholder="ស្កែន QR" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
+          <div>
+            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Slide Image</label>
+            <div class="flex gap-2 mb-2">
+              <button type="button" onclick="setImgTab('upload','slide')" id="slide-tab-upload" class="upload-tab active">📁 Upload</button>
+              <button type="button" onclick="setImgTab('url','slide')" id="slide-tab-url" class="upload-tab">🔗 URL</button>
+            </div>
+            <div id="slide-upload-panel">
+              <div class="img-dropzone rounded-xl" id="slideDropzone" onclick="document.getElementById('slideFileInput').click()">
+                <input type="file" id="slideFileInput" accept="image/*" onchange="handleFileSelect(this,'slideImgPreviewWrap','slideImageFinal')">
+                <div id="slideImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
+                <div id="slideDropzonePrompt" class="flex flex-col items-center gap-2 text-center"><p class="text-sm text-gray-400">Click or drag image</p></div>
+                <div class="upload-progress hidden mt-2" id="slideUploadProgress"><div class="upload-progress-bar" id="slideProgressBar"></div></div>
+              </div>
+            </div>
+            <div id="slide-url-panel" class="hidden">
+              <input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]">
+            </div>
+            <input type="hidden" id="slideImageFinal">
+          </div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label><textarea id="slideTitleEn" placeholder="Scan the QR Code" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><textarea id="slideTitleKh" placeholder="ស្កែន QR" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (EN)</label><textarea id="slideDescEn" placeholder="Use your phone camera..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (KH)</label><textarea id="slideDescKh" placeholder="ប្រើកាមេរ៉ាទូរស័ព្ទ..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
         </div>
@@ -355,17 +413,14 @@
       </div>
       <div>
         <h3 class="text-2xl serif mb-4">Current Slides</h3>
-        <div id="slideshowList" class="space-y-4">
-          <p class="text-center text-gray-400 py-8">No slides yet.</p>
-        </div>
+        <div id="slideshowList" class="space-y-4"><p class="text-center text-gray-400 py-8">No slides yet.</p></div>
       </div>
     </div>
 
-    <!-- ═══ TAB: SOCIAL LINKS ═══ -->
+    <!-- ═══ SOCIAL LINKS ═══ -->
     <div id="view-social" class="max-w-2xl mx-auto hidden">
       <h2 class="text-3xl serif mb-2">Social Links</h2>
-      <p class="text-gray-400 text-sm mb-6">Add Facebook and TikTok links. They will appear as a fixed floating icon on the bottom corner for customers.</p>
-
+      <p class="text-gray-400 text-sm mb-6">Add Facebook and TikTok links. They will appear as floating icons for customers.</p>
       <div class="bg-[#4e3b32] p-6 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg space-y-6">
         <div>
           <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
@@ -375,20 +430,15 @@
           <input type="url" id="fbUrl" placeholder="https://facebook.com/yourpage" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#1877f2] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
         </div>
         <div>
-          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-            TikTok Profile URL
-          </label>
+          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold">TikTok Profile URL</label>
           <input type="url" id="ttUrl" placeholder="https://tiktok.com/@yourprofile" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
         </div>
-
         <div class="flex items-center gap-4 pt-2 border-t border-[#5c453b]">
           <button onclick="saveSocialLinks()" class="flex-1 bg-[#d44e43] hover:bg-[#b83f36] text-white py-3 rounded-xl font-bold text-sm transition">Save Social Links</button>
           <button onclick="clearSocialLinks()" class="px-4 py-3 border border-[#5c453b] rounded-xl text-gray-400 hover:text-white hover:bg-[#3a2a24] text-sm transition">Clear</button>
         </div>
-
         <div class="pt-4 border-t border-[#5c453b]">
-          <p class="text-xs text-gray-500 uppercase tracking-wider mb-3 font-bold">Preview (what customers see)</p>
+          <p class="text-xs text-gray-500 uppercase tracking-wider mb-3 font-bold">Preview</p>
           <div class="bg-[#3a2a24] rounded-xl p-4 flex items-center justify-center gap-4 border border-[#5c453b] min-h-[80px]">
             <span id="preview-fb" class="hidden items-center justify-center w-10 h-10 rounded-full bg-[#1877f2] text-white shadow-md">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
@@ -402,15 +452,10 @@
       </div>
     </div>
 
-    <!-- ═══ TAB: COUPONS ═══ -->
+    <!-- ═══ COUPONS ═══ -->
     <div id="view-coupons" class="max-w-4xl mx-auto hidden space-y-8">
       <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg">
-        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-4 font-bold flex items-center gap-3">
-          <div class="p-2 bg-[#d44e43]/20 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
-          </div>
-          Create Discount Coupon
-        </h3>
+        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-4 font-bold">Create Discount Coupon</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Coupon Code</label><input type="text" id="addCouponCode" placeholder="e.g. SUMMER20" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] uppercase"></div>
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Discount (%)</label><input type="number" id="addCouponPct" placeholder="e.g. 20" min="1" max="100" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8]"></div>
@@ -436,11 +481,28 @@
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- Custom Confirmation Modal (Replaces browser confirm) -->
+<!-- KITCHEN DISPLAY MODE -->
+<div id="kitchenMode">
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4">
+      <h1 class="text-4xl font-serif text-[#d1a14a] font-bold">Kitchen Display</h1>
+      <div class="flex items-center gap-2 text-sm text-[#5db85b]">
+        <div class="w-2 h-2 rounded-full bg-[#5db85b] animate-pulse"></div>
+        Live
+      </div>
+    </div>
+    <div class="flex gap-3 items-center">
+      <span id="kitchenTime" class="text-2xl text-gray-300 font-mono font-bold"></span>
+      <button onclick="closeKitchenMode()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">✕ Exit</button>
+    </div>
+  </div>
+  <div id="kitchenGrid" class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 space-y-5"></div>
+</div>
+
+<!-- CONFIRM MODAL -->
 <div id="confirmModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[1000] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold" id="confirmTitle">Confirm</h3>
@@ -452,20 +514,18 @@
   </div>
 </div>
 
-<!-- Edit Menu Modal -->
-<div id="editMenuModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
+<!-- EDIT MENU MODAL -->
+<div id="editMenuModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4 overflow-y-auto">
+  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-lg shadow-2xl my-4">
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Edit Drink</h3>
     <div class="grid grid-cols-3 gap-4 mb-4">
       <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
       <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full"></div>
       <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
-      
       <div><label class="text-xs text-gray-400 mb-1 block">Ice Price</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Hot Price</label><input type="number" id="editPriceHot" step="0.01" class="w-full"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Frap Price</label><input type="number" id="editPriceFrappe" step="0.01" class="w-full"></div>
-      
-      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Temperature Options</label>
+      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Temperature</label>
         <select id="editTemperature" class="w-full">
           <option value="both">🧊☕ Ice & Hot</option>
           <option value="ice">🧊 Iced Only</option>
@@ -474,12 +534,27 @@
         </select>
       </div>
       <div class="col-span-3 flex items-center">
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" id="editPopular" class="w-4 h-4 accent-[#d44e43]">
-          <span class="text-sm text-gray-300">🔥 Popular</span>
-        </label>
+        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPopular" class="w-4 h-4 accent-[#d44e43]"><span class="text-sm text-gray-300">🔥 Popular</span></label>
       </div>
-      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editImage" class="w-full"></div>
+      <div class="col-span-3">
+        <label class="text-xs text-gray-400 mb-1 block">Image</label>
+        <div class="flex gap-2 mb-2">
+          <button type="button" onclick="setImgTab('upload','edit')" id="edit-tab-upload" class="upload-tab active">📁 Upload</button>
+          <button type="button" onclick="setImgTab('url','edit')" id="edit-tab-url" class="upload-tab">🔗 URL</button>
+        </div>
+        <div id="edit-upload-panel">
+          <div class="img-dropzone" id="editDropzone" onclick="document.getElementById('editFileInput').click()">
+            <input type="file" id="editFileInput" accept="image/*" onchange="handleFileSelect(this,'editImgPreviewWrap','editImageFinal')">
+            <div id="editImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
+            <div id="editDropzonePrompt" class="text-center"><p class="text-sm text-gray-400">Click to replace image</p></div>
+            <div class="upload-progress hidden mt-2" id="editUploadProgress"><div class="upload-progress-bar" id="editProgressBar"></div></div>
+          </div>
+        </div>
+        <div id="edit-url-panel" class="hidden">
+          <input type="text" id="editImage" class="w-full" placeholder="https://...">
+        </div>
+        <input type="hidden" id="editImageFinal">
+      </div>
     </div>
     <div class="flex gap-3">
       <button onclick="closeEditMenuModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
@@ -488,7 +563,7 @@
   </div>
 </div>
 
-<!-- Add Topping Modal -->
+<!-- ADD TOPPING MODAL -->
 <div id="toppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">New Topping</h3>
@@ -497,9 +572,17 @@
       <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="topNameKh" placeholder="e.g. គុជ" class="w-full"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="topPrice" placeholder="0.50" step="0.01" class="w-full"></div>
       <div>
-        <label class="text-xs text-gray-400 mb-1 block">Photo URL (Optional)</label>
-        <input type="text" id="topImage" placeholder="https://..." class="w-full" oninput="previewImg('topImage','topImagePreviewImg','topImagePreview')">
-        <div id="topImagePreview" class="mt-2 hidden"><img id="topImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview"/></div>
+        <label class="text-xs text-gray-400 mb-1 block">Photo</label>
+        <div class="img-dropzone" id="topDropzone" onclick="document.getElementById('topFileInput').click()">
+          <input type="file" id="topFileInput" accept="image/*" onchange="handleFileSelect(this,'topImgPreviewWrap','topImageFinal')">
+          <div id="topImgPreviewWrap" class="hidden flex-col items-center gap-2"></div>
+          <div id="topDropzonePrompt" class="text-center"><p class="text-sm text-gray-400">Upload photo (optional)</p></div>
+          <div class="upload-progress hidden mt-2" id="topUploadProgress"><div class="upload-progress-bar" id="topProgressBar"></div></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1 text-center">or</p>
+        <input type="text" id="topImage" placeholder="Paste URL..." class="w-full mt-1" oninput="previewImg('topImage','topUrlPreviewImg','topUrlPreview')">
+        <div id="topUrlPreview" class="mt-2 hidden"><img id="topUrlPreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview"/></div>
+        <input type="hidden" id="topImageFinal">
       </div>
     </div>
     <div class="flex gap-3">
@@ -509,7 +592,7 @@
   </div>
 </div>
 
-<!-- Edit Topping Modal -->
+<!-- EDIT TOPPING MODAL -->
 <div id="editToppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
     <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Topping</h3>
@@ -530,7 +613,7 @@
   </div>
 </div>
 
-<!-- Edit Slide Modal -->
+<!-- EDIT SLIDE MODAL -->
 <div id="editSlideModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
     <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Slide</h3>
@@ -549,7 +632,7 @@
   </div>
 </div>
 
-<!-- Edit Order Status Modal -->
+<!-- EDIT ORDER STATUS MODAL -->
 <div id="editOrderModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
   <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Update Status</h3>
@@ -571,17 +654,19 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const FB = {
   apiKey:"AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
   authDomain:"lortcha.firebaseapp.com",
   projectId:"lortcha",
-  storageBucket:"lortcha.firebasestorage.app",
+  storageBucket:"lortcha.appspot.com",
   messagingSenderId:"51187909854",
   appId:"1:51187909854:web:f4d7ace62c0a367a192e4f"
 };
 const app = initializeApp(FB);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
 const TG_CHAT = "-1003706744326";
@@ -590,143 +675,271 @@ let menuItems=[], toppings=[], orders=[], slideshowItems=[], coupons=[];
 let currentMenuCat='All', editingMenuId=null, editingToppingId=null;
 let editingOrderId=null, editingSlideId=null;
 let currentHistoryFilteredOrders=[];
-let currentOrderFilter = 'all';
+let orderFilter='all';
+let soundEnabled=true;
+let knownOrderIds=new Set();
+let audioCtx=null;
 
-// Custom CustomConfirm Promise wrapper
-window.customConfirm = function(message, title="Confirm Action") {
-  return new Promise((resolve) => {
-    const modal = document.getElementById('confirmModal');
-    document.getElementById('confirmTitle').innerText = title;
-    document.getElementById('confirmMessage').innerText = message;
-    modal.classList.remove('hidden');
-
-    const okBtn = document.getElementById('confirmOkBtn');
-    const cancelBtn = document.getElementById('confirmCancelBtn');
-
-    const cleanup = () => {
-      modal.classList.add('hidden');
-      okBtn.replaceWith(okBtn.cloneNode(true));
-      cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+// ── SOUND ──
+function getAudioCtx() {
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playNotifSound() {
+  if(!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const playTone = (freq, start, dur) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = freq; osc.type = 'sine';
+      gain.gain.setValueAtTime(0, ctx.currentTime + start);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur);
     };
-
-    document.getElementById('confirmOkBtn').addEventListener('click', () => {
-      cleanup();
-      resolve(true);
-    });
-
-    document.getElementById('confirmCancelBtn').addEventListener('click', () => {
-      cleanup();
-      resolve(false);
-    });
-  });
+    playTone(880, 0, 0.15); playTone(1100, 0.18, 0.15); playTone(1320, 0.36, 0.3);
+  } catch(e) {}
+}
+window.toggleSound = function() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundIcon').className = 'w-4 h-4 ' + (soundEnabled ? 'sound-on' : 'sound-off');
+  const lbl = document.getElementById('soundLabel');
+  lbl.className = soundEnabled ? 'text-[#5db85b]' : 'text-[#d44e43]';
+  lbl.textContent = soundEnabled ? 'Sound Alerts: ON' : 'Sound Alerts: OFF';
 };
+
+// ── NOTIF POPUP ──
+function showOrderNotif(order) {
+  const popup = document.getElementById('orderNotifPopup');
+  const card = document.createElement('div');
+  card.className = 'notif-card';
+  const items = (order.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ');
+  card.innerHTML = `
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="text-[#d1a14a] font-bold text-sm">🛍️ New Order!</span>
+          <span class="text-xs text-gray-400">Table ${order.tableNumber}</span>
+        </div>
+        <p class="text-xs text-gray-300 truncate">${items}</p>
+        <p class="text-[#5db85b] font-bold text-sm mt-1">$${Number(order.total).toFixed(2)}</p>
+      </div>
+      <button onclick="this.closest('.notif-card').classList.add('dismissing');setTimeout(()=>this.closest('.notif-card').remove(),300)" class="text-gray-500 hover:text-white text-lg leading-none">×</button>
+    </div>`;
+  popup.appendChild(card);
+  playNotifSound();
+  setTimeout(() => { if(card.parentNode){card.classList.add('dismissing');setTimeout(()=>card.parentNode&&card.remove(),300);} }, 6000);
+}
+
+// ── IMAGE UPLOAD ──
+window.setImgTab = function(tab, prefix) {
+  const uploadTab=document.getElementById(`${prefix}-tab-upload`);
+  const urlTab=document.getElementById(`${prefix}-tab-url`);
+  const uploadPanel=document.getElementById(`${prefix}-upload-panel`);
+  const urlPanel=document.getElementById(`${prefix}-url-panel`);
+  if(tab==='upload'){ uploadTab.classList.add('active'); urlTab.classList.remove('active'); uploadPanel.classList.remove('hidden'); urlPanel.classList.add('hidden'); }
+  else { urlTab.classList.add('active'); uploadTab.classList.remove('active'); urlPanel.classList.remove('hidden'); uploadPanel.classList.add('hidden'); }
+};
+window.handleDragOver = function(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag-over'); };
+window.handleDragLeave = function(e,id){ document.getElementById(id).classList.remove('drag-over'); };
+window.handleDrop = function(e,fileInputId,dropzoneId,previewWrapId,finalInputId) {
+  e.preventDefault(); document.getElementById(dropzoneId).classList.remove('drag-over');
+  const file=e.dataTransfer.files[0]; if(!file) return;
+  handleFileSelect({files:[file]},previewWrapId,finalInputId);
+};
+window.handleFileSelect = async function(input,previewWrapId,finalInputId) {
+  const file=input.files?.[0]||(Array.isArray(input.files)?input.files[0]:null);
+  if(!file) return;
+  if(file.size>5*1024*1024){ showToast('File too large (max 5MB)',true); return; }
+  const previewWrap=document.getElementById(previewWrapId);
+  const finalInput=document.getElementById(finalInputId);
+  const prefix=previewWrapId.replace('ImgPreviewWrap','');
+  const progressWrap=document.getElementById(prefix+'UploadProgress');
+  const progressBar=document.getElementById(prefix+'ProgressBar');
+  const promptEl=document.getElementById(prefix+'DropzonePrompt');
+  if(promptEl) promptEl.style.display='none';
+  if(progressWrap) progressWrap.classList.remove('hidden');
+  try {
+    const ext=file.name.split('.').pop();
+    const path=`menu/${Date.now()}_${Math.random().toString(36).substr(2,6)}.${ext}`;
+    const sRef=storageRef(storage,path);
+    const uploadTask=uploadBytesResumable(sRef,file);
+    uploadTask.on('state_changed',
+      snap=>{ const pct=(snap.bytesTransferred/snap.totalBytes)*100; if(progressBar) progressBar.style.width=pct+'%'; },
+      err=>{ showToast('Upload failed: '+err.message,true); if(progressWrap) progressWrap.classList.add('hidden'); },
+      async()=>{
+        const url=await getDownloadURL(uploadTask.snapshot.ref);
+        finalInput.value=url;
+        if(progressWrap) progressWrap.classList.add('hidden');
+        if(previewWrap){
+          previewWrap.innerHTML=`<div class="img-preview-wrap"><img src="${url}" alt="Preview"/><button type="button" class="remove-img" onclick="clearImgPreview('${previewWrapId}','${finalInputId}','${prefix}')">×</button></div><p class="text-xs text-[#5db85b] font-bold mt-1">✓ Uploaded!</p>`;
+          previewWrap.classList.remove('hidden'); previewWrap.style.display='flex';
+        }
+        showToast('Image uploaded!');
+      }
+    );
+  } catch(err){ showToast('Upload error',true); }
+};
+window.clearImgPreview = function(previewWrapId,finalInputId,prefix) {
+  const pw=document.getElementById(previewWrapId); const fi=document.getElementById(finalInputId); const pr=document.getElementById(prefix+'DropzonePrompt');
+  if(pw){pw.innerHTML='';pw.classList.add('hidden');pw.style.display='none';}
+  if(fi) fi.value='';
+  if(pr) pr.style.display='flex';
+};
+window.previewUrlImg = function(url,previewId) {
+  const img=document.getElementById(previewId); if(!img) return;
+  if(url){img.src=url;img.classList.remove('hidden');img.style.display='block';}else{img.classList.add('hidden');}
+};
+window.previewImg = function(inputId,imgId,previewId) {
+  const val=document.getElementById(inputId)?.value.trim();
+  const prev=document.getElementById(previewId); const img=document.getElementById(imgId);
+  if(val&&prev&&img){img.src=val;prev.classList.remove('hidden');}else if(prev) prev.classList.add('hidden');
+};
+
+// ── KITCHEN DISPLAY ──
+let kitchenTimerInterval;
+window.openKitchenMode = function() {
+  document.getElementById('kitchenMode').classList.add('active');
+  document.body.style.overflow='hidden';
+  renderKitchen();
+  kitchenTimerInterval=setInterval(()=>{
+    const el=document.getElementById('kitchenTime');
+    if(el) el.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    renderKitchen();
+  },1000);
+};
+window.closeKitchenMode = function() {
+  document.getElementById('kitchenMode').classList.remove('active');
+  document.body.style.overflow='';
+  clearInterval(kitchenTimerInterval);
+};
+function renderKitchen() {
+  const grid=document.getElementById('kitchenGrid'); if(!grid) return;
+  const pending=orders.filter(o=>o.status==='pending');
+  if(!pending.length){ grid.innerHTML=`<div class="col-span-full flex flex-col items-center justify-center py-20 text-center"><p class="text-6xl mb-4">✓</p><p class="text-3xl text-[#5db85b] font-bold">All caught up!</p><p class="text-gray-400 mt-2">No pending orders</p></div>`; return; }
+  const tempIcon=i=>i.temperature==='hot'?'☕':i.temperature==='frappe'?'🥤':'🧊';
+  grid.innerHTML=pending.map(o=>{
+    const mins=o.createdAt?Math.floor((Date.now()-(o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt)).getTime())/60000):0;
+    const urgent=mins>=10;
+    return `<div class="kitchen-card ${urgent?'urgent':''} mb-5">
+      <div class="flex justify-between items-center mb-4">
+        <div><span class="text-3xl font-bold text-[#d44e43]">Table ${o.tableNumber}</span><span class="ml-3 text-lg text-gray-400">#${o.id.slice(-4).toUpperCase()}</span></div>
+        <div class="text-right"><span class="text-xl font-bold ${urgent?'text-[#d44e43]':'text-[#d1a14a]'}">${mins}m</span>${urgent?'<p class="text-xs text-[#d44e43] font-bold">URGENT</p>':''}</div>
+      </div>
+      <div class="space-y-3 mb-4">
+        ${(o.items||[]).map(i=>`<div class="bg-[#1a0f0a] rounded-xl p-3">
+          <div class="flex justify-between items-center"><span class="text-xl font-bold text-white">${i.qty}× ${i.name}</span><span class="text-2xl">${tempIcon(i)}</span></div>
+          <div class="text-sm text-gray-400 mt-1">Sugar: ${i.sugar}${i.temperature!=='hot'?' | Ice: '+i.ice:''}${i.toppingsData?.length?' | +'+i.toppingsData.map(tp=>tp.name).join(', '):''}</div>
+        </div>`).join('')}
+      </div>
+      ${o.note?`<div class="bg-[#2a1a14] border border-[#d1a14a]/30 rounded-lg p-3 mb-4 text-sm text-[#d1a14a]">📝 ${o.note}</div>`:''}
+      <button onclick="quickStatus('${o.id}','completed');renderKitchen();" class="w-full bg-[#5db85b] hover:bg-[#4cae4c] text-white py-3 rounded-xl font-bold text-lg transition">✓ Mark Complete</button>
+    </div>`;
+  }).join('');
+}
 
 // ── TABS ──
 window.toggleSidebar = function() {
   const sb=document.getElementById('sidebar'), ov=document.getElementById('mobileOverlay');
-  if(sb.classList.contains('-translate-x-full')) {
-    sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden');
-    setTimeout(()=>ov.classList.add('opacity-100'),10);
-  } else {
-    sb.classList.add('-translate-x-full'); ov.classList.remove('opacity-100');
-    setTimeout(()=>ov.classList.add('hidden'),300);
-  }
+  if(sb.classList.contains('-translate-x-full')){ sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); setTimeout(()=>ov.classList.add('opacity-100'),10); }
+  else { sb.classList.add('-translate-x-full'); ov.classList.remove('opacity-100'); setTimeout(()=>ov.classList.add('hidden'),300); }
 };
-
 window.switchTab = function(tab) {
-  ['stats','orders','history','menu','slideshow','social','coupons'].forEach(t => {
+  ['stats','orders','history','menu','slideshow','social','coupons'].forEach(t=>{
     const v=document.getElementById(`view-${t}`), b=document.getElementById(`tab-${t}`);
     if(v) v.classList.add('hidden');
-    if(b) { b.classList.remove('bg-[#8a382f]/20','text-[#d44e43]'); b.classList.add('text-gray-400'); }
+    if(b){b.classList.remove('bg-[#8a382f]/20','text-[#d44e43]');b.classList.add('text-gray-400');}
   });
   const av=document.getElementById(`view-${tab}`), ab=document.getElementById(`tab-${tab}`);
   if(av) av.classList.remove('hidden');
-  if(ab) { ab.classList.remove('text-gray-400'); ab.classList.add('bg-[#8a382f]/20','text-[#d44e43]'); }
-  if(window.innerWidth<768) { const sb=document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) window.toggleSidebar(); }
+  if(ab){ab.classList.remove('text-gray-400');ab.classList.add('bg-[#8a382f]/20','text-[#d44e43]');}
+  if(tab==='stats') setTimeout(renderHourlyChart,100);
+  if(window.innerWidth<768){ const sb=document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) window.toggleSidebar(); }
 };
 
 function showToast(msg,isErr=false) {
-  const t=document.getElementById("toast"); if(!t) return;
-  t.textContent=msg; t.style.backgroundColor=isErr?"#d44e43":"#5db85b";
-  t.style.opacity="1"; setTimeout(()=>t.style.opacity="0",3000);
+  const t=document.getElementById('toast'); if(!t) return;
+  t.textContent=msg; t.style.backgroundColor=isErr?'#d44e43':'#5db85b';
+  t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',3000);
 }
 
 // ── FETCH DATA ──
 async function fetchData() {
-  onSnapshot(collection(db,"menu"), snap => {
-    menuItems = snap.docs.map(d=>({id:d.id,...d.data()}));
+  onSnapshot(collection(db,'menu'),snap=>{
+    menuItems=snap.docs.map(d=>({id:d.id,...d.data()}));
     updateCategoryDropdown(); renderMenuTable();
   });
-  onSnapshot(collection(db,"toppings"), snap => {
-    toppings = snap.docs.map(d=>({id:d.id,...d.data()}));
+  onSnapshot(collection(db,'toppings'),snap=>{
+    toppings=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderToppings();
   });
-  const q = query(collection(db,"orders"), orderBy("createdAt","desc"));
-  onSnapshot(q, snap => {
-    orders = snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderOrders(); renderHistory(); updateStats(); calculateFilteredStats(); renderTopItems();
+  const q=query(collection(db,'orders'),orderBy('createdAt','desc'));
+  onSnapshot(q,snap=>{
+    const isFirst=knownOrderIds.size===0;
+    snap.docChanges().forEach(change=>{
+      if(change.type==='added'&&!isFirst){
+        const order={id:change.doc.id,...change.doc.data()};
+        if(order.status==='pending') showOrderNotif(order);
+      }
+    });
+    orders=snap.docs.map(d=>({id:d.id,...d.data()}));
+    snap.docs.forEach(d=>knownOrderIds.add(d.id));
+    renderOrders(); renderHistory(); updateStats(); calculateFilteredStats(); renderTopItems(); renderHourlyChart();
   });
-  onSnapshot(collection(db,"slideshow"), snap => {
-    slideshowItems = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+  onSnapshot(collection(db,'slideshow'),snap=>{
+    slideshowItems=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
     renderSlideshowList();
   });
-  onSnapshot(collection(db,"coupons"), snap => {
-    coupons = snap.docs.map(d=>({id:d.id,...d.data()}));
+  onSnapshot(collection(db,'coupons'),snap=>{
+    coupons=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderCoupons();
   });
   try {
-    const snap = await getDocs(collection(db,"settings"));
-    const settings = {};
-    snap.docs.forEach(d => Object.assign(settings, d.data(), {_docId: d.id}));
-    if(settings.facebookUrl) document.getElementById("fbUrl").value = settings.facebookUrl;
-    if(settings.tiktokUrl) document.getElementById("ttUrl").value = settings.tiktokUrl;
-    window._settingsDocId = settings._docId;
+    const snap=await getDocs(collection(db,'settings'));
+    const settings={};
+    snap.docs.forEach(d=>Object.assign(settings,d.data(),{_docId:d.id}));
+    if(settings.facebookUrl) document.getElementById('fbUrl').value=settings.facebookUrl;
+    if(settings.tiktokUrl) document.getElementById('ttUrl').value=settings.tiktokUrl;
+    window._settingsDocId=settings._docId;
     updateSocialPreview();
-  } catch(e) {}
+  } catch(e){}
 }
 
 // ── STATS ──
 function updateStats() {
-  const pending = orders.filter(o=>o.status==='pending');
-  const completed = orders.filter(o=>o.status==='completed');
-  const rev = completed.reduce((s,o)=>s+Number(o.total),0);
-  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-  set('stat-all', orders.length); set('stat-pending', pending.length);
-  set('stat-completed', completed.length); set('stat-rev', `$${rev.toFixed(2)}`);
-  const badge = document.getElementById("pendingBadge");
-  const badgeMob = document.getElementById("pendingBadgeMobile");
-  if(badge) { if(pending.length>0){badge.textContent=pending.length;badge.classList.remove("hidden");}else{badge.classList.add("hidden");} }
-  if(badgeMob) { if(pending.length>0){badgeMob.textContent=`${pending.length} pending`;badgeMob.classList.remove("hidden");}else{badgeMob.classList.add("hidden");} }
+  const pending=orders.filter(o=>o.status==='pending');
+  const completed=orders.filter(o=>o.status==='completed');
+  const rev=completed.reduce((s,o)=>s+Number(o.total),0);
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('stat-all',orders.length); set('stat-pending',pending.length); set('stat-completed',completed.length); set('stat-rev',`$${rev.toFixed(2)}`);
+  const badge=document.getElementById('pendingBadge'); const badgeMob=document.getElementById('pendingBadgeMobile');
+  if(badge){if(pending.length>0){badge.textContent=pending.length;badge.classList.remove('hidden');}else badge.classList.add('hidden');}
+  if(badgeMob){if(pending.length>0){badgeMob.textContent=`${pending.length} pending`;badgeMob.classList.remove('hidden');}else badgeMob.classList.add('hidden');}
 }
 
 function renderTopItems() {
-  const counts = {};
-  orders.filter(o=>o.status==='completed').forEach(o => {
-    (o.items||[]).forEach(i => {
-      const key = i.name;
-      if(!counts[key]) counts[key] = { name:i.name, qty:0 };
-      counts[key].qty += i.qty;
+  const counts={};
+  orders.filter(o=>o.status==='completed').forEach(o=>{
+    (o.items||[]).forEach(i=>{
+      if(!counts[i.name]) counts[i.name]={name:i.name,qty:0};
+      counts[i.name].qty+=i.qty;
     });
   });
-  const sorted = Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,5);
-  const el = document.getElementById("topItemsList");
-  if(!el) return;
-  if(!sorted.length) { el.innerHTML = '<p class="text-gray-500 text-sm">No completed orders yet.</p>'; return; }
-  const max = sorted[0].qty;
-  el.innerHTML = sorted.map((item,i) => `
+  const sorted=Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,5);
+  const el=document.getElementById('topItemsList'); if(!el) return;
+  if(!sorted.length){el.innerHTML='<p class="text-gray-500 text-sm">No completed orders yet.</p>';return;}
+  const max=sorted[0].qty;
+  el.innerHTML=sorted.map((item,i)=>`
     <div class="flex items-center gap-3">
       <span class="text-xs text-gray-500 w-4">${i+1}</span>
       <div class="flex-1">
-        <div class="flex justify-between text-sm mb-1">
-          <span class="font-medium">${item.name}</span>
-          <span class="text-[#d44e43] font-bold">${item.qty}×</span>
-        </div>
-        <div class="h-1.5 bg-[#3a2a24] rounded-full overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-[#d44e43] to-[#d1a14a] rounded-full" style="width:${(item.qty/max*100).toFixed(0)}%"></div>
-        </div>
+        <div class="flex justify-between text-sm mb-1"><span class="font-medium">${item.name}</span><span class="text-[#d44e43] font-bold">${item.qty}×</span></div>
+        <div class="h-1.5 bg-[#3a2a24] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[#d44e43] to-[#d1a14a] rounded-full" style="width:${(item.qty/max*100).toFixed(0)}%"></div></div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 window.calculateFilteredStats = function() {
@@ -734,146 +947,123 @@ window.calculateFilteredStats = function() {
   const endDate=document.getElementById('statEndDate')?.value;
   const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
   let filtered=orders.filter(o=>o.status==='completed');
-  if(startDate||endDate) {
+  if(startDate||endDate){
     filtered=filtered.filter(o=>{
       if(!o.createdAt) return false;
       const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
       const iso=new Date(d.getTime()-(d.getTimezoneOffset()*60000)).toISOString().split('T')[0];
-      if(startDate&&iso<startDate) return false;
-      if(endDate&&iso>endDate) return false;
-      return true;
+      if(startDate&&iso<startDate) return false; if(endDate&&iso>endDate) return false; return true;
     });
   }
   const gross=filtered.reduce((s,o)=>s+Number(o.total),0);
   const subAmt=gross*(subPct/100); const net=gross-subAmt;
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   set('stat-f-orders',filtered.length); set('stat-f-gross',`$${gross.toFixed(2)}`);
-  set('stat-f-sub-lbl',`Subtract (${subPct}%)`); set('stat-f-sub-amt',`-$${subAmt.toFixed(2)}`);
-  set('stat-f-net',`$${net.toFixed(2)}`);
+  set('stat-f-sub-lbl',`Subtract (${subPct}%)`); set('stat-f-sub-amt',`-$${subAmt.toFixed(2)}`); set('stat-f-net',`$${net.toFixed(2)}`);
 };
 
-async function sendTG(msg) {
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
-    showToast("Sent to Telegram!");
-  } catch(e) { showToast("Error sending",true); }
+function renderHourlyChart() {
+  const canvas=document.getElementById('liveChartCanvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const now=new Date(); const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const todayOrders=orders.filter(o=>{ if(!o.createdAt) return false; const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt); return d>=today; });
+  document.getElementById('todayTotal').textContent=`${todayOrders.length} today`;
+  const hourCounts=Array(24).fill(0);
+  todayOrders.forEach(o=>{ const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt); hourCounts[d.getHours()]++; });
+  const currentHour=now.getHours(); const maxCount=Math.max(...hourCounts,1);
+  const width=canvas.offsetWidth||600; const height=200;
+  canvas.width=width; canvas.height=height; ctx.clearRect(0,0,width,height);
+  const barW=(width-40)/24; const maxH=height-40;
+  hourCounts.forEach((count,h)=>{
+    const x=20+h*barW; const barH=(count/maxCount)*maxH; const y=height-20-barH;
+    ctx.fillStyle=h===currentHour?'#d44e43':'#5c453b';
+    ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(x+2,y,barW-4,barH,3); else ctx.rect(x+2,y,barW-4,barH);
+    ctx.fill();
+    if(count>0){ ctx.fillStyle='#d1a14a'; ctx.font='10px Outfit'; ctx.textAlign='center'; ctx.fillText(count,x+barW/2,y-4); }
+  });
+  ctx.fillStyle='#5c453b'; ctx.font='9px Outfit'; ctx.textAlign='center';
+  [0,6,12,18,23].forEach(h=>{ const x=20+h*barW+barW/2; ctx.fillText(h+'h',x,height-4); });
 }
 
+async function sendTG(msg) {
+  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'HTML'})}); showToast('Sent to Telegram!'); }
+  catch(e){ showToast('Error sending',true); }
+}
 window.sendTotalStatsToTelegram = function() {
   const s=id=>document.getElementById(id)?.textContent||'';
-  const msg=`📊 <b>All-Time Overview</b>\n\n📦 <b>Total Orders:</b> ${s('stat-all')}\n⏳ <b>Pending:</b> ${s('stat-pending')}\n✓ <b>Completed:</b> ${s('stat-completed')}\n💵 <b>Total Revenue:</b> ${s('stat-rev')}`;
-  sendTG(msg);
+  sendTG(`📊 <b>All-Time Overview</b>\n\n📦 <b>Total Orders:</b> ${s('stat-all')}\n⏳ <b>Pending:</b> ${s('stat-pending')}\n✓ <b>Completed:</b> ${s('stat-completed')}\n💵 <b>Total Revenue:</b> ${s('stat-rev')}`);
 };
-
 window.sendTopItemsToTelegram = function() {
-  const counts = {};
-  orders.filter(o=>o.status==='completed').forEach(o => {
-    (o.items||[]).forEach(i => {
-      const key = i.name;
-      if(!counts[key]) counts[key] = { name:i.name, qty:0 };
-      counts[key].qty += i.qty;
-    });
-  });
-  const sorted = Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,10);
-  if(!sorted.length) return showToast("No completed orders",true);
-  let list = sorted.map((item,i) => `${i+1}. ${item.name} - <b>${item.qty}</b>`).join('\n');
-  const msg=`🔥 <b>Top Ordered Items</b>\n\n${list}`;
-  sendTG(msg);
+  const counts={};
+  orders.filter(o=>o.status==='completed').forEach(o=>{(o.items||[]).forEach(i=>{if(!counts[i.name])counts[i.name]={name:i.name,qty:0};counts[i.name].qty+=i.qty;});});
+  const sorted=Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,10);
+  if(!sorted.length) return showToast('No completed orders',true);
+  sendTG(`🔥 <b>Top Ordered Items</b>\n\n${sorted.map((item,i)=>`${i+1}. ${item.name} - <b>${item.qty}</b>`).join('\n')}`);
 };
-
 window.sendFilteredStatsToTelegram = function() {
   const s=id=>document.getElementById(id)?.textContent||'';
   const startDate=document.getElementById('statStartDate')?.value;
   const endDate=document.getElementById('statEndDate')?.value;
   const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
   const note=document.getElementById('statNote')?.value.trim()||'None';
-  let periodStr="All Time";
+  let periodStr='All Time';
   if(startDate&&endDate) periodStr=`${startDate} to ${endDate}`;
   else if(startDate) periodStr=`From ${startDate}`;
   else if(endDate) periodStr=`Until ${endDate}`;
-  const msg=`📅 <b>Period Report</b>\n\n🗓️ <b>Period:</b> ${periodStr}\n📝 <b>Note:</b> ${note}\n\n📦 <b>Orders:</b> ${s('stat-f-orders')}\n💵 <b>Gross Total:</b> ${s('stat-f-gross')}\n📉 <b>Subtract (${subPct}%):</b> ${s('stat-f-sub-amt')}\n💰 <b>Net Total:</b> ${s('stat-f-net')}`;
-  sendTG(msg);
+  sendTG(`📅 <b>Period Report</b>\n\n🗓️ <b>Period:</b> ${periodStr}\n📝 <b>Note:</b> ${note}\n\n📦 <b>Orders:</b> ${s('stat-f-orders')}\n💵 <b>Gross Total:</b> ${s('stat-f-gross')}\n📉 <b>Subtract (${subPct}%):</b> ${s('stat-f-sub-amt')}\n💰 <b>Net Total:</b> ${s('stat-f-net')}`);
 };
-
-async function sendStatusAlert(orderId, status) {
-  if(status === 'pending') return;
-  const o = orders.find(x => x.id === orderId);
-  if (!o) return;
-  const itemLines = (o.items||[]).map(i => {
-    let opts = `Temp: ${i.temperature === 'hot' ? '☕ Hot' : i.temperature === 'frappe' ? '🥤 Frappe' : '🧊 Iced'}`;
-    if(i.sugar && i.sugar !== "100%") opts += ` | Sugar: ${i.sugar}`;
-    if(i.temperature!=='hot' && i.ice && i.ice !== "100%") opts += ` | Ice: ${i.ice}`;
-    if(i.toppingsData?.length) opts += ` | Tops: ${i.toppingsData.map(t=> t.name).join(', ')}`;
-    return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i>[${opts}]</i>`;
-  }).join("\n");
-  
-  const icon = status === 'completed' ? '✅' : '❌';
-  const msg = `${icon} <b>Order ${status.toUpperCase()}</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
-  } catch(e) {}
+async function sendStatusAlert(orderId,status) {
+  if(status==='pending') return;
+  const o=orders.find(x=>x.id===orderId); if(!o) return;
+  const itemLines=(o.items||[]).map(i=>`  • <b>${i.name}</b> ×${i.qty}`).join('\n');
+  const icon=status==='completed'?'✅':'❌';
+  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:`${icon} <b>Order ${status.toUpperCase()}</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`,parse_mode:'HTML'})}); } catch(e){}
 }
 
 // ── LIVE ORDERS ──
-let orderFilter = 'all';
-
 window.setOrderFilter = function(f) {
-  orderFilter = f;
-  ['all','pending','completed','cancelled'].forEach(fv => {
-    const btn = document.getElementById(`ofilter-${fv}`);
-    if(!btn) return;
-    if(fv===f) { btn.classList.remove('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]'); btn.classList.add('bg-[#d44e43]','text-white'); }
-    else { btn.classList.add('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]'); btn.classList.remove('bg-[#d44e43]','text-white'); }
+  orderFilter=f;
+  ['all','pending','completed','cancelled'].forEach(fv=>{
+    const btn=document.getElementById(`ofilter-${fv}`); if(!btn) return;
+    if(fv===f){btn.classList.remove('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]');btn.classList.add('bg-[#d44e43]','text-white');}
+    else{btn.classList.add('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]');btn.classList.remove('bg-[#d44e43]','text-white');}
   });
   renderOrders();
 };
-
 function getElapsedTime(createdAt) {
   if(!createdAt) return '';
-  const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-  const mins = Math.floor((Date.now()-d.getTime())/60000);
-  if(mins<1) return 'just now';
-  if(mins<60) return `${mins}m ago`;
-  return `${Math.floor(mins/60)}h ${mins%60}m ago`;
+  const d=createdAt.toDate?createdAt.toDate():new Date(createdAt);
+  const mins=Math.floor((Date.now()-d.getTime())/60000);
+  if(mins<1) return 'just now'; if(mins<60) return `${mins}m ago`; return `${Math.floor(mins/60)}h ${mins%60}m ago`;
 }
-
 function renderOrders() {
-  const grid=document.getElementById('ordersGrid');
-  const noOrd=document.getElementById('noOrders');
+  const grid=document.getElementById('ordersGrid'); const noOrd=document.getElementById('noOrders');
   if(!grid||!noOrd) return;
-
-  let filtered = orders;
-  if(orderFilter!=='all') filtered = orders.filter(o=>o.status===orderFilter);
-  filtered = filtered.slice(0,50);
-
-  if(!filtered.length) { grid.innerHTML=''; noOrd.classList.remove('hidden'); return; }
+  let filtered=orderFilter!=='all'?orders.filter(o=>o.status===orderFilter):orders;
+  filtered=filtered.slice(0,60);
+  if(!filtered.length){grid.innerHTML='';noOrd.classList.remove('hidden');return;}
   noOrd.classList.add('hidden');
-
-  grid.innerHTML = filtered.map(o => {
-    const time = o.createdAt ? new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-    const elapsed = getElapsedTime(o.createdAt);
-    const cardClass = `order-card-${o.status}`;
-    const statusClass = `status-${o.status}`;
-    const statusLabel = o.status==='pending'?'⏳ Pending':o.status==='completed'?'✓ Completed':'✗ Cancelled';
-    const tempIcon = item => item.temperature==='hot'?'☕':item.temperature==='frappe'?'🥤':'🧊';
-
-    return `
-    <div class="bg-[#4e3b32] rounded-xl border ${cardClass} overflow-hidden shadow-lg flex flex-col fade-up">
+  const tempIcon=item=>item.temperature==='hot'?'☕':item.temperature==='frappe'?'🥤':'🧊';
+  grid.innerHTML=filtered.map(o=>{
+    const elapsed=getElapsedTime(o.createdAt);
+    const mins=o.createdAt?Math.floor((Date.now()-(o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt)).getTime())/60000):0;
+    return `<div class="bg-[#4e3b32] rounded-xl border order-card-${o.status} overflow-hidden shadow-lg flex flex-col fade-up">
       <div class="p-3 border-b border-[#5c453b] flex justify-between items-center">
         <div class="flex items-center gap-2">
           <span class="font-bold text-[#d44e43] text-sm">Table ${o.tableNumber}</span>
           <span class="text-xs text-gray-400">#${o.id.slice(-5).toUpperCase()}</span>
+          ${o.status==='pending'&&mins>=10?'<span class="text-[9px] bg-[#d44e43] text-white px-1.5 py-0.5 rounded font-bold animate-pulse">URGENT</span>':''}
         </div>
         <div class="flex items-center gap-2">
           <span class="order-timer">${elapsed}</span>
-          <span class="text-[10px] font-bold px-2 py-1 rounded-full ${statusClass}">${statusLabel}</span>
+          <span class="text-[10px] font-bold px-2 py-1 rounded-full status-${o.status}">${o.status==='pending'?'⏳ Pending':o.status==='completed'?'✓ Completed':'✗ Cancelled'}</span>
         </div>
       </div>
       <div class="p-4 flex-1 space-y-2">
-        ${(o.items||[]).map(i => {
-          let opts = `${tempIcon(i)} | Sugar:${i.sugar}`;
-          if(i.temperature!=='hot') opts += ` | Ice:${i.ice}`;
-          if(i.toppingsData?.length) opts += ` | +${i.toppingsData.length} tops`;
+        ${(o.items||[]).map(i=>{
+          let opts=`${tempIcon(i)} | Sugar:${i.sugar}`;
+          if(i.temperature!=='hot') opts+=` | Ice:${i.ice}`;
+          if(i.toppingsData?.length) opts+=` | +${i.toppingsData.length} tops`;
           return `<div class="border-b border-[#5c453b] pb-2 last:border-0 last:pb-0">
             <div class="flex justify-between text-sm"><span class="font-bold">${i.qty}× ${i.name}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
             <p class="text-xs text-gray-400 mt-0.5">${opts}</p>
@@ -885,31 +1075,26 @@ function renderOrders() {
         <span class="font-bold text-[#5db85b]">$${Number(o.total).toFixed(2)}</span>
         <div class="flex gap-2">
           ${o.status==='pending'
-            ? `<button onclick="quickStatus('${o.id}','completed')" class="bg-[#5db85b] hover:bg-[#4cae4c] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">✓ Complete</button>
+            ?`<button onclick="quickStatus('${o.id}','completed')" class="bg-[#5db85b] hover:bg-[#4cae4c] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">✓ Complete</button>
                <button onclick="quickStatus('${o.id}','cancelled')" class="bg-[#d44e43]/30 hover:bg-[#d44e43] text-[#d44e43] hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-[#d44e43]/50 transition">✗ Cancel</button>`
-            : `<button onclick="openEditOrderModal('${o.id}')" class="bg-[#5c453b] hover:bg-[#6b5040] text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit Status</button>`}
+            :`<button onclick="openEditOrderModal('${o.id}')" class="bg-[#5c453b] hover:bg-[#6b5040] text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit Status</button>`}
         </div>
       </div>
     </div>`;
   }).join('');
 }
-
-window.quickStatus = async function(id, status) {
-  try {
-    await updateDoc(doc(db,"orders",id), {status});
-    showToast(`Order ${status}!`);
-    sendStatusAlert(id, status);
-  } catch(e) { showToast("Error updating",true); }
+window.quickStatus = async function(id,status) {
+  try { await updateDoc(doc(db,'orders',id),{status}); showToast(`Order ${status}!`); sendStatusAlert(id,status); }
+  catch(e){ showToast('Error updating',true); }
 };
 
 // ── ORDER HISTORY ──
 window.renderHistory = function() {
   const startDate=document.getElementById('historyStartDate')?.value;
   const endDate=document.getElementById('historyEndDate')?.value;
-  const tbody=document.getElementById('historyTableBody');
-  if(!tbody) return;
+  const tbody=document.getElementById('historyTableBody'); if(!tbody) return;
   let filtered=orders;
-  if(startDate||endDate) {
+  if(startDate||endDate){
     filtered=orders.filter(o=>{
       if(!o.createdAt) return false;
       const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
@@ -918,7 +1103,7 @@ window.renderHistory = function() {
     });
   }
   currentHistoryFilteredOrders=filtered;
-  if(!filtered.length) { tbody.innerHTML=`<tr><td colspan="7" class="p-8 text-center text-gray-400">No orders found for this date range.</td></tr>`; return; }
+  if(!filtered.length){tbody.innerHTML=`<tr><td colspan="7" class="p-8 text-center text-gray-400">No orders for this range.</td></tr>`;return;}
   tbody.innerHTML=filtered.map(o=>{
     const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleString():'';
     const itemsTxt=(o.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ');
@@ -938,200 +1123,124 @@ window.renderHistory = function() {
     </tr>`;
   }).join('');
 };
-
 window.sendHistoryToTelegram = async function() {
-  if(!currentHistoryFilteredOrders.length) return showToast("No orders to send",true);
-  let listTxt="", listTotal=0;
+  if(!currentHistoryFilteredOrders.length) return showToast('No orders to send',true);
+  let listTxt='', listTotal=0;
   currentHistoryFilteredOrders.forEach(o=>{
     const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
     listTxt+=`• <b>#${o.id.slice(-6).toUpperCase()}</b> (${time}) - $${Number(o.total).toFixed(2)} [${o.status.toUpperCase()}]\n`;
     if(o.status==='completed') listTotal+=Number(o.total);
   });
-  const msg=`📋 <b>Order List Export</b>\n\n📦 <b>Total Orders:</b> ${currentHistoryFilteredOrders.length}\n💰 <b>Completed Sum:</b> $${listTotal.toFixed(2)}\n\n${listTxt}`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
-    showToast("List sent to Telegram!");
-  } catch(e) { showToast("Failed to send",true); }
+  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:`📋 <b>Order List Export</b>\n\n📦 <b>Total:</b> ${currentHistoryFilteredOrders.length}\n💰 <b>Completed Sum:</b> $${listTotal.toFixed(2)}\n\n${listTxt}`,parse_mode:'HTML'})}); showToast('List sent to Telegram!'); }
+  catch(e){ showToast('Failed to send',true); }
 };
-
 window.sendSingleOrderToTelegram = async function(id) {
   const o=orders.find(x=>x.id===id); if(!o) return;
-  const itemLines=(o.items||[]).map(i=>`  • ${i.qty}× ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join("\n");
-  const msg=`🧾 <b>Order Receipt</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n📌 Status: <b>${o.status.toUpperCase()}</b>\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
-    showToast("Order sent!");
-  } catch(e) { showToast("Failed",true); }
+  const itemLines=(o.items||[]).map(i=>`  • ${i.qty}× ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join('\n');
+  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:`🧾 <b>Order Receipt</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n📌 Status: <b>${o.status.toUpperCase()}</b>\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`,parse_mode:'HTML'})}); showToast('Order sent!'); }
+  catch(e){ showToast('Failed',true); }
 };
-
 window.deleteOrderHistory = async function(id) {
-  if(await customConfirm("Permanently delete this order?", "Delete Order")) {
-    try { await deleteDoc(doc(db,"orders",id)); showToast("Deleted."); }
-    catch(e) { showToast("Error",true); }
-  }
+  if(await customConfirm('Permanently delete this order?','Delete Order')){ try{ await deleteDoc(doc(db,'orders',id)); showToast('Deleted.'); } catch(e){ showToast('Error',true); } }
 };
-
 window.openEditOrderModal = function(id) {
-  editingOrderId=id;
-  const o=orders.find(x=>x.id===id); if(!o) return;
+  editingOrderId=id; const o=orders.find(x=>x.id===id); if(!o) return;
   document.getElementById('editOrderStatus').value=o.status||'pending';
   const m=document.getElementById('editOrderModal'); m.classList.remove('hidden'); m.style.display='flex';
 };
-window.closeEditOrderModal = function() { editingOrderId=null; const m=document.getElementById('editOrderModal'); m.classList.add('hidden'); m.style.display='none'; };
+window.closeEditOrderModal = function(){ editingOrderId=null; const m=document.getElementById('editOrderModal'); m.classList.add('hidden'); m.style.display='none'; };
 window.saveEditOrder = async function() {
   if(!editingOrderId) return;
   const status=document.getElementById('editOrderStatus').value;
-  try {
-    await updateDoc(doc(db,"orders",editingOrderId),{status});
-    closeEditOrderModal();
-    showToast("Status updated!");
-    sendStatusAlert(editingOrderId, status);
-  } catch(e) { showToast("Error",true); }
+  try{ await updateDoc(doc(db,'orders',editingOrderId),{status}); closeEditOrderModal(); showToast('Status updated!'); sendStatusAlert(editingOrderId,status); }
+  catch(e){ showToast('Error',true); }
 };
 
 // ── MENU MANAGER ──
 window.addMenuItem = async function() {
-  const name=document.getElementById("addName").value.trim();
-  const nameKh=document.getElementById("addNameKh").value.trim();
-  const price=parseFloat(document.getElementById("addPrice").value);
-  const priceHot=parseFloat(document.getElementById("addPriceHot").value)||null;
-  const priceFrappe=parseFloat(document.getElementById("addPriceFrappe").value)||null;
-  const cat=document.getElementById("addCat").value.trim();
-  const img=document.getElementById("addImage").value.trim();
-  const temperature=document.getElementById("addTemperature").value;
-  const popular=document.getElementById("addPopular").checked;
-  if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
+  const name=document.getElementById('addName').value.trim();
+  const nameKh=document.getElementById('addNameKh').value.trim();
+  const price=parseFloat(document.getElementById('addPrice').value);
+  const priceHot=parseFloat(document.getElementById('addPriceHot').value)||null;
+  const priceFrappe=parseFloat(document.getElementById('addPriceFrappe').value)||null;
+  const cat=document.getElementById('addCat').value.trim();
+  const temperature=document.getElementById('addTemperature').value;
+  const popular=document.getElementById('addPopular').checked;
+  if(!name||isNaN(price)){ showToast('Name and Price required',true); return; }
+  const imgUrl=document.getElementById('addImageFinal')?.value||document.getElementById('addImage')?.value.trim()||'';
   try {
-    await addDoc(collection(db,"menu"),{name,nameKh,price,priceHot,priceFrappe,category:cat||'Other',imageUrl:img,discount:0,inStock:true,temperature,popular});
-    document.getElementById("addName").value=''; document.getElementById("addNameKh").value='';
-    document.getElementById("addPrice").value=''; document.getElementById("addPriceHot").value='';
-    document.getElementById("addPriceFrappe").value=''; document.getElementById("addCat").value='';
-    document.getElementById("addImage").value=''; document.getElementById("addPopular").checked=false;
-    document.getElementById("addTemperature").value='both';
-    currentMenuCat='All'; document.getElementById('menuCatFilter').value='All';
-    showToast("Item added!");
-  } catch(e) { showToast("Error adding item",true); }
+    await addDoc(collection(db,'menu'),{name,nameKh,price,priceHot,priceFrappe,category:cat||'Other',imageUrl:imgUrl,discount:0,inStock:true,temperature,popular});
+    ['addName','addNameKh','addPrice','addPriceHot','addPriceFrappe','addCat','addImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    if(document.getElementById('addImageFinal')) document.getElementById('addImageFinal').value='';
+    document.getElementById('addPopular').checked=false;
+    clearImgPreview('addImgPreviewWrap','addImageFinal','add');
+    showToast('Item added!');
+  } catch(e){ showToast('Error adding item',true); }
 };
-
 window.applyBulkDiscount = async function() {
-  const pctInput=document.getElementById("bulkDiscountInput").value;
+  const pctInput=document.getElementById('bulkDiscountInput').value;
   const pct=parseInt(pctInput);
-  if(pctInput===""||isNaN(pct)||pct<0||pct>100) return showToast("Enter 0-100",true);
+  if(pctInput===''||isNaN(pct)||pct<0||pct>100) return showToast('Enter 0-100',true);
   const itemsToUpdate=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
-  if(!itemsToUpdate.length) return showToast("No items found",true);
-  
-  if(!(await customConfirm(`Apply ${pct}% discount to ${currentMenuCat==='All'?'ALL':''+itemsToUpdate.length} items?`, "Apply Discount"))) return;
-  
-  try {
-    await Promise.all(itemsToUpdate.map(m=>updateDoc(doc(db,"menu",m.id),{discount:pct})));
-    document.getElementById("bulkDiscountInput").value=''; showToast(`${pct}% applied!`);
-  } catch(e) { showToast("Error",true); }
+  if(!itemsToUpdate.length) return showToast('No items found',true);
+  if(!(await customConfirm(`Apply ${pct}% discount to ${itemsToUpdate.length} items?`,'Apply Discount'))) return;
+  try { await Promise.all(itemsToUpdate.map(m=>updateDoc(doc(db,'menu',m.id),{discount:pct}))); document.getElementById('bulkDiscountInput').value=''; showToast(`${pct}% applied!`); }
+  catch(e){ showToast('Error',true); }
 };
-
-window.updateDiscount = async function(id,val) {
-  const discount=parseInt(val)||0;
-  try { await updateDoc(doc(db,"menu",id),{discount}); } catch(e) { showToast("Error",true); }
-};
-
-window.togglePopular = async function(id, val) {
-  try { await updateDoc(doc(db,"menu",id),{popular:val}); showToast(val?"Marked popular!":"Removed from popular"); } catch(e) {}
-};
-
-// ── NEW: Toggle In-Stock ──
-window.toggleInStock = async function(id, val) {
-  try {
-    await updateDoc(doc(db,"menu",id),{inStock:val});
-    showToast(val ? "Item marked In Stock ✓" : "Item marked Out of Stock ✗");
-  } catch(e) { showToast("Error updating stock",true); }
-};
-
-window.deleteMenuItem = async function(id) {
-  if(!(await customConfirm("Delete this drink?", "Delete Drink"))) return;
-  try { await deleteDoc(doc(db,"menu",id)); showToast("Deleted."); } catch(e) { showToast("Error",true); }
-};
-
+window.updateDiscount = async function(id,val){ try{ await updateDoc(doc(db,'menu',id),{discount:parseInt(val)||0}); }catch(e){} };
+window.togglePopular = async function(id,val){ try{ await updateDoc(doc(db,'menu',id),{popular:val}); showToast(val?'Marked popular!':'Removed from popular'); }catch(e){} };
+window.toggleInStock = async function(id,val){ try{ await updateDoc(doc(db,'menu',id),{inStock:val}); showToast(val?'In Stock ✓':'Out of Stock ✗'); }catch(e){} };
+window.deleteMenuItem = async function(id){ if(!(await customConfirm('Delete this drink?','Delete Drink'))) return; try{ await deleteDoc(doc(db,'menu',id)); showToast('Deleted.'); }catch(e){ showToast('Error',true); } };
 window.openEditMenuModal = function(id) {
-  const item=menuItems.find(m=>m.id===id); if(!item) return;
-  editingMenuId=id;
-  document.getElementById('editName').value=item.name||'';
-  document.getElementById('editNameKh').value=item.nameKh||'';
-  document.getElementById('editPrice').value=item.price||0;
-  document.getElementById('editPriceHot').value=item.priceHot||'';
-  document.getElementById('editPriceFrappe').value=item.priceFrappe||'';
-  document.getElementById('editCat').value=item.category||'';
-  document.getElementById('editImage').value=item.imageUrl||'';
-  document.getElementById('editTemperature').value=item.temperature||'both';
-  document.getElementById('editPopular').checked=!!item.popular;
-  const m=document.getElementById("editMenuModal"); m.classList.remove("hidden"); m.style.display="flex";
+  const item=menuItems.find(m=>m.id===id); if(!item) return; editingMenuId=id;
+  document.getElementById('editName').value=item.name||''; document.getElementById('editNameKh').value=item.nameKh||'';
+  document.getElementById('editPrice').value=item.price||0; document.getElementById('editPriceHot').value=item.priceHot||'';
+  document.getElementById('editPriceFrappe').value=item.priceFrappe||''; document.getElementById('editCat').value=item.category||'';
+  document.getElementById('editImage').value=item.imageUrl||''; document.getElementById('editImageFinal').value=item.imageUrl||'';
+  document.getElementById('editTemperature').value=item.temperature||'both'; document.getElementById('editPopular').checked=!!item.popular;
+  const m=document.getElementById('editMenuModal'); m.classList.remove('hidden'); m.style.display='flex';
 };
-window.closeEditMenuModal = function() { editingMenuId=null; const m=document.getElementById("editMenuModal"); m.classList.add("hidden"); m.style.display="none"; };
+window.closeEditMenuModal = function(){ editingMenuId=null; const m=document.getElementById('editMenuModal'); m.classList.add('hidden'); m.style.display='none'; };
 window.saveEditMenu = async function() {
   if(!editingMenuId) return;
-  const name=document.getElementById("editName").value.trim();
-  const nameKh=document.getElementById("editNameKh").value.trim();
-  const price=parseFloat(document.getElementById("editPrice").value);
-  const priceHot=parseFloat(document.getElementById("editPriceHot").value)||null;
-  const priceFrappe=parseFloat(document.getElementById("editPriceFrappe").value)||null;
-  const category=document.getElementById("editCat").value.trim()||'Other';
-  const imageUrl=document.getElementById("editImage").value.trim();
-  const temperature=document.getElementById("editTemperature").value;
-  const popular=document.getElementById("editPopular").checked;
-  if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
-  try {
-    await updateDoc(doc(db,"menu",editingMenuId),{name,nameKh,price,priceHot,priceFrappe,category,imageUrl,temperature,popular});
-    closeEditMenuModal(); showToast("Updated!");
-  } catch(e) { showToast("Error",true); }
+  const name=document.getElementById('editName').value.trim(); const nameKh=document.getElementById('editNameKh').value.trim();
+  const price=parseFloat(document.getElementById('editPrice').value); const priceHot=parseFloat(document.getElementById('editPriceHot').value)||null;
+  const priceFrappe=parseFloat(document.getElementById('editPriceFrappe').value)||null; const category=document.getElementById('editCat').value.trim()||'Other';
+  const temperature=document.getElementById('editTemperature').value; const popular=document.getElementById('editPopular').checked;
+  if(!name||isNaN(price)){ showToast('Name and Price required',true); return; }
+  const imageUrl=document.getElementById('editImageFinal')?.value||document.getElementById('editImage')?.value.trim()||'';
+  try{ await updateDoc(doc(db,'menu',editingMenuId),{name,nameKh,price,priceHot,priceFrappe,category,imageUrl,temperature,popular}); closeEditMenuModal(); showToast('Updated!'); }
+  catch(e){ showToast('Error',true); }
 };
-
-window.filterMenu = function() { currentMenuCat=document.getElementById('menuCatFilter').value; renderMenuTable(); };
-
+window.filterMenu = function(){ currentMenuCat=document.getElementById('menuCatFilter').value; renderMenuTable(); };
 function updateCategoryDropdown() {
   const select=document.getElementById('menuCatFilter'); if(!select) return;
-  const cats=[...new Set(menuItems.map(m=>m.category||'Other'))];
-  select.innerHTML=`<option value="All">All Categories</option>`;
-  cats.forEach(c=>{ select.innerHTML+=`<option value="${c}" ${currentMenuCat===c?'selected':''}>${c}</option>`; });
+  const cats=[...new Set(menuItems.map(m=>m.category||'Other'))]; const prev=select.value;
+  select.innerHTML='<option value="All">All Categories</option>';
+  cats.forEach(c=>{ select.innerHTML+=`<option value="${c}" ${prev===c?'selected':''}>${c}</option>`; });
 }
-
 function getTempLabel(t) {
   if(t==='ice') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-ice">🧊 Ice</span>`;
   if(t==='hot') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-hot">☕ Hot</span>`;
   if(t==='frappe') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-frappe">🥤 Frappe</span>`;
   return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-both">🧊☕ Both</span>`;
 }
-
 function renderMenuTable() {
-  const tbody=document.getElementById("menuTableBody"); if(!tbody) return;
+  const tbody=document.getElementById('menuTableBody'); if(!tbody) return;
   const filtered=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
   tbody.innerHTML=filtered.map(m=>{
-    const finalPrice=m.price*(1-(m.discount||0)/100);
-    const inStock = m.inStock !== false; // default true
-    return `
-    <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
+    const finalPrice=m.price*(1-(m.discount||0)/100); const inStock=m.inStock!==false;
+    return `<tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
       <td class="p-4 flex items-center gap-3">
         <img src="${m.imageUrl||'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-10 h-10 rounded shadow object-cover border border-[#5c453b]" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'">
         <div><div class="font-medium">${m.name}</div><div class="text-xs text-gray-400">${m.nameKh||''}</div></div>
       </td>
       <td class="p-4"><span class="bg-[#3a2a24] border border-[#5c453b] px-2 py-1 rounded text-xs">${m.category}</span></td>
       <td class="p-4">${getTempLabel(m.temperature||'both')}</td>
-      <td class="p-4">
-        <button onclick="togglePopular('${m.id}',${!m.popular})" class="text-lg ${m.popular?'opacity-100':'opacity-25 hover:opacity-60'} transition" title="${m.popular?'Remove popular':'Mark popular'}">🔥</button>
-      </td>
-      <td class="p-4">
-        <button onclick="toggleInStock('${m.id}',${!inStock})"
-          class="px-3 py-1.5 rounded-lg text-xs font-bold transition border ${inStock
-            ? 'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43] hover:border-[#d44e43]/40'
-            : 'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b] hover:border-[#5db85b]/40'}"
-          title="${inStock?'Click to mark Out of Stock':'Click to mark In Stock'}">
-          ${inStock ? '✓ In Stock' : '✗ Out of Stock'}
-        </button>
-      </td>
+      <td class="p-4"><button onclick="togglePopular('${m.id}',${!m.popular})" class="text-lg ${m.popular?'opacity-100':'opacity-25 hover:opacity-60'} transition">🔥</button></td>
+      <td class="p-4"><button onclick="toggleInStock('${m.id}',${!inStock})" class="px-3 py-1.5 rounded-lg text-xs font-bold transition border ${inStock?'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43] hover:border-[#d44e43]/40':'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b] hover:border-[#5db85b]/40'}">${inStock?'✓ In Stock':'✗ Out'}</button></td>
       <td class="p-4">$${Number(m.price).toFixed(2)}</td>
-      <td class="p-4">
-        <div class="flex items-center gap-1 bg-[#3a2a24] border border-[#5c453b] rounded p-1 w-20">
-          <input type="number" min="0" max="100" value="${m.discount||0}" onchange="updateDiscount('${m.id}',this.value)" class="w-full bg-transparent text-center border-none p-0 text-[#d44e43] font-bold focus:ring-0">
-          <span class="pr-2 text-gray-400 text-xs">%</span>
-        </div>
-      </td>
+      <td class="p-4"><div class="flex items-center gap-1 bg-[#3a2a24] border border-[#5c453b] rounded p-1 w-20"><input type="number" min="0" max="100" value="${m.discount||0}" onchange="updateDiscount('${m.id}',this.value)" class="w-full bg-transparent text-center border-none p-0 text-[#d44e43] font-bold focus:ring-0"><span class="pr-2 text-gray-400 text-xs">%</span></div></td>
       <td class="p-4 text-[#5db85b] font-bold">$${finalPrice.toFixed(2)}</td>
       <td class="p-4 text-right">
         <button onclick="openEditMenuModal('${m.id}')" class="text-gray-400 hover:text-[#5db85b] transition mr-3"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
@@ -1142,68 +1251,47 @@ function renderMenuTable() {
 }
 
 // ── TOPPINGS ──
-window.previewImg = function(inputId, imgId, previewId) {
-  const val=document.getElementById(inputId)?.value.trim();
-  const prev=document.getElementById(previewId); const img=document.getElementById(imgId);
-  if(val&&prev&&img) { img.src=val; prev.classList.remove("hidden"); }
-  else if(prev) prev.classList.add("hidden");
-};
-window.openAddToppingModal = () => { const m=document.getElementById("toppingModal"); m.classList.remove("hidden"); m.style.display="flex"; };
-window.closeAddToppingModal = () => { const m=document.getElementById("toppingModal"); m.classList.add("hidden"); m.style.display="none"; };
+window.openAddToppingModal = ()=>{ const m=document.getElementById('toppingModal'); m.classList.remove('hidden'); m.style.display='flex'; };
+window.closeAddToppingModal = ()=>{ const m=document.getElementById('toppingModal'); m.classList.add('hidden'); m.style.display='none'; };
 window.saveTopping = async function() {
-  const name=document.getElementById("topName").value.trim();
-  const nameKh=document.getElementById("topNameKh").value.trim();
-  const price=parseFloat(document.getElementById("topPrice").value);
-  const imageUrl=document.getElementById("topImage").value.trim();
-  if(!name) { showToast("Name required!",true); return; }
-  if(isNaN(price)||price<0) { showToast("Valid price required!",true); return; }
+  const name=document.getElementById('topName').value.trim(); const nameKh=document.getElementById('topNameKh').value.trim();
+  const price=parseFloat(document.getElementById('topPrice').value);
+  const imageUrl=document.getElementById('topImageFinal')?.value||document.getElementById('topImage').value.trim();
+  if(!name){ showToast('Name required!',true); return; } if(isNaN(price)||price<0){ showToast('Valid price required!',true); return; }
   try {
-    await addDoc(collection(db,"toppings"),{name,nameKh,price,imageUrl,inStock:true});
+    await addDoc(collection(db,'toppings'),{name,nameKh,price,imageUrl,inStock:true});
     closeAddToppingModal();
     ['topName','topNameKh','topPrice','topImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    document.getElementById("topImagePreview").classList.add("hidden");
-    showToast("Topping added!");
-  } catch(e) { showToast("Error: "+e.message,true); }
+    if(document.getElementById('topImageFinal')) document.getElementById('topImageFinal').value='';
+    clearImgPreview('topImgPreviewWrap','topImageFinal','top');
+    showToast('Topping added!');
+  } catch(e){ showToast('Error: '+e.message,true); }
 };
-window.deleteTopping = async function(id) { 
-  if(!(await customConfirm("Remove this topping?", "Remove Topping"))) return; 
-  try{await deleteDoc(doc(db,"toppings",id));}catch(e){} 
-};
-
+window.deleteTopping = async function(id){ if(!(await customConfirm('Remove this topping?','Remove Topping'))) return; try{ await deleteDoc(doc(db,'toppings',id)); }catch(e){} };
 window.openEditToppingModal = function(id) {
   const tp=toppings.find(x=>x.id===id); if(!tp) return; editingToppingId=id;
-  document.getElementById("editTopName").value=tp.name||''; document.getElementById("editTopNameKh").value=tp.nameKh||'';
-  document.getElementById("editTopPrice").value=tp.price||0; document.getElementById("editTopImage").value=tp.imageUrl||'';
-  const prevImg=document.getElementById("editTopImagePreviewImg");
-  if(tp.imageUrl){prevImg.src=tp.imageUrl;document.getElementById("editTopImagePreview").style.display='block';}
-  else{document.getElementById("editTopImagePreview").style.display='none';}
-  const m=document.getElementById("editToppingModal"); m.classList.remove("hidden"); m.style.display="flex";
+  document.getElementById('editTopName').value=tp.name||''; document.getElementById('editTopNameKh').value=tp.nameKh||'';
+  document.getElementById('editTopPrice').value=tp.price||0; document.getElementById('editTopImage').value=tp.imageUrl||'';
+  const prevImg=document.getElementById('editTopImagePreviewImg');
+  if(tp.imageUrl){prevImg.src=tp.imageUrl;document.getElementById('editTopImagePreview').style.display='block';}
+  else document.getElementById('editTopImagePreview').style.display='none';
+  const m=document.getElementById('editToppingModal'); m.classList.remove('hidden'); m.style.display='flex';
 };
-window.closeEditToppingModal = function() { editingToppingId=null; const m=document.getElementById("editToppingModal"); m.classList.add("hidden"); m.style.display="none"; };
+window.closeEditToppingModal = function(){ editingToppingId=null; const m=document.getElementById('editToppingModal'); m.classList.add('hidden'); m.style.display='none'; };
 window.saveEditTopping = async function() {
   if(!editingToppingId) return;
-  const name=document.getElementById("editTopName").value.trim();
-  const nameKh=document.getElementById("editTopNameKh").value.trim();
-  const price=parseFloat(document.getElementById("editTopPrice").value);
-  const imageUrl=document.getElementById("editTopImage").value.trim();
-  if(!name||isNaN(price)||price<0) { showToast("Invalid data",true); return; }
-  try { await updateDoc(doc(db,"toppings",editingToppingId),{name,nameKh,price,imageUrl}); closeEditToppingModal(); showToast("Updated!"); }
-  catch(e) { showToast("Error",true); }
+  const name=document.getElementById('editTopName').value.trim(); const nameKh=document.getElementById('editTopNameKh').value.trim();
+  const price=parseFloat(document.getElementById('editTopPrice').value); const imageUrl=document.getElementById('editTopImage').value.trim();
+  if(!name||isNaN(price)||price<0){ showToast('Invalid data',true); return; }
+  try{ await updateDoc(doc(db,'toppings',editingToppingId),{name,nameKh,price,imageUrl}); closeEditToppingModal(); showToast('Updated!'); }
+  catch(e){ showToast('Error',true); }
 };
-
-window.toggleToppingStock = async function(id, val) {
-  try {
-    await updateDoc(doc(db,"toppings",id),{inStock:val});
-    showToast(val ? "Topping In Stock ✓" : "Topping Out of Stock ✗");
-  } catch(e) { showToast("Error",true); }
-};
-
+window.toggleToppingStock = async function(id,val){ try{ await updateDoc(doc(db,'toppings',id),{inStock:val}); showToast(val?'Topping In Stock ✓':'Out of Stock ✗'); }catch(e){} };
 function renderToppings() {
-  const grid=document.getElementById("toppingsGrid"); if(!grid) return;
+  const grid=document.getElementById('toppingsGrid'); if(!grid) return;
   grid.innerHTML=toppings.map(tp=>{
-    const inStock = tp.inStock !== false;
-    return `
-    <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden shadow-sm">
+    const inStock=tp.inStock!==false;
+    return `<div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden shadow-sm">
       ${tp.imageUrl?`<div class="h-28 bg-[#3a2a24] overflow-hidden"><img src="${tp.imageUrl}" alt="${tp.name}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/></div>`:`<div class="h-28 bg-[#3a2a24] flex items-center justify-center text-4xl opacity-30">🧁</div>`}
       <div class="p-4 flex justify-between items-start">
         <div class="flex-1 min-w-0 mr-2">
@@ -1212,64 +1300,54 @@ function renderToppings() {
           <p class="text-[#5db85b] font-semibold text-sm">+$${Number(tp.price).toFixed(2)}</p>
         </div>
         <div class="flex gap-1 flex-shrink-0 items-center">
-          <button onclick="toggleToppingStock('${tp.id}',${!inStock})" class="px-2 py-1 rounded text-[10px] font-bold transition border ${inStock ? 'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43]' : 'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b]'}">${inStock ? '✓ Stock' : '✗ Out'}</button>
+          <button onclick="toggleToppingStock('${tp.id}',${!inStock})" class="px-2 py-1 rounded text-[10px] font-bold transition border ${inStock?'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40':'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40'}">${inStock?'✓':'✗'}</button>
           <button onclick="openEditToppingModal('${tp.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
           <button onclick="deleteTopping('${tp.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
         </div>
       </div>
-    </div>
-  `}).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── SLIDESHOW ──
 window.addSlide = async function() {
-  const step=parseInt(document.getElementById("slideStep").value)||(slideshowItems.length+1);
-  const imageUrl=document.getElementById("slideImage").value.trim();
-  const titleEn=document.getElementById("slideTitleEn").value.trim();
-  const titleKh=document.getElementById("slideTitleKh").value.trim();
-  const descEn=document.getElementById("slideDescEn").value.trim();
-  const descKh=document.getElementById("slideDescKh").value.trim();
-  if(!titleEn) { showToast("Title (EN) required",true); return; }
+  const step=parseInt(document.getElementById('slideStep').value)||(slideshowItems.length+1);
+  const imageUrl=document.getElementById('slideImageFinal')?.value||document.getElementById('slideImage')?.value.trim()||'';
+  const titleEn=document.getElementById('slideTitleEn').value.trim(); const titleKh=document.getElementById('slideTitleKh').value.trim();
+  const descEn=document.getElementById('slideDescEn').value.trim(); const descKh=document.getElementById('slideDescKh').value.trim();
+  if(!titleEn){ showToast('Title (EN) required',true); return; }
   try {
-    await addDoc(collection(db,"slideshow"),{step,order:step,imageUrl,title:titleEn,titleKh,description:descEn,descKh});
+    await addDoc(collection(db,'slideshow'),{step,order:step,imageUrl,title:titleEn,titleKh,description:descEn,descKh});
     ['slideStep','slideImage','slideTitleEn','slideTitleKh','slideDescEn','slideDescKh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    showToast("Slide added!");
-  } catch(e) { showToast("Error",true); }
+    if(document.getElementById('slideImageFinal')) document.getElementById('slideImageFinal').value='';
+    showToast('Slide added!');
+  } catch(e){ showToast('Error',true); }
 };
-window.deleteSlide = async function(id) { 
-  if(!(await customConfirm("Delete slide?", "Delete Slide"))) return; 
-  try{await deleteDoc(doc(db,"slideshow",id));showToast("Deleted.");}catch(e){showToast("Error",true);} 
-};
-
+window.deleteSlide = async function(id){ if(!(await customConfirm('Delete slide?','Delete Slide'))) return; try{ await deleteDoc(doc(db,'slideshow',id)); showToast('Deleted.'); }catch(e){ showToast('Error',true); } };
 window.openEditSlideModal = function(id) {
   const slide=slideshowItems.find(s=>s.id===id); if(!slide) return; editingSlideId=id;
-  document.getElementById("editSlideStep").value=slide.step||'';
-  document.getElementById("editSlideImage").value=slide.imageUrl||'';
-  document.getElementById("editSlideTitleEn").value=slide.title||'';
-  document.getElementById("editSlideTitleKh").value=slide.titleKh||'';
-  document.getElementById("editSlideDescEn").value=slide.description||'';
-  document.getElementById("editSlideDescKh").value=slide.descKh||'';
-  const m=document.getElementById("editSlideModal"); m.classList.remove("hidden"); m.style.display="flex";
+  document.getElementById('editSlideStep').value=slide.step||''; document.getElementById('editSlideImage').value=slide.imageUrl||'';
+  document.getElementById('editSlideTitleEn').value=slide.title||''; document.getElementById('editSlideTitleKh').value=slide.titleKh||'';
+  document.getElementById('editSlideDescEn').value=slide.description||''; document.getElementById('editSlideDescKh').value=slide.descKh||'';
+  const m=document.getElementById('editSlideModal'); m.classList.remove('hidden'); m.style.display='flex';
 };
-window.closeEditSlideModal = function() { editingSlideId=null; const m=document.getElementById("editSlideModal"); m.classList.add("hidden"); m.style.display="none"; };
+window.closeEditSlideModal = function(){ editingSlideId=null; const m=document.getElementById('editSlideModal'); m.classList.add('hidden'); m.style.display='none'; };
 window.saveEditSlide = async function() {
   if(!editingSlideId) return;
-  const step=parseInt(document.getElementById("editSlideStep").value)||1;
-  const imageUrl=document.getElementById("editSlideImage").value.trim();
-  const title=document.getElementById("editSlideTitleEn").value.trim();
-  const titleKh=document.getElementById("editSlideTitleKh").value.trim();
-  const description=document.getElementById("editSlideDescEn").value.trim();
-  const descKh=document.getElementById("editSlideDescKh").value.trim();
-  if(!title) { showToast("Title required",true); return; }
-  try { await updateDoc(doc(db,"slideshow",editingSlideId),{step,order:step,imageUrl,title,titleKh,description,descKh}); closeEditSlideModal(); showToast("Updated!"); }
-  catch(e) { showToast("Error",true); }
+  const step=parseInt(document.getElementById('editSlideStep').value)||1;
+  const imageUrl=document.getElementById('editSlideImage').value.trim();
+  const title=document.getElementById('editSlideTitleEn').value.trim(); const titleKh=document.getElementById('editSlideTitleKh').value.trim();
+  const description=document.getElementById('editSlideDescEn').value.trim(); const descKh=document.getElementById('editSlideDescKh').value.trim();
+  if(!title){ showToast('Title required',true); return; }
+  try{ await updateDoc(doc(db,'slideshow',editingSlideId),{step,order:step,imageUrl,title,titleKh,description,descKh}); closeEditSlideModal(); showToast('Updated!'); }
+  catch(e){ showToast('Error',true); }
 };
 function renderSlideshowList() {
-  const container=document.getElementById("slideshowList"); if(!container) return;
-  if(!slideshowItems.length) { container.innerHTML=`<p class="text-center text-gray-400 py-8">No slides yet.</p>`; return; }
+  const container=document.getElementById('slideshowList'); if(!container) return;
+  if(!slideshowItems.length){container.innerHTML='<p class="text-center text-gray-400 py-8">No slides yet.</p>';return;}
   container.innerHTML=slideshowItems.map(slide=>`
-    <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden flex gap-0">
-      ${slide.imageUrl?`<div class="w-28 flex-shrink-0 bg-[#3a2a24]"><img src="${slide.imageUrl}" alt="Slide" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-3xl opacity-20\'>🖼️</div>'"/></div>`:`<div class="w-28 flex-shrink-0 bg-[#3a2a24] flex items-center justify-center text-3xl opacity-20">🖼️</div>`}
+    <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden flex">
+      ${slide.imageUrl?`<div class="w-28 flex-shrink-0 bg-[#3a2a24]"><img src="${slide.imageUrl}" alt="Slide" class="w-full h-full object-cover"/></div>`:`<div class="w-28 flex-shrink-0 bg-[#3a2a24] flex items-center justify-center text-3xl opacity-20">🖼️</div>`}
       <div class="flex-1 p-4 flex justify-between items-start min-w-0">
         <div class="flex-1 min-w-0 mr-3">
           <div class="flex items-center gap-2 mb-1">
@@ -1284,92 +1362,71 @@ function renderSlideshowList() {
           <button onclick="deleteSlide('${slide.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 // ── SOCIAL LINKS ──
 function updateSocialPreview() {
-  const fbVal=document.getElementById("fbUrl").value.trim();
-  const ttVal=document.getElementById("ttUrl").value.trim();
-  const pfb=document.getElementById("preview-fb"); const ptt=document.getElementById("preview-tt"); const pnone=document.getElementById("preview-none");
+  const fbVal=document.getElementById('fbUrl').value.trim(); const ttVal=document.getElementById('ttUrl').value.trim();
+  const pfb=document.getElementById('preview-fb'); const ptt=document.getElementById('preview-tt'); const pnone=document.getElementById('preview-none');
   if(!pfb||!ptt||!pnone) return;
-  if(fbVal||ttVal) {
-    pnone.classList.add("hidden");
-    if(fbVal){pfb.classList.remove("hidden");pfb.style.display="flex";}else{pfb.classList.add("hidden");}
-    if(ttVal){ptt.classList.remove("hidden");ptt.style.display="flex";}else{ptt.classList.add("hidden");}
-  } else {
-    pfb.classList.add("hidden"); ptt.classList.add("hidden"); pnone.classList.remove("hidden");
-  }
+  if(fbVal||ttVal){
+    pnone.classList.add('hidden');
+    if(fbVal){pfb.classList.remove('hidden');pfb.style.display='flex';}else pfb.classList.add('hidden');
+    if(ttVal){ptt.classList.remove('hidden');ptt.style.display='flex';}else ptt.classList.add('hidden');
+  } else { pfb.classList.add('hidden'); ptt.classList.add('hidden'); pnone.classList.remove('hidden'); }
 }
-document.getElementById("fbUrl").addEventListener("input", updateSocialPreview);
-document.getElementById("ttUrl").addEventListener("input", updateSocialPreview);
-
+document.getElementById('fbUrl').addEventListener('input',updateSocialPreview);
+document.getElementById('ttUrl').addEventListener('input',updateSocialPreview);
 window.saveSocialLinks = async function() {
-  const fbUrl=document.getElementById("fbUrl").value.trim();
-  const tiktokUrl=document.getElementById("ttUrl").value.trim();
-  try {
-    await setDoc(doc(db,"settings","socialLinks"),{facebookUrl:fbUrl,tiktokUrl:tiktokUrl});
-    showToast("Social links saved! Customers will see them on the order page.");
-    updateSocialPreview();
-  } catch(e) { showToast("Error saving: "+e.message,true); }
+  const fbUrl=document.getElementById('fbUrl').value.trim(); const tiktokUrl=document.getElementById('ttUrl').value.trim();
+  try{ await setDoc(doc(db,'settings','socialLinks'),{facebookUrl:fbUrl,tiktokUrl}); showToast('Social links saved!'); updateSocialPreview(); }
+  catch(e){ showToast('Error saving: '+e.message,true); }
 };
-
 window.clearSocialLinks = async function() {
-  document.getElementById("fbUrl").value=''; document.getElementById("ttUrl").value='';
-  try {
-    await setDoc(doc(db,"settings","socialLinks"),{facebookUrl:'',tiktokUrl:''});
-    showToast("Social links cleared.");
-    updateSocialPreview();
-  } catch(e) {}
+  document.getElementById('fbUrl').value=''; document.getElementById('ttUrl').value='';
+  try{ await setDoc(doc(db,'settings','socialLinks'),{facebookUrl:'',tiktokUrl:''}); showToast('Cleared.'); updateSocialPreview(); }catch(e){}
 };
 
 // ── COUPONS ──
 window.addCoupon = async function() {
-  const code = document.getElementById("addCouponCode").value.trim().toUpperCase();
-  const pct = parseInt(document.getElementById("addCouponPct").value);
-  if(!code || isNaN(pct) || pct <= 0 || pct > 100) return showToast("Invalid code or percentage", true);
-  try {
-    await addDoc(collection(db,"coupons"), {code, discount:pct, active:true});
-    document.getElementById("addCouponCode").value='';
-    document.getElementById("addCouponPct").value='';
-    showToast("Coupon added!");
-  } catch(e) { showToast("Error adding coupon", true); }
+  const code=document.getElementById('addCouponCode').value.trim().toUpperCase();
+  const pct=parseInt(document.getElementById('addCouponPct').value);
+  if(!code||isNaN(pct)||pct<=0||pct>100) return showToast('Invalid code or percentage',true);
+  try{ await addDoc(collection(db,'coupons'),{code,discount:pct,active:true}); document.getElementById('addCouponCode').value=''; document.getElementById('addCouponPct').value=''; showToast('Coupon added!'); }
+  catch(e){ showToast('Error adding coupon',true); }
 };
-
-window.toggleCoupon = async function(id, val) {
-  try { await updateDoc(doc(db,"coupons",id),{active:val}); showToast(val?"Coupon activated":"Coupon deactivated"); } catch(e){}
-};
-
-window.deleteCoupon = async function(id) {
-  if(await customConfirm("Delete this coupon?", "Delete Coupon")) {
-    try { await deleteDoc(doc(db,"coupons",id)); showToast("Deleted"); } catch(e){}
-  }
-};
-
+window.toggleCoupon = async function(id,val){ try{ await updateDoc(doc(db,'coupons',id),{active:val}); showToast(val?'Coupon activated':'Coupon deactivated'); }catch(e){} };
+window.deleteCoupon = async function(id){ if(await customConfirm('Delete this coupon?','Delete Coupon')){ try{ await deleteDoc(doc(db,'coupons',id)); showToast('Deleted'); }catch(e){} } };
 function renderCoupons() {
-  const tbody = document.getElementById("couponsTableBody");
-  if(!tbody) return;
-  if(!coupons.length) { tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400">No coupons created yet.</td></tr>`; return; }
-  tbody.innerHTML = coupons.map(c => `
+  const tbody=document.getElementById('couponsTableBody'); if(!tbody) return;
+  if(!coupons.length){tbody.innerHTML='<tr><td colspan="4" class="p-8 text-center text-gray-400">No coupons created yet.</td></tr>';return;}
+  tbody.innerHTML=coupons.map(c=>`
     <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
       <td class="p-4 font-bold text-white tracking-widest">${c.code}</td>
       <td class="p-4 text-[#d44e43] font-bold">-${c.discount}%</td>
-      <td class="p-4">
-         <button onclick="toggleCoupon('${c.id}',${!c.active})" class="px-3 py-1 rounded text-[10px] uppercase font-bold border transition ${c.active ? 'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43]' : 'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b]'}">${c.active ? '✓ Active' : '✗ Inactive'}</button>
-      </td>
-      <td class="p-4 text-right">
-         <button onclick="deleteCoupon('${c.id}')" class="text-gray-400 hover:text-[#d44e43] transition"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-      </td>
-    </tr>
-  `).join('');
+      <td class="p-4"><button onclick="toggleCoupon('${c.id}',${!c.active})" class="px-3 py-1 rounded text-[10px] uppercase font-bold border transition ${c.active?'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40':'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40'}">${c.active?'✓ Active':'✗ Inactive'}</button></td>
+      <td class="p-4 text-right"><button onclick="deleteCoupon('${c.id}')" class="text-gray-400 hover:text-[#d44e43] transition"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
+    </tr>`).join('');
 }
+
+// ── CONFIRM MODAL ──
+window.customConfirm = function(message,title='Confirm Action') {
+  return new Promise(resolve=>{
+    const modal=document.getElementById('confirmModal');
+    document.getElementById('confirmTitle').innerText=title;
+    document.getElementById('confirmMessage').innerText=message;
+    modal.classList.remove('hidden');
+    const okBtn=document.getElementById('confirmOkBtn'); const cancelBtn=document.getElementById('confirmCancelBtn');
+    const cleanup=()=>{ modal.classList.add('hidden'); okBtn.replaceWith(okBtn.cloneNode(true)); cancelBtn.replaceWith(cancelBtn.cloneNode(true)); };
+    document.getElementById('confirmOkBtn').addEventListener('click',()=>{cleanup();resolve(true);});
+    document.getElementById('confirmCancelBtn').addEventListener('click',()=>{cleanup();resolve(false);});
+  });
+};
 
 // Init
 fetchData();
-
-// Refresh elapsed timers every minute
-setInterval(()=>{ if(document.getElementById('view-orders')&&!document.getElementById('view-orders').classList.contains('hidden')) renderOrders(); }, 60000);
+setInterval(()=>{ const v=document.getElementById('view-orders'); if(v&&!v.classList.contains('hidden')) renderOrders(); },30000);
 </script>
 </body>
 </html>

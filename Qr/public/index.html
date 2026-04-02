@@ -64,7 +64,6 @@ select option{background:var(--sur);}
 .temp-ice{background:#dbeafe;color:#1d4ed8;}
 .temp-hot{background:#fee2e2;color:#b91c1c;}
 .temp-frappe{background:#e0e7ff;color:#4338ca;}
-.order-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(60,42,33,0.85);color:#f5ece3;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;backdrop-filter:blur(4px);border:1px solid rgba(191,60,55,.4);}
 /* SOCIAL BAR */
 #socialBar{position:fixed;bottom:24px;right:24px;z-index:45;background:transparent;border:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;}
 #socialBar.hidden-bar{display:none;}
@@ -367,7 +366,7 @@ const T = {
     toppings:"Add Toppings", saveChanges:"Save Changes", addTopping:"Customize", note:"Note",
     howToOrder:"How to Order", prev:"Prev", next:"Next", popular:"Popular",
     tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe",
-    ordersCount:"orders", customBtn:"Custom"
+    ordersCount:"orders", customBtn:"Custom", totalOrders:"Total Orders"
   },
   kh: {
     sub:"បញ្ជាទិញ", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
@@ -381,7 +380,7 @@ const T = {
     toppings:"បន្ថែម Toppings", saveChanges:"រក្សាទុក", addTopping:"កំណត់ Toppings", note:"ចំណាំ",
     howToOrder:"របៀបបញ្ជាទិញ", prev:"ថយក្រោយ", next:"បន្ត", popular:"ពេញនិយម",
     tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ",
-    ordersCount:"ការបញ្ជា", customBtn:"កែច្នៃ"
+    ordersCount:"ការបញ្ជា", customBtn:"កែច្នៃ", totalOrders:"ការកាម្មងសរុប"
   }
 };
 
@@ -700,7 +699,7 @@ function renderMenu(items) {
     const tempBadge = getTempBadgeHTML(item.temperature);
 
     const orderCount = itemOrderCounts[item.name] || 0;
-    const orderCountBadge = orderCount > 0 ? `<span class="order-count-badge">🛒 ${orderCount} ${tx.ordersCount}</span>` : '';
+    const orderCountText = orderCount > 0 ? `<p class="text-[10px] text-[var(--muted)] mt-0.5">(${tx.totalOrders}: ${orderCount})</p>` : '';
 
     return `<div class="m-card${outOfStock?" out-stock":""} rounded-2xl overflow-hidden flex flex-col fade-up" style="animation-delay:${idx*35}ms">
       <div class="relative h-36 bg-[var(--sur2)] overflow-hidden cursor-pointer" onclick='${!outOfStock ? `openCustomize(${JSON.stringify({
@@ -714,27 +713,22 @@ function renderMenu(items) {
         ${item.popular?`<span class="popular-badge">🔥 Hot</span>`:''}
         <span class="absolute top-2 right-2 bg-[#3c2a21]/80 text-[#faf6eb] text-[9px] px-2 py-0.5 rounded-full border border-[var(--gold)]/50 uppercase tracking-wide" style="backdrop-filter:blur(4px)">${item.category||""}</span>
         ${outOfStock?`<div class="out-stock-badge"><span class="text-white text-xs font-bold tracking-wide uppercase bg-black/70 px-3 py-1 rounded-full">${tx.outOfStock}</span></div>`:""}
-        ${orderCountBadge}
       </div>
       <div class="p-3 flex flex-col flex-1">
-        <h3 class="text-sm font-medium leading-snug flex-1 mb-1">${dName}</h3>
+        <div class="flex-1 mb-1">
+          <h3 class="text-sm font-medium leading-snug">${dName}</h3>
+          ${orderCountText}
+        </div>
         ${tempBadge ? `<div class="mb-2">${tempBadge}</div>` : '<div class="mb-2"></div>'}
         <div class="flex items-center justify-between">
           ${priceHTML}
           ${outOfStock
             ? `<span class="text-xs text-[var(--muted)] border border-[var(--bdr)] px-2 py-1 rounded-full">${tx.outOfStock}</span>`
-            : `<div class="flex items-center gap-1.5">
-                 <button class="text-[var(--gold)] border border-[var(--gold)] bg-transparent hover:bg-[var(--gold)] hover:text-[#faf6eb] px-2.5 py-1 rounded-full text-[10px] font-bold transition-all shadow-sm" onclick='openCustomize(${JSON.stringify({
+            : `<button class="g-btn px-4 py-1.5 rounded-full font-bold shadow-sm text-xs" onclick='addToCartDirect(${JSON.stringify({
                 id:item.id, name:item.name, nameKh:item.nameKh||'',
                 imageUrl:item.imageUrl||'', price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,
                 temperature:item.temperature||'both'
-              }).replace(/'/g,"&#39;")})'>+ ${tx.customBtn||"Custom"}</button>
-                 <button class="g-btn px-4 py-1 rounded-full font-bold shadow-sm text-xs" onclick='addToCartDirect(${JSON.stringify({
-                id:item.id, name:item.name, nameKh:item.nameKh||'',
-                imageUrl:item.imageUrl||'', price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,
-                temperature:item.temperature||'both'
-              }).replace(/'/g,"&#39;")})'>+ Add</button>
-               </div>`}
+              }).replace(/'/g,"&#39;")})'>+ Add</button>`}
         </div>
       </div>
     </div>`;
@@ -748,21 +742,24 @@ function renderPopular() {
   if(!popularItems.length) { section.classList.add("hidden"); return; }
   section.classList.remove("hidden");
 
+  const tx = t();
+
   grid.innerHTML = popularItems.map(item => {
     const dName = lang==='kh'&&item.nameKh ? item.nameKh : item.name;
     const discount = item.discount||0;
     const calcPrice = discount>0 ? item.price*(1-discount/100) : item.price;
     const orderCount = itemOrderCounts[item.name] || 0;
+    const orderCountText = orderCount > 0 ? `<p class="text-[10px] text-[var(--muted)] mt-0.5">(${tx.totalOrders}: ${orderCount})</p>` : '';
     return `
     <div class="flex-shrink-0 w-36 bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden cursor-pointer hover:border-[var(--gold)] transition-all hover:-translate-y-1 hover:shadow-lg"
-         onclick='addToCartDirect(${JSON.stringify({id:item.id,name:item.name,nameKh:item.nameKh||'',imageUrl:item.imageUrl||'',price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,temperature:item.temperature||'both'}).replace(/'/g,"&#39;")})'>
+         onclick='openCustomize(${JSON.stringify({id:item.id,name:item.name,nameKh:item.nameKh||'',imageUrl:item.imageUrl||'',price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,temperature:item.temperature||'both'}).replace(/'/g,"&#39;")})'>
       <div class="h-24 bg-[var(--sur2)] overflow-hidden relative">
         <img src="${item.imageUrl||'https://placehold.co/200x150/f5ece3/3c2a21?text=☕'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x150/f5ece3/3c2a21?text=☕'"/>
         <span class="popular-badge" style="top:5px;left:5px">🔥</span>
-        ${orderCount>0?`<span class="order-count-badge">🛒 ${orderCount}</span>`:''}
       </div>
       <div class="p-2.5">
         <p class="text-xs font-semibold truncate">${dName}</p>
+        ${orderCountText}
         <p class="text-[var(--gold)] font-bold text-xs mt-0.5">$${calcPrice.toFixed(2)}</p>
       </div>
     </div>`;
@@ -842,7 +839,9 @@ function _openCustomPanel() {
     if(selectedTemp === 'frappe') selectedTemp = 'ice';
   }
 
-  document.getElementById("cm-top-list").innerHTML = allToppings.length ? allToppings.map(tp => {
+  const availableToppings = allToppings.filter(t => t.inStock !== false);
+
+  document.getElementById("cm-top-list").innerHTML = availableToppings.length ? availableToppings.map(tp => {
     const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
     const isAct = selectedTops.includes(tp.id);
     const imgHTML = tp.imageUrl

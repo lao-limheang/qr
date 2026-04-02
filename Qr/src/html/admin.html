@@ -3,1234 +3,1297 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Chafé Admin Panel</title>
+<title>Chafé — Order</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  body{font-family:'Outfit',sans-serif;background-color:#3e2a24;color:#e6e0d8;margin:0;min-height:100vh;overflow-x:hidden;}
-  .serif{font-family:'Cormorant Garamond',serif;}
-  .btn-primary{background:#d44e43;color:white;transition:background .2s;}
-  .btn-primary:hover{background:#b83f36;}
-  .btn-success{background:#5db85b;color:white;transition:background .2s;}
-  .btn-success:hover{background:#4cae4c;}
-  input,select,textarea{background-color:#5c453b;border:1px solid #5c453b;color:white;outline:none;border-radius:6px;padding:8px 12px;}
-  input:focus,select:focus,textarea:focus{border-color:#d44e43;}
-  input::placeholder,textarea::placeholder{color:#a3958f;}
-  ::-webkit-scrollbar{width:6px;height:6px;}
-  ::-webkit-scrollbar-track{background:#3a2a24;}
-  ::-webkit-scrollbar-thumb{background:#5c453b;border-radius:4px;}
+:root{--bg:#faf6eb;--sur:#ffffff;--sur2:#f5ece3;--bdr:#e6d6c8;--gold:#bf3c37;--gold2:#a6332f;--txt:#3c2a21;--muted:#8c6b5d;--green:#48a863;--red:#bf3c37;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;padding-bottom:70px;}
+.serif{font-family:'Cormorant Garamond',serif;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--sur);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.4;}
+.cat-pill{border:1px solid var(--bdr);color:var(--muted);transition:all .2s;white-space:nowrap;cursor:pointer;}
+.cat-pill:hover{border-color:var(--gold);color:var(--gold);}
+.cat-pill.on{background:var(--gold);color:#faf6eb;border-color:var(--gold);font-weight:600;}
+.m-card{background:var(--sur);border:1px solid var(--bdr);transition:border-color .2s,transform .2s,box-shadow .2s;}
+.m-card:hover{border-color:rgba(191,60,55,.4);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.1);}
+.m-card.out-stock{opacity:.5;pointer-events:none;}
+.out-stock-badge{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;border-radius:inherit;}
 
-  /* Status badges */
-  .status-pending{background:#d1a14a22;color:#d1a14a;border:1px solid #d1a14a44;}
-  .status-completed{background:#5db85b22;color:#5db85b;border:1px solid #5db85b44;}
-  .status-cancelled{background:#d44e4322;color:#d44e43;border:1px solid #d44e4344;}
+/* Panel Slide Animations */
+#cartPanel, #myOrdersPanel { transition: transform .35s cubic-bezier(.4,0,.2,1); }
+#cartPanel.show { transform: translateX(0) !important; }
+#myOrdersPanel.show { transform: translateY(0) !important; }
 
-  /* Order card status ring */
-  .order-card-pending{border-color:#d1a14a60;}
-  .order-card-completed{border-color:#5db85b60;opacity:.75;}
-  .order-card-cancelled{border-color:#d44e4360;opacity:.6;}
+.g-btn{background:var(--gold);color:#faf6eb;font-weight:700;cursor:pointer;transition:background .18s,transform .1s;border:none;}
+.g-btn:hover{background:var(--gold2);}
+.g-btn:active{transform:scale(.97);}
+.g-btn:disabled{background:var(--bdr);color:var(--muted);cursor:not-allowed;}
+.r-btn{background:transparent;border:1px solid var(--red);color:var(--red);cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
+.r-btn:hover{background:var(--red);color:#fff;}
+#toast{transition:opacity .3s,transform .3s;pointer-events:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-up{animation:fadeUp .35s ease both;}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer{background:linear-gradient(90deg,var(--sur) 25%,var(--sur2) 50%,var(--sur) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}.pop-anim{animation:pop .25s ease;}
+select,input,textarea{background:var(--bg);border:1px solid var(--bdr);color:var(--txt);font-family:'Outfit',sans-serif;}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--gold);}
+select option{background:var(--sur);}
+.lang-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--sur);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;min-width:130px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;}
+.lang-opt{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;cursor:pointer;transition:background .15s;}
+.lang-opt:hover{background:var(--sur2);}
+.lang-opt.active{color:var(--gold);}
 
-  /* Live timer */
-  .order-timer{font-size:11px;font-weight:600;color:#d1a14a;}
+/* Customize Modal Buttons */
+.opt-btn { transition: all 0.15s; background: transparent; }
+.opt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
+.top-box.active{border-color:var(--gold);background:rgba(191,60,55,0.03);}
+.temp-btn{transition:all .15s;background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.temp-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(191,60,55,.05);}
 
-  /* Temp pills */
-  .tp-ice{background:#1d4ed822;color:#60a5fa;border:1px solid #1d4ed844;}
-  .tp-hot{background:#b91c1c22;color:#f87171;border:1px solid #b91c1c44;}
-  .tp-frappe{background:#4f46e522;color:#818cf8;border:1px solid #4f46e544;}
-  .tp-both{background:#37415122;color:#9ca3af;border:1px solid #37415144;}
+/* SLIDESHOW */
+#slideshow-section{position:relative;overflow:hidden;}
+.slide-dot{width:8px;height:8px;border-radius:50%;background:var(--bdr);cursor:pointer;transition:all .2s;}
+.slide-dot.on{background:var(--gold);width:20px;border-radius:4px;}
+.step-badge{width:32px;height:32px;border-radius:50%;background:var(--gold);color:#faf6eb;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
-  /* Total order counter banner */
-  #totalOrderBanner{background:linear-gradient(135deg,#d44e43,#a6332f);border-radius:16px;padding:20px 24px;}
+/* BADGES */
+.popular-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;box-shadow:0 2px 8px rgba(239,68,68,.4);}
+.temp-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600;letter-spacing:.3px;}
+.temp-ice{background:#dbeafe;color:#1d4ed8;}
+.temp-hot{background:#fee2e2;color:#b91c1c;}
+.temp-frappe{background:#e0e7ff;color:#4338ca;}
+.order-count-badge{position:absolute;bottom:8px;right:8px;background:rgba(60,42,33,0.85);color:#f5ece3;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.3px;backdrop-filter:blur(4px);border:1px solid rgba(191,60,55,.4);}
 
-  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .fade-up{animation:fadeUp .3s ease both;}
+/* SOCIAL BAR */
+#socialBar{position:fixed;bottom:24px;right:24px;z-index:45;background:transparent;border:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;}
+#socialBar.hidden-bar{display:none;}
+.social-link{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;pointer-events:auto;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.social-fb{background:#1877f2;color:#fff;}
+.social-fb:hover{background:#166fe5;transform:translateY(-2px) scale(1.05);}
+.social-tiktok{background:#000;color:#fff;}
+.social-tiktok:hover{background:#111;transform:translateY(-2px) scale(1.05);}
 </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body>
 
-<!-- MOBILE OVERLAY -->
-<div id="mobileOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
-
-<!-- SIDEBAR -->
-<div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out bg-[#3a2a24] border-r border-[#4a352a] flex flex-col shrink-0 shadow-2xl md:shadow-none">
-  <div class="p-6 border-b border-[#4a352a] flex justify-between items-center">
-    <div>
-      <h1 class="text-3xl font-serif text-[#d44e43] font-bold">Chafé</h1>
-      <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Admin Panel</p>
+<!-- HEADER -->
+<header class="sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md" style="box-shadow:0 1px 0 var(--bdr),0 4px 20px rgba(0,0,0,.06)">
+  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <img src="../src/img/logo/Icon.png" alt="Chafé Logo" class="h-8 w-auto object-contain" onerror="this.src='https://placehold.co/100x40/faf6eb/bf3c37?text=Chaf%C3%A9'" />
+      <span class="hidden sm:block text-[var(--bdr)]">|</span>
+      <p class="hidden sm:block text-xs text-[var(--muted)] tracking-widest uppercase mt-0.5" id="h-sub">Order</p>
     </div>
-    <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-white">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-    </button>
+    <div class="flex items-center gap-2">
+      <div class="relative" id="langWrap">
+        <button onclick="toggleLangDropdown()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] transition-colors border border-[var(--bdr)] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer">
+          <span id="langFlag">🇬🇧</span>
+          <span id="langLabel" class="hidden sm:inline text-[11px]">EN</span>
+          <svg class="w-2.5 h-2.5 opacity-50" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div id="langDropdown" class="lang-dropdown hidden">
+          <div class="lang-opt" onclick="setLang('en')"><span>🇬🇧</span><span>English</span></div>
+          <div class="lang-opt" onclick="setLang('kh')"><span>🇰🇭</span><span>ភាសាខ្មែរ</span></div>
+        </div>
+      </div>
+      <button onclick="openMyOrders()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] border border-[var(--bdr)] px-3 py-1.5 rounded-full transition-colors cursor-pointer flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <span id="h-myorders" class="hidden sm:inline">My Orders</span>
+      </button>
+      <button onclick="openCart()" class="relative g-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <span id="h-cart" class="hidden sm:inline">Cart</span>
+        <span id="cartBadge" class="absolute -top-1 -right-1 bg-white text-[var(--gold)] text-[9px] font-bold w-4 h-4 rounded-full items-center justify-center hidden shadow-md border border-[var(--gold)]">0</span>
+      </button>
+    </div>
   </div>
-  <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-    <button onclick="switchTab('stats')" id="tab-stats" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors bg-[#8a382f]/20 text-[#d44e43] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-      Statistics
-    </button>
-    <button onclick="switchTab('orders')" id="tab-orders" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-      Live Orders <span id="pendingBadge" class="ml-auto bg-[#d44e43] text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
-    </button>
-    <button onclick="switchTab('history')" id="tab-history" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      Order History
-    </button>
-    <button onclick="switchTab('menu')" id="tab-menu" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-      Menu Manager
-    </button>
-    <button onclick="switchTab('slideshow')" id="tab-slideshow" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      How-to Slides
-    </button>
-    <button onclick="switchTab('social')" id="tab-social" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-      Social Links
-    </button>
-  </nav>
+</header>
+
+<!-- ══════════════════════ HOW TO ORDER SLIDESHOW ══════════════════════ -->
+<div id="slideshow-section" class="hidden max-w-4xl mx-auto px-4 mt-6 mb-6">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden shadow-sm">
+    <div class="px-5 pt-4 pb-3 border-b border-[var(--bdr)] flex items-center justify-between">
+      <h2 class="serif text-lg text-[var(--gold)] font-bold" id="slideshow-title">How to Order</h2>
+      <div class="flex items-center gap-1.5" id="slide-dots"></div>
+    </div>
+    
+    <!-- Smooth Sliding Track -->
+    <div class="overflow-hidden relative w-full">
+      <div id="slides-container" class="flex transition-transform duration-500 ease-in-out min-h-[160px]"></div>
+    </div>
+
+    <div class="px-5 py-3 flex items-center justify-between border-t border-[var(--bdr)] bg-[var(--bg)]/50">
+      <button onclick="prevSlide()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <span id="slide-prev-lbl">Prev</span>
+      </button>
+      <p class="text-xs font-bold text-[var(--muted)]" id="slide-counter">1 / 1</p>
+      <button onclick="nextSlide()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
+        <span id="slide-next-lbl">Next</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
 </div>
 
-<!-- MAIN CONTENT WRAPPER -->
-<div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-  <!-- MOBILE HEADER -->
-  <div class="md:hidden flex items-center justify-between bg-[#3a2a24] p-4 border-b border-[#4a352a] shrink-0 z-30 shadow-md">
-    <div class="flex items-center gap-3">
-      <button onclick="toggleSidebar()" class="text-gray-300 hover:text-white p-1">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-      <h1 class="text-2xl font-serif text-[#d44e43] font-bold leading-none mt-1">Chafé</h1>
+<!-- CATS -->
+<div class="sticky top-[57px] z-30 bg-[var(--bg)]/90 backdrop-blur-sm border-b border-[var(--bdr)]">
+  <div class="max-w-4xl mx-auto px-4 py-2.5 overflow-x-auto" style="scrollbar-width:none">
+    <div id="catRow" class="flex gap-2 min-w-max">
+      <div class="shimmer w-14 h-8 rounded-full"></div>
+      <div class="shimmer w-20 h-8 rounded-full"></div>
+      <div class="shimmer w-16 h-8 rounded-full"></div>
     </div>
-    <span id="pendingBadgeMobile" class="bg-[#d44e43] text-white text-xs px-2 py-0.5 rounded-full hidden">0 pending</span>
   </div>
+</div>
 
-  <!-- SCROLLABLE CONTENT -->
-  <div class="flex-1 overflow-y-auto p-4 md:p-8 relative" id="main-area">
+<!-- POPULAR SECTION -->
+<section id="popularSection" class="hidden max-w-4xl mx-auto px-4 pt-6">
+  <div class="flex items-center gap-2 mb-3">
+    <span class="text-lg">🔥</span>
+    <h2 class="serif text-xl text-[var(--gold)] font-bold" id="popular-title">Popular</h2>
+  </div>
+  <div id="popularGrid" class="flex gap-3 overflow-x-auto pb-2" style="scrollbar-width:none"></div>
+</section>
 
-    <!-- ═══ TAB: STATISTICS ═══ -->
-    <div id="view-stats" class="max-w-6xl mx-auto block">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 class="text-3xl serif">Statistics</h2>
-        <button onclick="sendStatsToTelegram()" class="w-full md:w-auto bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition text-sm">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-          Send to Telegram
-        </button>
+<!-- MENU -->
+<main class="max-w-4xl mx-auto px-4 py-6">
+  <div id="menuSkeleton" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div class="shimmer h-52 rounded-2xl"></div><div class="shimmer h-52 rounded-2xl"></div>
+    <div class="shimmer h-52 rounded-2xl"></div><div class="shimmer h-52 rounded-2xl"></div>
+  </div>
+  <div id="menuGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 hidden"></div>
+  <p id="emptyMenu" class="text-center py-20 text-[var(--muted)] text-sm hidden"></p>
+</main>
+
+<!-- CART OVERLAY & PANEL -->
+<div id="cartOverlay" onclick="closePanels()" class="fixed inset-0 bg-black/60 z-50 hidden" style="backdrop-filter:blur(4px)"></div>
+<aside id="cartPanel" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-[var(--sur)] z-50 flex flex-col shadow-2xl border-l border-[var(--bdr)]" style="transform:translateX(100%)">
+  <div class="px-5 py-4 border-b border-[var(--bdr)] flex items-center justify-between">
+    <div><h2 class="serif text-2xl text-[var(--gold)]" id="c-title">Your Order</h2>
+    <p class="text-xs text-[var(--muted)]" id="c-sub">Review before placing</p></div>
+    <button onclick="closePanels()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl w-8 h-8 flex items-center justify-center cursor-pointer">×</button>
+  </div>
+  <div id="cartItems" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
+  <div id="cartEmpty" class="flex-1 items-center justify-center flex-col gap-3 hidden bg-[var(--bg)]">
+    <div class="w-16 h-16 rounded-full border border-[var(--bdr)] flex items-center justify-center opacity-25">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+    </div>
+    <p class="text-[var(--muted)] text-sm" id="c-empty">Your cart is empty</p>
+  </div>
+  <div class="border-t border-[var(--bdr)] bg-[var(--sur2)]">
+    <div class="px-5 py-3 border-b border-[var(--bdr)]">
+      <div class="flex gap-2" id="coupon-input-box">
+        <input type="text" id="cartCoupon" placeholder="Promo code" class="flex-1 bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-3 py-2 text-sm focus:border-[var(--gold)] uppercase outline-none shadow-sm transition"/>
+        <button onclick="applyCoupon()" class="g-btn px-4 rounded-lg text-sm font-bold shadow-sm" id="c-apply-btn">Apply</button>
       </div>
-
-      <!-- TOTAL ORDER COUNTER BANNER -->
-      <div id="totalOrderBanner" class="mb-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <p class="text-xs uppercase tracking-widest opacity-70 mb-1">Total Orders All Time</p>
-          <p class="text-5xl font-bold" id="stat-all">0</p>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full sm:w-auto">
-          <div class="bg-white/10 rounded-xl p-3 text-center">
-            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Pending</p>
-            <p class="text-2xl font-bold" id="stat-pending">0</p>
-          </div>
-          <div class="bg-white/10 rounded-xl p-3 text-center">
-            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Completed</p>
-            <p class="text-2xl font-bold" id="stat-completed">0</p>
-          </div>
-          <div class="bg-white/10 rounded-xl p-3 text-center col-span-2 sm:col-span-1">
-            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Revenue</p>
-            <p class="text-2xl font-bold" id="stat-rev">$0</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- TOP ITEMS -->
-      <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
-        <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4 font-bold border-b border-[#5c453b] pb-2">🔥 Most Ordered Items</h3>
-        <div id="topItemsList" class="space-y-2">
-          <p class="text-gray-500 text-sm">Loading...</p>
-        </div>
-      </div>
-
-      <!-- Period Calculation -->
-      <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
-        <h3 class="text-sm uppercase tracking-wider text-gray-400 mb-4 font-bold border-b border-[#5c453b] pb-2">Period Calculation</h3>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
-          <div><label class="block text-xs text-gray-400 mb-2">Start Date</label><input type="date" id="statStartDate" onchange="calculateFilteredStats()" class="w-full"></div>
-          <div><label class="block text-xs text-gray-400 mb-2">End Date</label><input type="date" id="statEndDate" onchange="calculateFilteredStats()" class="w-full"></div>
-          <div><label class="block text-xs text-gray-400 mb-2">Subtract (%)</label><input type="number" id="statSubtract" oninput="calculateFilteredStats()" placeholder="0" class="w-full"></div>
-          <div><label class="block text-xs text-gray-400 mb-2">Note</label><input type="text" id="statNote" placeholder="Optional note..." class="w-full"></div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#5c453b]">
-          <div><p class="text-xs text-gray-400 mb-1">Orders</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-orders">0</p></div>
-          <div><p class="text-xs text-gray-400 mb-1">Gross Total</p><p class="text-xl font-bold" id="stat-f-gross">$0.00</p></div>
-          <div><p class="text-xs text-gray-400 mb-1" id="stat-f-sub-lbl">Subtract (0%)</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-sub-amt">-$0.00</p></div>
-          <div><p class="text-xs text-gray-400 mb-1">Net Total</p><p class="text-xl font-bold text-[#5db85b]" id="stat-f-net">$0.00</p></div>
-        </div>
+      <div id="applied-coupon-box" class="hidden flex justify-between items-center bg-[var(--green)]/10 border border-[var(--green)]/30 rounded-lg px-3 py-2">
+        <span class="text-[var(--green)] text-sm font-bold flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> <span id="ac-code"></span></span>
+        <button onclick="removeCoupon()" class="text-[var(--muted)] hover:text-[var(--red)] transition-colors text-xs font-bold uppercase tracking-wider" id="c-remove-btn">Remove</button>
       </div>
     </div>
-
-    <!-- ═══ TAB: LIVE ORDERS ═══ -->
-    <div id="view-orders" class="max-w-6xl mx-auto hidden">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
-        <h2 class="text-3xl serif">Live Orders</h2>
-        <div class="flex gap-2 flex-wrap">
-          <button onclick="setOrderFilter('all')" id="ofilter-all" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#d44e43] text-white transition">All</button>
-          <button onclick="setOrderFilter('pending')" id="ofilter-pending" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">⏳ Pending</button>
-          <button onclick="setOrderFilter('completed')" id="ofilter-completed" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✓ Completed</button>
-          <button onclick="setOrderFilter('cancelled')" id="ofilter-cancelled" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✗ Cancelled</button>
-        </div>
+    <div class="px-5 py-4 border-b border-[var(--bdr)] flex gap-4">
+      <div class="w-1/3">
+        <label class="text-[10px] text-[var(--muted)] uppercase font-semibold tracking-wide block mb-1" id="c-table-lbl">Table No.</label>
+        <select id="cartTable" class="w-full bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-2 py-2 text-sm font-bold text-center text-[var(--gold)] focus:border-[var(--gold)] outline-none shadow-sm transition">
+          <option value="">—</option>
+        </select>
       </div>
-      <div id="ordersGrid" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
-      <p id="noOrders" class="text-center text-gray-400 py-10 hidden">No orders found.</p>
+      <div class="flex-1">
+        <label class="text-[10px] text-[var(--muted)] uppercase font-semibold tracking-wide block mb-1" id="c-note-lbl">Note</label>
+        <input type="text" id="cartNote" placeholder="Any special requests?" class="w-full bg-[var(--sur)] border border-[var(--bdr)] rounded-lg px-3 py-2 text-sm focus:border-[var(--gold)] outline-none shadow-sm transition"/>
+      </div>
+    </div>
+    <div class="px-5 py-4">
+      <div id="cart-subtotal-row" class="flex justify-between items-center mb-2 hidden text-[var(--muted)] text-sm">
+        <span id="c-subtotal-lbl">Subtotal</span>
+        <span id="cartSubtotal" class="font-semibold">$0.00</span>
+      </div>
+      <div id="cart-discount-row" class="flex justify-between items-center mb-3 hidden text-[var(--green)] text-sm">
+        <span id="c-discount-lbl">Discount</span>
+        <span id="cartDiscountAmt" class="font-bold">-$0.00</span>
+      </div>
+      <div class="flex justify-between items-center mb-4 pt-1">
+        <span class="text-[var(--txt)] text-base font-bold" id="c-total-lbl">Total</span>
+        <span id="cartTotal" class="text-3xl serif font-bold text-[var(--gold)]">$0.00</span>
+      </div>
+      <button onclick="placeOrder()" id="placeBtn" class="g-btn w-full py-4 rounded-xl text-sm tracking-wide font-bold shadow-lg shadow-red-900/10">Place Order</button>
+      <button onclick="clearCart()" class="mt-3 w-full py-1 text-xs text-[var(--muted)] hover:text-[var(--gold)] transition-colors cursor-pointer" id="c-clear">Clear cart</button>
+    </div>
+  </div>
+</aside>
+
+<!-- MY ORDERS PANEL -->
+<aside id="myOrdersPanel" class="fixed bottom-0 left-0 right-0 sm:top-0 sm:left-auto sm:right-0 sm:h-full sm:w-[400px] bg-[var(--sur)] z-50 flex flex-col shadow-2xl border-t sm:border-t-0 sm:border-l border-[var(--bdr)] rounded-t-3xl sm:rounded-none max-h-[85vh] sm:max-h-full" style="transform:translateY(100%)">
+  <div class="px-5 py-4 border-b border-[var(--bdr)] flex items-center justify-between">
+    <h2 class="serif text-2xl text-[var(--gold)]" id="mo-title">My Orders</h2>
+    <button onclick="closePanels()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl cursor-pointer">×</button>
+  </div>
+  <div id="myOrdersList" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
+</aside>
+
+<!-- CUSTOMIZE MODAL (Centered Popup) -->
+<div id="customModal" class="fixed inset-0 z-[998] bg-black/60 items-center justify-center hidden" style="backdrop-filter:blur(4px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-[2rem] p-6 w-full max-w-[360px] mx-4 shadow-2xl fade-up flex flex-col max-h-[90vh]">
+    <div class="flex justify-between items-start shrink-0 mb-4 border-b border-[var(--bdr)] pb-4">
+      <div>
+        <h3 class="serif text-[22px] text-[var(--gold)] leading-tight font-bold" id="cm-title">Drink Name</h3>
+        <p class="text-xs text-[var(--muted)] mt-1 tracking-wide" id="cm-subtitle">Add Toppings</p>
+      </div>
+      <button onclick="closeCustomModal()" class="text-2xl text-[var(--muted)] hover:text-[var(--txt)] leading-none">&times;</button>
     </div>
 
-    <!-- ═══ TAB: ORDER HISTORY ═══ -->
-    <div id="view-history" class="max-w-6xl mx-auto hidden">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 class="text-3xl serif">Order History</h2>
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-          <div class="flex items-center gap-3 bg-[#4e3b32] p-2 rounded-xl border border-[#5c453b]">
-            <span class="text-xs text-gray-400 font-bold ml-1">From</span>
-            <input type="date" id="historyStartDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
-            <span class="text-xs text-gray-400 font-bold">To</span>
-            <input type="date" id="historyEndDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
-          </div>
-          <button onclick="sendHistoryToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 text-sm">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-            Send to Telegram
+    <div class="flex-1 overflow-y-auto space-y-6 pr-2" style="scrollbar-width:none">
+      <!-- Temperature -->
+      <div id="cm-temp-wrap">
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-temp-lbl">Temperature</label>
+        <div class="flex gap-3">
+          <button onclick="setTemp('ice')" id="temp-ice" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">🧊</span> <span id="temp-ice-lbl">Iced</span> <span class="text-[10px] ml-1" id="price-lbl-ice"></span>
+          </button>
+          <button onclick="setTemp('hot')" id="temp-hot" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">☕</span> <span id="temp-hot-lbl">Hot</span> <span class="text-[10px] ml-1" id="price-lbl-hot"></span>
+          </button>
+          <button onclick="setTemp('frappe')" id="temp-frappe" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">🥤</span> <span id="temp-frappe-lbl">Frappe</span> <span class="text-[10px] ml-1" id="price-lbl-frappe"></span>
           </button>
         </div>
       </div>
-      <div class="bg-[#4e3b32] rounded-xl border border-[#5c453b] overflow-x-auto">
-        <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="bg-[#3a2a24] border-b border-[#5c453b]">
-            <tr>
-              <th class="p-4 font-medium text-gray-300">Order ID</th>
-              <th class="p-4 font-medium text-gray-300">Date/Time</th>
-              <th class="p-4 font-medium text-gray-300">Table</th>
-              <th class="p-4 font-medium text-gray-300">Items</th>
-              <th class="p-4 font-medium text-gray-300">Total</th>
-              <th class="p-4 font-medium text-[#d44e43]">Status</th>
-              <th class="p-4 font-medium text-gray-300 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody"></tbody>
-        </table>
-      </div>
-    </div>
 
-    <!-- ═══ TAB: MENU MANAGER ═══ -->
-    <div id="view-menu" class="max-w-6xl mx-auto hidden space-y-10">
-      <!-- Add New Drink -->
-      <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-[#d44e43] to-transparent opacity-10 rounded-bl-full pointer-events-none"></div>
-        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-6 font-bold flex items-center gap-3">
-          <div class="p-2 bg-[#d44e43]/20 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-          </div>
-          Create New Drink
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 relative z-10">
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (EN)</label>
-            <input type="text" id="addName" placeholder="Matcha Latte" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH)</label>
-            <input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-4">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Category</label>
-            <input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Ice/Base Price ($)</label>
-            <input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Hot Price ($)</label>
-            <input type="number" id="addPriceHot" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Frappe Price ($)</label>
-            <input type="number" id="addPriceFrappe" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Temperature Options</label>
-            <select id="addTemperature" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8]">
-              <option value="both">🧊☕ Ice & Hot</option>
-              <option value="ice">🧊 Iced Only</option>
-              <option value="hot">☕ Hot Only</option>
-              <option value="frappe">🥤 Frappe Only</option>
-            </select>
-          </div>
-          <div class="col-span-12 md:col-span-2 flex items-end pb-0">
-            <label class="flex items-center gap-2 cursor-pointer bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 w-full">
-              <input type="checkbox" id="addPopular" class="w-4 h-4 accent-[#d44e43]">
-              <span class="text-sm text-gray-300">🔥 Popular</span>
-            </label>
-          </div>
-          <div class="col-span-12 md:col-span-10">
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label>
-            <input type="text" id="addImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-          </div>
-          <div class="col-span-12 flex justify-end mt-2">
-            <button onclick="addMenuItem()" class="w-full md:w-auto bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Add to Menu
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Menu List -->
+      <!-- Sugar -->
       <div>
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-          <h3 class="text-2xl serif">Current Menu & Discounts</h3>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-            <select id="menuCatFilter" onchange="filterMenu()" class="w-full sm:w-40 bg-[#3a2a24] border border-[#5c453b] rounded-lg px-3 py-2 text-sm text-gray-300 outline-none focus:border-[#d44e43]">
-              <option value="All">All Categories</option>
-            </select>
-            <div class="flex items-center bg-[#3a2a24] rounded-lg border border-[#5c453b] overflow-hidden shrink-0">
-              <input type="number" id="bulkDiscountInput" placeholder="Discount %" class="w-28 bg-transparent border-none text-sm outline-none px-3 py-2 text-[#d44e43] font-bold">
-              <button onclick="applyBulkDiscount()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-4 py-2 text-xs font-bold transition whitespace-nowrap border-l border-[#5c453b]">Apply All</button>
-            </div>
-          </div>
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
+        <div class="flex gap-2">
+          <button onclick="setSugar('0%')" id="sug-0" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">0%</button>
+          <button onclick="setSugar('30%')" id="sug-30" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">30%</button>
+          <button onclick="setSugar('50%')" id="sug-50" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">50%</button>
+          <button onclick="setSugar('70%')" id="sug-70" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">70%</button>
+          <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">100%</button>
         </div>
-        <div class="bg-[#4e3b32] rounded-xl border border-[#5c453b] overflow-x-auto">
-          <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-[#3a2a24] border-b border-[#5c453b]">
-              <tr>
-                <th class="p-4 text-sm font-medium text-gray-300">Name & Image</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Category</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Temp</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Popular</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Stock</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Base Price</th>
-                <th class="p-4 text-sm font-medium text-[#d44e43]">Discount (%)</th>
-                <th class="p-4 text-sm font-medium text-[#5db85b]">Final Price</th>
-                <th class="p-4 text-sm font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="menuTableBody"></tbody>
-          </table>
+      </div>
+
+      <!-- Ice Level -->
+      <div id="cm-ice-section">
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
+        <div class="flex gap-2">
+          <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">0%</button>
+          <button onclick="setIce('50%')" id="ice-50" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">50%</button>
+          <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">100%</button>
         </div>
       </div>
 
       <!-- Toppings -->
       <div>
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-2xl serif">Dynamic Toppings</h3>
-          <button onclick="openAddToppingModal()" class="btn-success px-4 py-2 rounded text-sm font-bold flex items-center gap-2">
-            <span>+</span> Add Topping
-          </button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="toppingsGrid"></div>
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
+        <div class="space-y-3" id="cm-top-list"></div>
       </div>
     </div>
 
-    <!-- ═══ TAB: HOW-TO SLIDES ═══ -->
-    <div id="view-slideshow" class="max-w-4xl mx-auto hidden space-y-8">
-      <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg">
-        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-2 font-bold">Add How-to-Order Slide</h3>
-        <p class="text-xs text-gray-400 mb-5">These slides appear on the ordering page to guide customers.</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Step Number</label><input type="number" id="slideStep" placeholder="1" min="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Image URL (Optional)</label><input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label><input type="text" id="slideTitleEn" placeholder="Scan the QR Code" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><input type="text" id="slideTitleKh" placeholder="ស្កែន QR" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (EN)</label><textarea id="slideDescEn" placeholder="Use your phone camera..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (KH)</label><textarea id="slideDescKh" placeholder="ប្រើកាមេរ៉ាទូរស័ព្ទ..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
-        </div>
-        <div class="flex justify-end mt-6">
-          <button onclick="addSlide()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            Add Slide
-          </button>
-        </div>
-      </div>
-      <div>
-        <h3 class="text-2xl serif mb-4">Current Slides</h3>
-        <div id="slideshowList" class="space-y-4">
-          <p class="text-center text-gray-400 py-8">No slides yet.</p>
-        </div>
-      </div>
+    <div class="pt-5 shrink-0 mt-2 border-t border-[var(--sur2)]">
+      <button onclick="saveCustomization()" class="g-btn w-full py-4 rounded-2xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/20">
+        <span id="cm-add-btn-txt" class="font-bold tracking-wide">Save Changes</span>
+        <span class="font-bold text-[17px]" id="cm-price">$0.00</span>
+      </button>
     </div>
-
-    <!-- ═══ TAB: SOCIAL LINKS ═══ -->
-    <div id="view-social" class="max-w-2xl mx-auto hidden">
-      <h2 class="text-3xl serif mb-2">Social Links</h2>
-      <p class="text-gray-400 text-sm mb-6">Add Facebook and TikTok links. They will appear as a fixed floating icon on the bottom corner for customers.</p>
-
-      <div class="bg-[#4e3b32] p-6 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg space-y-6">
-        <div>
-          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
-            <svg class="w-4 h-4 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            Facebook Page URL
-          </label>
-          <input type="url" id="fbUrl" placeholder="https://facebook.com/yourpage" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#1877f2] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-            TikTok Profile URL
-          </label>
-          <input type="url" id="ttUrl" placeholder="https://tiktok.com/@yourprofile" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-        </div>
-
-        <div class="flex items-center gap-4 pt-2 border-t border-[#5c453b]">
-          <button onclick="saveSocialLinks()" class="flex-1 bg-[#d44e43] hover:bg-[#b83f36] text-white py-3 rounded-xl font-bold text-sm transition">Save Social Links</button>
-          <button onclick="clearSocialLinks()" class="px-4 py-3 border border-[#5c453b] rounded-xl text-gray-400 hover:text-white hover:bg-[#3a2a24] text-sm transition">Clear</button>
-        </div>
-
-        <div class="pt-4 border-t border-[#5c453b]">
-          <p class="text-xs text-gray-500 uppercase tracking-wider mb-3 font-bold">Preview (what customers see)</p>
-          <div class="bg-[#3a2a24] rounded-xl p-4 flex items-center justify-center gap-4 border border-[#5c453b] min-h-[80px]">
-            <span id="preview-fb" class="hidden items-center justify-center w-10 h-10 rounded-full bg-[#1877f2] text-white shadow-md">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            </span>
-            <span id="preview-tt" class="hidden items-center justify-center w-10 h-10 rounded-full bg-black text-white shadow-md">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-            </span>
-            <span id="preview-none" class="text-gray-600 text-xs">No floating icons saved yet</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </div>
 
-<!-- Custom Confirmation Modal (Replaces browser confirm) -->
-<div id="confirmModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[1000] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold" id="confirmTitle">Confirm</h3>
-    <p class="text-gray-300 text-sm mb-6" id="confirmMessage">Are you sure?</p>
+
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="fixed inset-0 z-[998] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-sm mx-4 shadow-2xl fade-up text-center">
+    <div class="w-14 h-14 rounded-full bg-[var(--green)]/15 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-7 h-7 text-[var(--green)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h3 class="serif text-2xl text-[var(--gold)] mb-1" id="conf-title">Order Placed!</h3>
+    <p class="text-[var(--muted)] text-sm mb-1" id="conf-msg">We're preparing your order.</p>
+    <p class="text-xs text-[var(--muted)] mb-5" id="conf-id"></p>
+    <button onclick="closeConfirm()" class="g-btn w-full py-3 rounded-2xl text-sm" id="conf-btn">Done</button>
+  </div>
+</div>
+
+<!-- CANCEL MODAL -->
+<div id="cancelModal" class="fixed inset-0 z-[998] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-sm mx-4 shadow-2xl fade-up">
+    <h3 class="serif text-2xl text-[var(--red)] mb-2" id="can-title">Cancel Order?</h3>
+    <p class="text-[var(--muted)] text-sm mb-4" id="can-msg">This will remove your order from the queue.</p>
+    <input type="text" id="cancelReason" placeholder="Reason (optional)" class="w-full bg-[var(--sur2)] border border-[var(--bdr)] rounded-xl px-3 py-2.5 text-sm outline-none transition mb-6 text-[var(--txt)] focus:border-[#bf3c37]" />
     <div class="flex gap-3">
-      <button id="confirmCancelBtn" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button id="confirmOkBtn" class="flex-1 py-2 btn-primary rounded font-bold">Yes</button>
+      <button onclick="closeCancelModal()" class="flex-1 py-3 rounded-2xl border border-[var(--bdr)] text-sm text-[var(--muted)] hover:text-[var(--txt)] transition-colors cursor-pointer" id="can-no">No, keep it</button>
+      <button onclick="confirmCancel()" class="flex-1 py-3 rounded-2xl bg-[var(--red)] text-[#faf6eb] text-sm font-semibold hover:bg-[#a6332f] transition-colors cursor-pointer" id="can-yes">Yes, cancel</button>
     </div>
   </div>
 </div>
 
-<!-- Edit Menu Modal -->
-<div id="editMenuModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Edit Drink</h3>
-    <div class="grid grid-cols-3 gap-4 mb-4">
-      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
-      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full"></div>
-      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
-      
-      <div><label class="text-xs text-gray-400 mb-1 block">Ice Price</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Hot Price</label><input type="number" id="editPriceHot" step="0.01" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Frap Price</label><input type="number" id="editPriceFrappe" step="0.01" class="w-full"></div>
-      
-      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Temperature Options</label>
-        <select id="editTemperature" class="w-full">
-          <option value="both">🧊☕ Ice & Hot</option>
-          <option value="ice">🧊 Iced Only</option>
-          <option value="hot">☕ Hot Only</option>
-          <option value="frappe">🥤 Frappe Only</option>
-        </select>
-      </div>
-      <div class="col-span-3 flex items-center">
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" id="editPopular" class="w-4 h-4 accent-[#d44e43]">
-          <span class="text-sm text-gray-300">🔥 Popular</span>
-        </label>
-      </div>
-      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editImage" class="w-full"></div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="closeEditMenuModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveEditMenu()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
-  </div>
-</div>
+<!-- SOCIAL BAR -->
+<div id="socialBar" class="hidden-bar"></div>
 
-<!-- Add Topping Modal -->
-<div id="toppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">New Topping</h3>
-    <div class="space-y-3 mb-6">
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="topName" placeholder="e.g. Boba" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="topNameKh" placeholder="e.g. គុជ" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="topPrice" placeholder="0.50" step="0.01" class="w-full"></div>
-      <div>
-        <label class="text-xs text-gray-400 mb-1 block">Photo URL (Optional)</label>
-        <input type="text" id="topImage" placeholder="https://..." class="w-full" oninput="previewImg('topImage','topImagePreviewImg','topImagePreview')">
-        <div id="topImagePreview" class="mt-2 hidden"><img id="topImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview"/></div>
-      </div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="closeAddToppingModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveTopping()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Topping Modal -->
-<div id="editToppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
-    <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Topping</h3>
-    <div class="space-y-3 mb-6">
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editTopName" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editTopNameKh" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="editTopPrice" step="0.01" class="w-full"></div>
-      <div>
-        <label class="text-xs text-gray-400 mb-1 block">Photo URL</label>
-        <input type="text" id="editTopImage" class="w-full" placeholder="https://..." oninput="previewImg('editTopImage','editTopImagePreviewImg','editTopImagePreview')">
-        <div id="editTopImagePreview" class="mt-2"><img id="editTopImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview" onerror="this.parentElement.style.display='none'"/></div>
-      </div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="closeEditToppingModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveEditTopping()" class="flex-1 py-2 btn-success rounded font-bold">Update</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Slide Modal -->
-<div id="editSlideModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
-    <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Slide</h3>
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <div><label class="text-xs text-gray-400 mb-1 block">Step No.</label><input type="number" id="editSlideStep" class="w-full" min="1"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editSlideImage" class="w-full" placeholder="https://..."></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Title (EN)</label><input type="text" id="editSlideTitleEn" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Title (KH)</label><input type="text" id="editSlideTitleKh" class="w-full"></div>
-      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Description (EN)</label><textarea id="editSlideDescEn" rows="2" class="w-full resize-none"></textarea></div>
-      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Description (KH)</label><textarea id="editSlideDescKh" rows="2" class="w-full resize-none"></textarea></div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="closeEditSlideModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveEditSlide()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Order Status Modal -->
-<div id="editOrderModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Update Status</h3>
-    <select id="editOrderStatus" class="w-full mb-6 py-3 text-center font-bold bg-[#3a2a24]">
-      <option value="pending">⏳ Pending</option>
-      <option value="completed">✓ Completed</option>
-      <option value="cancelled">✗ Cancelled</option>
-    </select>
-    <div class="flex gap-3">
-      <button onclick="closeEditOrderModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Close</button>
-      <button onclick="saveEditOrder()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="toast" class="fixed bottom-6 left-1/2 bg-[#5db85b] text-white px-5 py-2.5 rounded shadow-xl opacity-0 transition-opacity pointer-events-none transform -translate-x-1/2 font-medium z-[9999]">Success!</div>
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 left-1/2 bg-[var(--sur2)] border border-[var(--bdr)] text-[var(--txt)] px-5 py-2.5 rounded-full text-xs shadow-2xl opacity-0 z-[9999] whitespace-nowrap pointer-events-none" style="transform:translateX(-50%) translateY(16px)"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const safeStorage = {
+  get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+  set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} }
+};
 
 const FB = {
-  apiKey:"AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
-  authDomain:"lortcha.firebaseapp.com",
-  projectId:"lortcha",
-  storageBucket:"lortcha.firebasestorage.app",
-  messagingSenderId:"51187909854",
-  appId:"1:51187909854:web:f4d7ace62c0a367a192e4f"
+  apiKey: "AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
+  authDomain: "lortcha.firebaseapp.com",
+  projectId: "lortcha",
+  storageBucket: "lortcha.firebasestorage.app",
+  messagingSenderId: "51187909854",
+  appId: "1:51187909854:web:f4d7ace62c0a367a192e4f"
 };
-const app = initializeApp(FB);
-const db = getFirestore(app);
+
+let db;
+try { const app = initializeApp(FB); db = getFirestore(app); } catch(e) {}
 
 const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
 const TG_CHAT = "-1003706744326";
 
-let menuItems=[], toppings=[], orders=[], slideshowItems=[];
-let currentMenuCat='All', editingMenuId=null, editingToppingId=null;
-let editingOrderId=null, editingSlideId=null;
-let currentHistoryFilteredOrders=[];
-let currentOrderFilter = 'all';
-
-// Custom CustomConfirm Promise wrapper
-window.customConfirm = function(message, title="Confirm Action") {
-  return new Promise((resolve) => {
-    const modal = document.getElementById('confirmModal');
-    document.getElementById('confirmTitle').innerText = title;
-    document.getElementById('confirmMessage').innerText = message;
-    modal.classList.remove('hidden');
-
-    const okBtn = document.getElementById('confirmOkBtn');
-    const cancelBtn = document.getElementById('confirmCancelBtn');
-
-    const cleanup = () => {
-      modal.classList.add('hidden');
-      okBtn.replaceWith(okBtn.cloneNode(true));
-      cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-    };
-
-    document.getElementById('confirmOkBtn').addEventListener('click', () => {
-      cleanup();
-      resolve(true);
-    });
-
-    document.getElementById('confirmCancelBtn').addEventListener('click', () => {
-      cleanup();
-      resolve(false);
-    });
-  });
-};
-
-// ── TABS ──
-window.toggleSidebar = function() {
-  const sb=document.getElementById('sidebar'), ov=document.getElementById('mobileOverlay');
-  if(sb.classList.contains('-translate-x-full')) {
-    sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden');
-    setTimeout(()=>ov.classList.add('opacity-100'),10);
-  } else {
-    sb.classList.add('-translate-x-full'); ov.classList.remove('opacity-100');
-    setTimeout(()=>ov.classList.add('hidden'),300);
-  }
-};
-
-window.switchTab = function(tab) {
-  ['stats','orders','history','menu','slideshow','social'].forEach(t => {
-    const v=document.getElementById(`view-${t}`), b=document.getElementById(`tab-${t}`);
-    if(v) v.classList.add('hidden');
-    if(b) { b.classList.remove('bg-[#8a382f]/20','text-[#d44e43]'); b.classList.add('text-gray-400'); }
-  });
-  const av=document.getElementById(`view-${tab}`), ab=document.getElementById(`tab-${tab}`);
-  if(av) av.classList.remove('hidden');
-  if(ab) { ab.classList.remove('text-gray-400'); ab.classList.add('bg-[#8a382f]/20','text-[#d44e43]'); }
-  if(window.innerWidth<768) { const sb=document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) window.toggleSidebar(); }
-};
-
-function showToast(msg,isErr=false) {
-  const t=document.getElementById("toast"); if(!t) return;
-  t.textContent=msg; t.style.backgroundColor=isErr?"#d44e43":"#5db85b";
-  t.style.opacity="1"; setTimeout(()=>t.style.opacity="0",3000);
-}
-
-// ── FETCH DATA ──
-async function fetchData() {
-  onSnapshot(collection(db,"menu"), snap => {
-    menuItems = snap.docs.map(d=>({id:d.id,...d.data()}));
-    updateCategoryDropdown(); renderMenuTable();
-  });
-  onSnapshot(collection(db,"toppings"), snap => {
-    toppings = snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderToppings();
-  });
-  const q = query(collection(db,"orders"), orderBy("createdAt","desc"));
-  onSnapshot(q, snap => {
-    orders = snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderOrders(); renderHistory(); updateStats(); calculateFilteredStats(); renderTopItems();
-  });
-  onSnapshot(collection(db,"slideshow"), snap => {
-    slideshowItems = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
-    renderSlideshowList();
-  });
+async function sendTelegramAlert(order, orderId) {
   try {
-    const snap = await getDocs(collection(db,"settings"));
-    const settings = {};
-    snap.docs.forEach(d => Object.assign(settings, d.data(), {_docId: d.id}));
-    if(settings.facebookUrl) document.getElementById("fbUrl").value = settings.facebookUrl;
-    if(settings.tiktokUrl) document.getElementById("ttUrl").value = settings.tiktokUrl;
-    window._settingsDocId = settings._docId;
-    updateSocialPreview();
+    const itemLines = order.items.map(i => {
+      let opts = `Temp: ${i.temperature === 'hot' ? '☕ Hot' : i.temperature === 'frappe' ? '🥤 Frappe' : '🧊 Iced'} | Sugar: ${i.sugar} | Ice: ${i.ice}`;
+      if(i.toppingsData?.length) opts += ` | Tops: ${i.toppingsData.map(t=> lang==='kh'&&t.nameKh?t.nameKh:t.name).join(', ')}`;
+      return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i>[${opts}]</i>`;
+    }).join("\n");
+    const noteText = order.note ? `\n📝 <b>Note:</b> ${order.note}\n` : "";
+    const discountLine = order.couponCode ? `\n🏷️ <b>Coupon:</b> ${order.couponCode} (-$${order.discountAmt.toFixed(2)})` : "";
+    const msg = `🛍️ <b>New Order!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}${discountLine}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`;
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
   } catch(e) {}
 }
 
-// ── STATS ──
-function updateStats() {
-  const pending = orders.filter(o=>o.status==='pending');
-  const completed = orders.filter(o=>o.status==='completed');
-  const rev = completed.reduce((s,o)=>s+Number(o.total),0);
+// ── I18N ──
+const T = {
+  en: {
+    sub:"Order", cart:"Cart", myorders:"My Orders",
+    tableLbl:"Table No.", cartTitle:"Your Order", cartSub:"Review before placing",
+    totalLbl:"Total", place:"Place Order", clear:"Clear cart", emptyCart:"Your cart is empty",
+    confirmTitle:"Order Placed! 🎉", confirmMsg:"We're preparing your order.", confirmBtn:"Done",
+    cancelTitle:"Cancel Order?", cancelMsg:"This will remove your order from the queue.", cancelNo:"No, keep it", cancelYes:"Cancel Order",
+    moTitle:"My Orders", status:{pending:"Pending ⏳", completed:"Completed ✓", cancelled:"Cancelled ✗"},
+    addedToast:"added to cart", cancelToast:"Order cancelled.", noItems:"No items in this category.",
+    tableFor:"Table", outOfStock:"Out of Stock", sugar:"Sugar Level", ice:"Ice Level",
+    toppings:"Add Toppings", saveChanges:"Save Changes", addTopping:"Customize", note:"Note",
+    howToOrder:"How to Order", prev:"Prev", next:"Next", popular:"Popular",
+    tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe",
+    ordersCount:"orders", customBtn:"Custom", totalOrders:"Total Orders",
+    cancelReasonPlaceholder: "Reason for cancellation (optional)",
+    promoPlaceholder: "Promo code", apply: "Apply", remove: "Remove",
+    couponApplied: "Coupon applied!", invalidCoupon: "Invalid or inactive coupon",
+    subtotal: "Subtotal", discount: "Discount"
+  },
+  kh: {
+    sub:"បញ្ជាទិញ", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
+    tableLbl:"លេខតុ", cartTitle:"ការបញ្ជាទិញ", cartSub:"ពិនិត្យមុនបញ្ជា",
+    totalLbl:"សរុប", place:"ដាក់ការបញ្ជា", clear:"លុបកន្ត្រក", emptyCart:"កន្ត្រករបស់អ្នកទទេ",
+    confirmTitle:"បានជោគជ័យ! 🎉", confirmMsg:"យើងកំពុងរៀបចំ។", confirmBtn:"រួចរាល់",
+    cancelTitle:"លុបការបញ្ជា?", cancelMsg:"ការបញ្ជារបស់អ្នកនឹងត្រូវដក។", cancelNo:"ទេ", cancelYes:"លុបចោល",
+    moTitle:"ការបញ្ជារបស់ខ្ញុំ", status:{pending:"រង់ចាំ ⏳", completed:"បានបញ្ចប់ ✓", cancelled:"បានលុប ✗"},
+    addedToast:"បានបន្ថែម", cancelToast:"បានលុបការបញ្ជា", noItems:"មិនមានទំនិញ",
+    tableFor:"តុ", outOfStock:"អស់ស្តុក", sugar:"កម្រិតស្ករ", ice:"កម្រិតទឹកកក",
+    toppings:"បន្ថែម Toppings", saveChanges:"រក្សាទុក", addTopping:"កំណត់ Toppings", note:"ចំណាំ",
+    howToOrder:"របៀបបញ្ជាទិញ", prev:"ថយក្រោយ", next:"បន្ត", popular:"ពេញនិយម",
+    tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ",
+    ordersCount:"ការបញ្ជា", customBtn:"កែច្នៃ", totalOrders:"ការកាម្មងសរុប",
+    cancelReasonPlaceholder: "មូលហេតុនៃការលុបចោល (ជម្រើស)",
+    promoPlaceholder: "លេខកូដបញ្ចុះតម្លៃ", apply: "ប្រើប្រាស់", remove: "លុបចេញ",
+    couponApplied: "បានប្រើប្រាស់កូដ!", invalidCoupon: "កូដមិនត្រឹមត្រូវ",
+    subtotal: "សរុបរង", discount: "បញ្ចុះតម្លៃ"
+  }
+};
+
+let lang = safeStorage.get("chafe_lang") || "kh";
+let cancelTargetId = null;
+let itemOrderCounts = {};
+
+window.setLang = function(l) {
+  lang = l;
+  safeStorage.set("chafe_lang", l);
+  document.getElementById("langFlag").textContent = l==="kh"?"🇰🇭":"🇬🇧";
+  document.getElementById("langLabel").textContent = l==="kh"?"KH":"EN";
+  document.getElementById("langDropdown").classList.add("hidden");
+  applyLang();
+  buildTableOptions();
+  if(slides.length > 0) renderSlideshow();
+};
+
+window.toggleLangDropdown = () => document.getElementById("langDropdown").classList.toggle("hidden");
+document.addEventListener("click", e => {
+  const wrap = document.getElementById("langWrap");
+  if(!wrap.contains(e.target)) document.getElementById("langDropdown").classList.add("hidden");
+});
+
+function t() { return T[lang||"en"]; }
+
+function applyLang() {
+  const tx = t();
   const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-  set('stat-all', orders.length); set('stat-pending', pending.length);
-  set('stat-completed', completed.length); set('stat-rev', `$${rev.toFixed(2)}`);
-  const badge = document.getElementById("pendingBadge");
-  const badgeMob = document.getElementById("pendingBadgeMobile");
-  if(badge) { if(pending.length>0){badge.textContent=pending.length;badge.classList.remove("hidden");}else{badge.classList.add("hidden");} }
-  if(badgeMob) { if(pending.length>0){badgeMob.textContent=`${pending.length} pending`;badgeMob.classList.remove("hidden");}else{badgeMob.classList.add("hidden");} }
+  set("h-sub",tx.sub); set("h-cart",tx.cart); set("h-myorders",tx.myorders);
+  set("c-table-lbl",tx.tableLbl); set("c-title",tx.cartTitle); set("c-sub",tx.cartSub);
+  set("c-total-lbl",tx.totalLbl); set("placeBtn",tx.place); set("c-clear",tx.clear);
+  set("c-empty",tx.emptyCart); set("conf-title",tx.confirmTitle); set("conf-msg",tx.confirmMsg);
+  set("conf-btn",tx.confirmBtn); set("can-title",tx.cancelTitle); set("can-msg",tx.cancelMsg);
+  set("can-no",tx.cancelNo); set("can-yes",tx.cancelYes); set("mo-title",tx.moTitle);
+  set("emptyMenu",tx.noItems); set("cm-sugar-lbl",tx.sugar); set("cm-ice-lbl",tx.ice);
+  set("cm-top-lbl",tx.toppings); set("cm-add-btn-txt",tx.saveChanges);
+  set("c-note-lbl",tx.note); set("slideshow-title",tx.howToOrder);
+  set("slide-prev-lbl",tx.prev); set("slide-next-lbl",tx.next);
+  set("popular-title",tx.popular); set("cm-temp-lbl",tx.tempLbl);
+  set("temp-ice-lbl",tx.tempIce); set("temp-hot-lbl",tx.tempHot); set("temp-frappe-lbl",tx.tempFrappe);
+  set("c-apply-btn",tx.apply); set("c-remove-btn",tx.remove); 
+  set("c-subtotal-lbl",tx.subtotal); set("c-discount-lbl",tx.discount);
+  
+  const cancelReasonInput = document.getElementById("cancelReason");
+  if (cancelReasonInput) cancelReasonInput.placeholder = tx.cancelReasonPlaceholder;
+  const couponInput = document.getElementById("cartCoupon");
+  if (couponInput) couponInput.placeholder = tx.promoPlaceholder;
+
+  if(currentItems.length > 0) { renderMenu(currentItems); renderPopular(); }
+  renderCart(); renderMyOrders();
 }
 
-function renderTopItems() {
-  const counts = {};
-  orders.filter(o=>o.status==='completed').forEach(o => {
-    (o.items||[]).forEach(i => {
-      const key = i.name;
-      if(!counts[key]) counts[key] = { name:i.name, qty:0 };
-      counts[key].qty += i.qty;
+// ── TABLES ──
+function buildTableOptions() {
+  const sel = document.getElementById("cartTable");
+  sel.innerHTML = `<option value="" disabled selected>—</option>`;
+  for(let i=1;i<=20;i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
+  const saved = safeStorage.get("chafe_table");
+  if(saved) sel.value = saved;
+}
+document.getElementById("cartTable").addEventListener("change", e => safeStorage.set("chafe_table", e.target.value));
+
+// ── DATA ──
+let allItems=[], currentItems=[], currentCat="All", cart=[], allToppings=[], slides=[], currentSlide=0;
+let dbCoupons = [], appliedCoupon = null;
+
+async function loadOrderCounts() {
+  try {
+    if(!db) return;
+    const snap = await getDocs(collection(db,"orders"));
+    const counts = {};
+    snap.docs.forEach(d => {
+      const order = d.data();
+      if(order.status === 'completed') {
+        (order.items||[]).forEach(item => {
+          const key = item.name;
+          counts[key] = (counts[key] || 0) + (item.qty || 1);
+        });
+      }
     });
-  });
-  const sorted = Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,5);
-  const el = document.getElementById("topItemsList");
-  if(!el) return;
-  if(!sorted.length) { el.innerHTML = '<p class="text-gray-500 text-sm">No completed orders yet.</p>'; return; }
-  const max = sorted[0].qty;
-  el.innerHTML = sorted.map((item,i) => `
-    <div class="flex items-center gap-3">
-      <span class="text-xs text-gray-500 w-4">${i+1}</span>
-      <div class="flex-1">
-        <div class="flex justify-between text-sm mb-1">
-          <span class="font-medium">${item.name}</span>
-          <span class="text-[#d44e43] font-bold">${item.qty}×</span>
+    itemOrderCounts = counts;
+  } catch(e) {}
+}
+
+async function loadData() {
+  try {
+    if(!db) throw new Error("No DB");
+    
+    try {
+      const tSnap = await getDocs(collection(db,"toppings"));
+      allToppings = tSnap.docs.map(d=>({id:d.id,...d.data()}));
+    } catch(e) {}
+
+    await loadOrderCounts();
+
+    const snap = await Promise.race([
+      getDocs(collection(db,"menu")),
+      new Promise((_,r)=>setTimeout(()=>r(new Error("Timeout")),8000))
+    ]);
+    allItems = snap.docs.map(d=>({id:d.id,...d.data()}));
+
+    onSnapshot(collection(db,"coupons"), snap => {
+      dbCoupons = snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(appliedCoupon) {
+        const stillValid = dbCoupons.find(c => c.code === appliedCoupon.code && c.active);
+        if(!stillValid) { appliedCoupon = null; renderCart(); }
+      }
+    });
+
+    onSnapshot(collection(db,"orders"), snap => {
+      const counts = {};
+      snap.docs.forEach(d => {
+        const order = d.data();
+        if(order.status === 'completed') {
+          (order.items||[]).forEach(item => {
+            const key = item.name;
+            counts[key] = (counts[key] || 0) + (item.qty || 1);
+          });
+        }
+      });
+      itemOrderCounts = counts;
+      if(currentItems.length > 0) { renderMenu(currentItems); renderPopular(); }
+    });
+
+    await loadSocialLinks();
+    await loadSlideshow();
+
+  } catch(e) {
+    allToppings = [
+      {id:"t1",name:"Boba",nameKh:"គុជ",price:0.50},
+      {id:"t2",name:"Coffee Jelly",nameKh:"ចាហួយកាហ្វេ",price:0.50},
+      {id:"t3",name:"Cheese Foam",nameKh:"ហ្វូមឈីស",price:0.75}
+    ];
+    allItems = [
+      {id:"1",name:"Thai Milk Tea",nameKh:"តែទឹកដោះគោថៃ",price:4.50, priceHot: 4.00, category:"Milk Tea",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Thai+Tea",inStock:true,discount:10,popular:true,temperature:"both"},
+      {id:"2",name:"Iced Coffee",nameKh:"កាហ្វេទឹកកក",price:3.50,category:"Coffee",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Coffee",inStock:true,temperature:"ice"},
+      {id:"3",name:"Matcha Latte",nameKh:"តែបៃតងទឹកដោះគោ",price:5.00, priceHot: 4.50, priceFrappe: 6.00, category:"Matcha",imageUrl:"https://placehold.co/300x200/f5ece3/3c2a21?text=Matcha",inStock:true,popular:true,temperature:"both"}
+    ];
+  } finally {
+    buildCats();
+    filterByCat("All");
+    renderPopular();
+    document.getElementById("menuSkeleton").classList.add("hidden");
+  }
+}
+
+// ── SOCIAL LINKS ──
+async function loadSocialLinks() {
+  try {
+    const snap = await getDocs(collection(db,"settings"));
+    const settings = {};
+    snap.docs.forEach(d => Object.assign(settings, d.data()));
+    renderSocialBar(settings.facebookUrl, settings.tiktokUrl);
+  } catch(e) {}
+}
+
+function renderSocialBar(fbUrl, ttUrl) {
+  const bar = document.getElementById("socialBar");
+  if(!fbUrl && !ttUrl) { bar.classList.add("hidden-bar"); return; }
+  bar.classList.remove("hidden-bar");
+  let html = '';
+  if(fbUrl) html += `<a href="${fbUrl}" target="_blank" rel="noopener" class="social-link social-fb">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+  </a>`;
+  if(ttUrl) html += `<a href="${ttUrl}" target="_blank" rel="noopener" class="social-link social-tiktok">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+  </a>`;
+  bar.innerHTML = html;
+}
+
+// ── SLIDESHOW ──
+let _slideshowTimer;
+
+async function loadSlideshow() {
+  try {
+    const snap = await getDocs(collection(db,"slideshow"));
+    slides = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+    if(slides.length > 0) {
+      currentSlide = 0;
+      renderSlideshow();
+      document.getElementById("slideshow-section").classList.remove("hidden");
+      startSlideshow();
+    }
+  } catch(e) {}
+}
+
+function startSlideshow() {
+  clearInterval(_slideshowTimer);
+  if(slides.length <= 1) return;
+  _slideshowTimer = setInterval(() => {
+    currentSlide = (currentSlide + 1) % slides.length;
+    updateSlide();
+  }, 5000);
+}
+
+function renderSlideshow() {
+  const container = document.getElementById("slides-container");
+  const dotsEl = document.getElementById("slide-dots");
+  if(!container || !slides.length) return;
+
+  container.innerHTML = slides.map((slide, i) => `
+    <div class="slide-item w-full flex-shrink-0 flex flex-col items-center text-center sm:text-left sm:flex-row gap-4 p-5" data-index="${i}">
+      <div class="w-full sm:w-48 flex-shrink-0 rounded-xl overflow-hidden border border-[var(--bdr)] bg-[var(--sur2)] relative" style="aspect-ratio:16/9">
+        ${slide.imageUrl
+          ? `<img src="${slide.imageUrl}" alt="Step ${slide.step||(i+1)}" class="w-full h-full object-contain"/>`
+          : `<div class="absolute inset-0 flex items-center justify-center text-4xl opacity-20">🖼️</div>`}
+      </div>
+      <div class="flex-1 w-full">
+        <div class="flex items-center justify-center sm:justify-start gap-2 mb-2">
+          <div class="step-badge">${slide.step||(i+1)}</div>
+          <h3 class="font-bold text-[var(--txt)] text-lg">${lang==='kh'&&slide.titleKh ? slide.titleKh : (slide.title||'')}</h3>
         </div>
-        <div class="h-1.5 bg-[#3a2a24] rounded-full overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-[#d44e43] to-[#d1a14a] rounded-full" style="width:${(item.qty/max*100).toFixed(0)}%"></div>
-        </div>
+        <p class="text-sm text-[var(--muted)] leading-relaxed">${lang==='kh'&&slide.descKh ? slide.descKh : (slide.description||'')}</p>
       </div>
     </div>
   `).join('');
+
+  dotsEl.innerHTML = slides.map((_, i) =>
+    `<div class="slide-dot ${i === currentSlide ? 'on' : ''}" onclick="goToSlide(${i})"></div>`
+  ).join('');
+
+  updateSlideCounter();
 }
 
-window.calculateFilteredStats = function() {
-  const startDate=document.getElementById('statStartDate')?.value;
-  const endDate=document.getElementById('statEndDate')?.value;
-  const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
-  let filtered=orders.filter(o=>o.status==='completed');
-  if(startDate||endDate) {
-    filtered=filtered.filter(o=>{
-      if(!o.createdAt) return false;
-      const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
-      const iso=new Date(d.getTime()-(d.getTimezoneOffset()*60000)).toISOString().split('T')[0];
-      if(startDate&&iso<startDate) return false;
-      if(endDate&&iso>endDate) return false;
-      return true;
+function updateSlide() {
+  const container = document.getElementById("slides-container");
+  if(container) {
+    container.style.transform = `translateX(-${currentSlide * 100}%)`;
+  }
+  document.querySelectorAll('.slide-dot').forEach((d, i) => d.classList.toggle('on', i === currentSlide));
+  updateSlideCounter();
+}
+
+function updateSlideCounter() {
+  const el = document.getElementById("slide-counter");
+  if(el) el.textContent = `${currentSlide + 1} / ${slides.length}`;
+}
+
+window.goToSlide = function(i) {
+  currentSlide = i;
+  updateSlide();
+  startSlideshow();
+};
+
+window.nextSlide = function() {
+  if(slides.length === 0) return;
+  currentSlide = (currentSlide + 1) % slides.length;
+  updateSlide();
+  startSlideshow();
+};
+
+window.prevSlide = function() {
+  if(slides.length === 0) return;
+  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+  updateSlide();
+  startSlideshow();
+};
+
+// ── MENU ──
+function buildCats() {
+  const cats = ["All", ...new Set(allItems.map(i=>i.category||"Other"))];
+  document.getElementById("catRow").innerHTML = cats.map(c =>
+    `<button class="cat-pill${c===currentCat?" on":""} px-4 py-1.5 rounded-full text-xs font-medium" onclick="filterByCat('${c}')">${c}</button>`
+  ).join("");
+}
+
+window.filterByCat = function(cat) {
+  currentCat = cat;
+  buildCats();
+  currentItems = cat==="All" ? allItems : allItems.filter(i=>i.category===cat);
+  renderMenu(currentItems);
+};
+
+function getTempBadgeHTML(temperature) {
+  if(temperature==='ice') return `<span class="temp-badge temp-ice">🧊 Iced</span>`;
+  if(temperature==='hot') return `<span class="temp-badge temp-hot">☕ Hot</span>`;
+  if(temperature==='frappe') return `<span class="temp-badge temp-frappe">🥤 Frappe</span>`;
+  if(temperature==='both') return `<span class="temp-badge" style="background:linear-gradient(90deg,#dbeafe 50%,#fee2e2 50%);color:#374151">🧊☕</span>`;
+  return '';
+}
+
+// Directly add item to cart without showing a popup
+window.addToCartDirect = function(item) {
+  const defaultTemp = item.temperature === 'both' ? 'ice' : (item.temperature || 'ice');
+  
+  let baseVar = item.price;
+  if(defaultTemp === 'ice') baseVar = item.priceIce || item.price;
+  if(defaultTemp === 'hot') baseVar = item.priceHot || item.price;
+  if(defaultTemp === 'frappe') baseVar = item.priceFrappe || item.price;
+  
+  const finalPrice = item.discount > 0 ? baseVar*(1-item.discount/100) : baseVar;
+  
+  const existing = cart.find(c => c.id === item.id && c.temperature === defaultTemp && c.toppingsData.length === 0 && c.sugar === "100%" && c.ice === "100%");
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({
+      cartId: 'cart_'+Date.now()+Math.random().toString(36).substr(2,5),
+      id: item.id, name: item.name, nameKh: item.nameKh||'',
+      imageUrl: item.imageUrl, basePrice: baseVar,
+      price: finalPrice, qty: 1, 
+      sugar: "100%", ice: "100%",
+      temperature: defaultTemp,
+      toppingsData: [],
+      originalPrice: item.price, priceHot: item.priceHot, priceFrappe: item.priceFrappe, discount: item.discount
     });
   }
-  const gross=filtered.reduce((s,o)=>s+Number(o.total),0);
-  const subAmt=gross*(subPct/100); const net=gross-subAmt;
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('stat-f-orders',filtered.length); set('stat-f-gross',`$${gross.toFixed(2)}`);
-  set('stat-f-sub-lbl',`Subtract (${subPct}%)`); set('stat-f-sub-amt',`-$${subAmt.toFixed(2)}`);
-  set('stat-f-net',`$${net.toFixed(2)}`);
+  renderCart();
+  showToast(t().addedToast);
+  
+  const b = document.getElementById("cartBadge");
+  b.classList.remove("hidden");
+  b.classList.add("pop-anim"); setTimeout(()=>b.classList.remove("pop-anim"),300);
 };
 
-window.sendStatsToTelegram = async function() {
-  const s=id=>document.getElementById(id)?.textContent||'';
-  const startDate=document.getElementById('statStartDate')?.value;
-  const endDate=document.getElementById('statEndDate')?.value;
-  const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
-  const note=document.getElementById('statNote')?.value.trim()||'None';
-  let periodStr="All Time";
-  if(startDate&&endDate) periodStr=`${startDate} to ${endDate}`;
-  else if(startDate) periodStr=`From ${startDate}`;
-  else if(endDate) periodStr=`Until ${endDate}`;
-  const msg=`📊 <b>Chafé Revenue Report</b>\n\n📅 <b>Period:</b> ${periodStr}\n📝 <b>Note:</b> ${note}\n\n📦 <b>Total Orders:</b> ${s('stat-all')}\n⏳ <b>Pending:</b> ${s('stat-pending')}\n✓ <b>Completed:</b> ${s('stat-completed')}\n💵 <b>All Time Revenue:</b> ${s('stat-rev')}\n\n<b>Filtered Period:</b>\n📦 Orders: ${s('stat-f-orders')}\n💵 Gross: ${s('stat-f-gross')}\n📉 Subtract (${subPct}%): ${s('stat-f-sub-amt')}\n💰 Net: ${s('stat-f-net')}\n\n<i>Generated from Admin Panel</i>`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
-    showToast("Stats sent to Telegram!");
-  } catch(e) { showToast("Error sending",true); }
-};
+function renderMenu(items) {
+  const grid = document.getElementById("menuGrid");
+  const empty = document.getElementById("emptyMenu");
+  if(!items?.length) { grid.classList.add("hidden"); empty.classList.remove("hidden"); return; }
+  empty.classList.add("hidden"); grid.classList.remove("hidden");
+  const tx = t();
 
-// ── LIVE ORDERS ──
-let orderFilter = 'all';
+  grid.innerHTML = items.map((item,idx) => {
+    const outOfStock = item.inStock===false;
+    const dName = lang==='kh'&&item.nameKh ? item.nameKh : item.name;
+    const discount = item.discount||0;
+    const calcPrice = discount>0 ? item.price*(1-discount/100) : item.price;
+    const priceHTML = discount>0
+      ? `<div class="flex flex-col items-start leading-none"><span class="text-[10px] text-[var(--muted)] line-through">$${Number(item.price).toFixed(2)}</span><span class="text-[var(--gold)] font-semibold text-sm">$${calcPrice.toFixed(2)}</span></div>`
+      : `<span class="text-[var(--gold)] font-semibold text-sm">$${Number(item.price).toFixed(2)}</span>`;
+    const tempBadge = getTempBadgeHTML(item.temperature);
 
-window.setOrderFilter = function(f) {
-  orderFilter = f;
-  ['all','pending','completed','cancelled'].forEach(fv => {
-    const btn = document.getElementById(`ofilter-${fv}`);
-    if(!btn) return;
-    if(fv===f) { btn.classList.remove('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]'); btn.classList.add('bg-[#d44e43]','text-white'); }
-    else { btn.classList.add('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]'); btn.classList.remove('bg-[#d44e43]','text-white'); }
-  });
-  renderOrders();
-};
+    const orderCount = itemOrderCounts[item.name] || 0;
+    const orderCountText = orderCount > 0 ? `<p class="text-[10px] text-[var(--muted)] mt-0.5">(${tx.totalOrders}: ${orderCount})</p>` : '';
 
-function getElapsedTime(createdAt) {
-  if(!createdAt) return '';
-  const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-  const mins = Math.floor((Date.now()-d.getTime())/60000);
-  if(mins<1) return 'just now';
-  if(mins<60) return `${mins}m ago`;
-  return `${Math.floor(mins/60)}h ${mins%60}m ago`;
+    return `<div class="m-card${outOfStock?" out-stock":""} rounded-2xl overflow-hidden flex flex-col fade-up" style="animation-delay:${idx*35}ms">
+      <div class="relative h-36 bg-[var(--sur2)] overflow-hidden cursor-pointer" onclick='${!outOfStock ? `openCustomize(${JSON.stringify({
+                id:item.id, name:item.name, nameKh:item.nameKh||'',
+                imageUrl:item.imageUrl||'', price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,
+                temperature:item.temperature||'both'
+              }).replace(/'/g,"&#39;")})` : ''}'>
+        <img src="${item.imageUrl||'https://placehold.co/300x200/f5ece3/3c2a21?text=☕'}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x200/f5ece3/3c2a21?text=☕'"/>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#3c2a21]/60 to-transparent"></div>
+        ${discount>0?`<span class="absolute top-2 left-2 bg-[var(--red)] text-[#faf6eb] text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">-${discount}%</span>`:''}
+        ${item.popular?`<span class="popular-badge">🔥 Hot</span>`:''}
+        <span class="absolute top-2 right-2 bg-[#3c2a21]/80 text-[#faf6eb] text-[9px] px-2 py-0.5 rounded-full border border-[var(--gold)]/50 uppercase tracking-wide" style="backdrop-filter:blur(4px)">${item.category||""}</span>
+        ${outOfStock?`<div class="out-stock-badge"><span class="text-white text-xs font-bold tracking-wide uppercase bg-black/70 px-3 py-1 rounded-full">${tx.outOfStock}</span></div>`:""}
+      </div>
+      <div class="p-3 flex flex-col flex-1">
+        <div class="flex-1 mb-1">
+          <h3 class="text-sm font-medium leading-snug">${dName}</h3>
+          ${orderCountText}
+        </div>
+        ${tempBadge ? `<div class="mb-2">${tempBadge}</div>` : '<div class="mb-2"></div>'}
+        <div class="flex items-center justify-between">
+          ${priceHTML}
+          ${outOfStock
+            ? `<span class="text-xs text-[var(--muted)] border border-[var(--bdr)] px-2 py-1 rounded-full">${tx.outOfStock}</span>`
+            : `<button class="g-btn px-4 py-1.5 rounded-full font-bold shadow-sm text-xs" onclick='addToCartDirect(${JSON.stringify({
+                id:item.id, name:item.name, nameKh:item.nameKh||'',
+                imageUrl:item.imageUrl||'', price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,
+                temperature:item.temperature||'both'
+              }).replace(/'/g,"&#39;")})'>+ Add</button>`}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
 }
 
-function renderOrders() {
-  const grid=document.getElementById('ordersGrid');
-  const noOrd=document.getElementById('noOrders');
-  if(!grid||!noOrd) return;
+function renderPopular() {
+  const popularItems = allItems.filter(i => i.popular && i.inStock!==false);
+  const section = document.getElementById("popularSection");
+  const grid = document.getElementById("popularGrid");
+  if(!popularItems.length) { section.classList.add("hidden"); return; }
+  section.classList.remove("hidden");
 
-  let filtered = orders;
-  if(orderFilter!=='all') filtered = orders.filter(o=>o.status===orderFilter);
-  filtered = filtered.slice(0,50);
+  const tx = t();
 
-  if(!filtered.length) { grid.innerHTML=''; noOrd.classList.remove('hidden'); return; }
-  noOrd.classList.add('hidden');
-
-  grid.innerHTML = filtered.map(o => {
-    const time = o.createdAt ? new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
-    const elapsed = getElapsedTime(o.createdAt);
-    const cardClass = `order-card-${o.status}`;
-    const statusClass = `status-${o.status}`;
-    const statusLabel = o.status==='pending'?'⏳ Pending':o.status==='completed'?'✓ Completed':'✗ Cancelled';
-    const tempIcon = item => item.temperature==='hot'?'☕':item.temperature==='frappe'?'🥤':'🧊';
-
+  grid.innerHTML = popularItems.map(item => {
+    const dName = lang==='kh'&&item.nameKh ? item.nameKh : item.name;
+    const discount = item.discount||0;
+    const calcPrice = discount>0 ? item.price*(1-discount/100) : item.price;
+    const orderCount = itemOrderCounts[item.name] || 0;
+    const orderCountText = orderCount > 0 ? `<p class="text-[10px] text-[var(--muted)] mt-0.5">(${tx.totalOrders}: ${orderCount})</p>` : '';
     return `
-    <div class="bg-[#4e3b32] rounded-xl border ${cardClass} overflow-hidden shadow-lg flex flex-col fade-up">
-      <div class="p-3 border-b border-[#5c453b] flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-[#d44e43] text-sm">Table ${o.tableNumber}</span>
-          <span class="text-xs text-gray-400">#${o.id.slice(-5).toUpperCase()}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="order-timer">${elapsed}</span>
-          <span class="text-[10px] font-bold px-2 py-1 rounded-full ${statusClass}">${statusLabel}</span>
-        </div>
+    <div class="flex-shrink-0 w-36 bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden cursor-pointer hover:border-[var(--gold)] transition-all hover:-translate-y-1 hover:shadow-lg"
+         onclick='openCustomize(${JSON.stringify({id:item.id,name:item.name,nameKh:item.nameKh||'',imageUrl:item.imageUrl||'',price:item.price, priceHot:item.priceHot||null, priceFrappe:item.priceFrappe||null, discount:item.discount||0,temperature:item.temperature||'both'}).replace(/'/g,"&#39;")})'>
+      <div class="h-24 bg-[var(--sur2)] overflow-hidden relative">
+        <img src="${item.imageUrl||'https://placehold.co/200x150/f5ece3/3c2a21?text=☕'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x150/f5ece3/3c2a21?text=☕'"/>
+        <span class="popular-badge" style="top:5px;left:5px">🔥</span>
       </div>
-      <div class="p-4 flex-1 space-y-2">
-        ${(o.items||[]).map(i => {
-          let opts = `${tempIcon(i)} | Sugar:${i.sugar}`;
-          if(i.temperature!=='hot') opts += ` | Ice:${i.ice}`;
-          if(i.toppingsData?.length) opts += ` | +${i.toppingsData.length} tops`;
-          return `<div class="border-b border-[#5c453b] pb-2 last:border-0 last:pb-0">
-            <div class="flex justify-between text-sm"><span class="font-bold">${i.qty}× ${i.name}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
-            <p class="text-xs text-gray-400 mt-0.5">${opts}</p>
-          </div>`;
-        }).join('')}
-        ${o.note?`<div class="mt-2 p-2 bg-[#3a2a24] rounded border border-[#5c453b] text-xs text-gray-300">📝 ${o.note}</div>`:''}
-      </div>
-      <div class="bg-[#3a2a24] p-3 border-t border-[#5c453b] flex items-center justify-between">
-        <span class="font-bold text-[#5db85b]">$${Number(o.total).toFixed(2)}</span>
-        <div class="flex gap-2">
-          ${o.status==='pending'
-            ? `<button onclick="quickStatus('${o.id}','completed')" class="bg-[#5db85b] hover:bg-[#4cae4c] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">✓ Complete</button>
-               <button onclick="quickStatus('${o.id}','cancelled')" class="bg-[#d44e43]/30 hover:bg-[#d44e43] text-[#d44e43] hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-[#d44e43]/50 transition">✗ Cancel</button>`
-            : `<button onclick="openEditOrderModal('${o.id}')" class="bg-[#5c453b] hover:bg-[#6b5040] text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit Status</button>`}
-        </div>
+      <div class="p-2.5">
+        <p class="text-xs font-semibold truncate">${dName}</p>
+        ${orderCountText}
+        <p class="text-[var(--gold)] font-bold text-xs mt-0.5">$${calcPrice.toFixed(2)}</p>
       </div>
     </div>`;
   }).join('');
 }
 
-window.quickStatus = async function(id, status) {
-  try {
-    await updateDoc(doc(db,"orders",id), {status});
-    showToast(`Order ${status}!`);
-  } catch(e) { showToast("Error updating",true); }
+// ── PANELS ──
+window.closePanels = function() {
+  document.getElementById("cartPanel").classList.remove("show");
+  document.getElementById("myOrdersPanel").classList.remove("show");
+  document.getElementById("cartOverlay").classList.add("hidden");
 };
 
-// ── ORDER HISTORY ──
-window.renderHistory = function() {
-  const startDate=document.getElementById('historyStartDate')?.value;
-  const endDate=document.getElementById('historyEndDate')?.value;
-  const tbody=document.getElementById('historyTableBody');
-  if(!tbody) return;
-  let filtered=orders;
-  if(startDate||endDate) {
-    filtered=orders.filter(o=>{
-      if(!o.createdAt) return false;
-      const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
-      const iso=new Date(d.getTime()-(d.getTimezoneOffset()*60000)).toISOString().split('T')[0];
-      if(startDate&&iso<startDate) return false; if(endDate&&iso>endDate) return false; return true;
-    });
-  }
-  currentHistoryFilteredOrders=filtered;
-  if(!filtered.length) { tbody.innerHTML=`<tr><td colspan="7" class="p-8 text-center text-gray-400">No orders found for this date range.</td></tr>`; return; }
-  tbody.innerHTML=filtered.map(o=>{
-    const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleString():'';
-    const itemsTxt=(o.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ');
-    const sc=o.status==='completed'?'text-[#5db85b]':o.status==='cancelled'?'text-red-500':'text-[#d1a14a]';
-    return `<tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
-      <td class="p-4 text-xs font-mono">#${o.id.slice(-6).toUpperCase()}</td>
-      <td class="p-4 text-xs text-gray-400">${time}</td>
-      <td class="p-4">T${o.tableNumber}</td>
-      <td class="p-4 text-xs max-w-[180px] truncate" title="${itemsTxt}">${itemsTxt}</td>
-      <td class="p-4 font-bold">$${Number(o.total).toFixed(2)}</td>
-      <td class="p-4 font-bold ${sc} uppercase text-xs">${o.status}</td>
-      <td class="p-4 text-right flex items-center justify-end gap-3 h-full pt-4">
-        <button onclick="sendSingleOrderToTelegram('${o.id}')" class="text-blue-400 hover:text-blue-300 transition" title="Send"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></button>
-        <button onclick="openEditOrderModal('${o.id}')" class="text-gray-400 hover:text-[#5db85b] transition" title="Edit"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-        <button onclick="deleteOrderHistory('${o.id}')" class="text-gray-400 hover:text-[#d44e43] transition" title="Delete"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-      </td>
-    </tr>`;
-  }).join('');
+// ── CUSTOMIZE (MODAL) ──
+let editingCartId = null, customItem = null;
+let selectedSugar = "100%", selectedIce = "100%", selectedTemp = "ice", selectedTops = [];
+
+window.openCustomize = function(item) {
+  editingCartId = null;
+  customItem = { ...item };
+  selectedSugar = "100%"; selectedIce = "100%"; selectedTops = [];
+  selectedTemp = item.temperature==='hot' ? 'hot' : item.temperature==='frappe' ? 'frappe' : 'ice';
+  _openCustomModal();
 };
 
-window.sendHistoryToTelegram = async function() {
-  if(!currentHistoryFilteredOrders.length) return showToast("No orders to send",true);
-  let listTxt="", listTotal=0;
-  currentHistoryFilteredOrders.forEach(o=>{
-    const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-    listTxt+=`• <b>#${o.id.slice(-6).toUpperCase()}</b> (${time}) - $${Number(o.total).toFixed(2)} [${o.status.toUpperCase()}]\n`;
-    if(o.status==='completed') listTotal+=Number(o.total);
-  });
-  const msg=`📋 <b>Order List Export</b>\n\n📦 <b>Total Orders:</b> ${currentHistoryFilteredOrders.length}\n💰 <b>Completed Sum:</b> $${listTotal.toFixed(2)}\n\n${listTxt}`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
-    showToast("List sent to Telegram!");
-  } catch(e) { showToast("Failed to send",true); }
+window.editCartItem = function(cartId) {
+  editingCartId = cartId;
+  const cartItem = cart.find(c=>c.cartId===cartId);
+  if(!cartItem) return;
+  customItem = cartItem;
+  selectedSugar = cartItem.sugar;
+  selectedIce = cartItem.ice;
+  selectedTemp = cartItem.temperature||'ice';
+  selectedTops = cartItem.toppingsData.map(t=>t.id);
+  _openCustomModal();
 };
 
-window.sendSingleOrderToTelegram = async function(id) {
-  const o=orders.find(x=>x.id===id); if(!o) return;
-  const itemLines=(o.items||[]).map(i=>`  • ${i.qty}× ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join("\n");
-  const msg=`🧾 <b>Order Receipt</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n📌 Status: <b>${o.status.toUpperCase()}</b>\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
-    showToast("Order sent!");
-  } catch(e) { showToast("Failed",true); }
-};
+function _openCustomModal() {
+  const tx = t();
+  const dName = lang==='kh'&&customItem.nameKh ? customItem.nameKh : customItem.name;
+  document.getElementById("cm-title").textContent = dName;
+  document.getElementById("cm-subtitle").textContent = tx.toppings;
 
-window.deleteOrderHistory = async function(id) {
-  if(await customConfirm("Permanently delete this order?", "Delete Order")) {
-    try { await deleteDoc(doc(db,"orders",id)); showToast("Deleted."); }
-    catch(e) { showToast("Error",true); }
-  }
-};
-
-window.openEditOrderModal = function(id) {
-  editingOrderId=id;
-  const o=orders.find(x=>x.id===id); if(!o) return;
-  document.getElementById('editOrderStatus').value=o.status||'pending';
-  const m=document.getElementById('editOrderModal'); m.classList.remove('hidden'); m.style.display='flex';
-};
-window.closeEditOrderModal = function() { editingOrderId=null; const m=document.getElementById('editOrderModal'); m.classList.add('hidden'); m.style.display='none'; };
-window.saveEditOrder = async function() {
-  if(!editingOrderId) return;
-  const status=document.getElementById('editOrderStatus').value;
-  try { await updateDoc(doc(db,"orders",editingOrderId),{status}); closeEditOrderModal(); showToast("Status updated!"); }
-  catch(e) { showToast("Error",true); }
-};
-
-// ── MENU MANAGER ──
-window.addMenuItem = async function() {
-  const name=document.getElementById("addName").value.trim();
-  const nameKh=document.getElementById("addNameKh").value.trim();
-  const price=parseFloat(document.getElementById("addPrice").value);
-  const priceHot=parseFloat(document.getElementById("addPriceHot").value)||null;
-  const priceFrappe=parseFloat(document.getElementById("addPriceFrappe").value)||null;
-  const cat=document.getElementById("addCat").value.trim();
-  const img=document.getElementById("addImage").value.trim();
-  const temperature=document.getElementById("addTemperature").value;
-  const popular=document.getElementById("addPopular").checked;
-  if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
-  try {
-    await addDoc(collection(db,"menu"),{name,nameKh,price,priceHot,priceFrappe,category:cat||'Other',imageUrl:img,discount:0,inStock:true,temperature,popular});
-    document.getElementById("addName").value=''; document.getElementById("addNameKh").value='';
-    document.getElementById("addPrice").value=''; document.getElementById("addPriceHot").value='';
-    document.getElementById("addPriceFrappe").value=''; document.getElementById("addCat").value='';
-    document.getElementById("addImage").value=''; document.getElementById("addPopular").checked=false;
-    document.getElementById("addTemperature").value='both';
-    currentMenuCat='All'; document.getElementById('menuCatFilter').value='All';
-    showToast("Item added!");
-  } catch(e) { showToast("Error adding item",true); }
-};
-
-window.applyBulkDiscount = async function() {
-  const pctInput=document.getElementById("bulkDiscountInput").value;
-  const pct=parseInt(pctInput);
-  if(pctInput===""||isNaN(pct)||pct<0||pct>100) return showToast("Enter 0-100",true);
-  const itemsToUpdate=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
-  if(!itemsToUpdate.length) return showToast("No items found",true);
+  const tempWrap = document.getElementById("cm-temp-wrap");
+  const btnIce = document.getElementById("temp-ice");
+  const btnHot = document.getElementById("temp-hot");
+  const btnFrappe = document.getElementById("temp-frappe");
   
-  if(!(await customConfirm(`Apply ${pct}% discount to ${currentMenuCat==='All'?'ALL':''+itemsToUpdate.length} items?`, "Apply Discount"))) return;
-  
-  try {
-    await Promise.all(itemsToUpdate.map(m=>updateDoc(doc(db,"menu",m.id),{discount:pct})));
-    document.getElementById("bulkDiscountInput").value=''; showToast(`${pct}% applied!`);
-  } catch(e) { showToast("Error",true); }
-};
+  // Calculate dynamic variant prices considering discount
+  const discountMultiplier = 1 - ((customItem.discount || 0) / 100);
+  const pIce = (customItem.priceIce || customItem.originalPrice || customItem.price) * discountMultiplier;
+  const pHot = (customItem.priceHot || customItem.originalPrice || customItem.price) * discountMultiplier;
+  const pFrap = (customItem.priceFrappe || customItem.originalPrice || customItem.price) * discountMultiplier;
 
-window.updateDiscount = async function(id,val) {
-  const discount=parseInt(val)||0;
-  try { await updateDoc(doc(db,"menu",id),{discount}); } catch(e) { showToast("Error",true); }
-};
+  document.getElementById("price-lbl-ice").textContent = `+$${pIce.toFixed(2)}`;
+  document.getElementById("price-lbl-hot").textContent = `+$${pHot.toFixed(2)}`;
+  document.getElementById("price-lbl-frappe").textContent = `+$${pFrap.toFixed(2)}`;
 
-window.togglePopular = async function(id, val) {
-  try { await updateDoc(doc(db,"menu",id),{popular:val}); showToast(val?"Marked popular!":"Removed from popular"); } catch(e) {}
-};
+  tempWrap.style.display = 'block';
+  btnIce.style.display = 'none';
+  btnHot.style.display = 'none';
+  btnFrappe.style.display = 'none';
 
-// ── NEW: Toggle In-Stock ──
-window.toggleInStock = async function(id, val) {
-  try {
-    await updateDoc(doc(db,"menu",id),{inStock:val});
-    showToast(val ? "Item marked In Stock ✓" : "Item marked Out of Stock ✗");
-  } catch(e) { showToast("Error updating stock",true); }
-};
-
-window.deleteMenuItem = async function(id) {
-  if(!(await customConfirm("Delete this drink?", "Delete Drink"))) return;
-  try { await deleteDoc(doc(db,"menu",id)); showToast("Deleted."); } catch(e) { showToast("Error",true); }
-};
-
-window.openEditMenuModal = function(id) {
-  const item=menuItems.find(m=>m.id===id); if(!item) return;
-  editingMenuId=id;
-  document.getElementById('editName').value=item.name||'';
-  document.getElementById('editNameKh').value=item.nameKh||'';
-  document.getElementById('editPrice').value=item.price||0;
-  document.getElementById('editPriceHot').value=item.priceHot||'';
-  document.getElementById('editPriceFrappe').value=item.priceFrappe||'';
-  document.getElementById('editCat').value=item.category||'';
-  document.getElementById('editImage').value=item.imageUrl||'';
-  document.getElementById('editTemperature').value=item.temperature||'both';
-  document.getElementById('editPopular').checked=!!item.popular;
-  const m=document.getElementById("editMenuModal"); m.classList.remove("hidden"); m.style.display="flex";
-};
-window.closeEditMenuModal = function() { editingMenuId=null; const m=document.getElementById("editMenuModal"); m.classList.add("hidden"); m.style.display="none"; };
-window.saveEditMenu = async function() {
-  if(!editingMenuId) return;
-  const name=document.getElementById("editName").value.trim();
-  const nameKh=document.getElementById("editNameKh").value.trim();
-  const price=parseFloat(document.getElementById("editPrice").value);
-  const priceHot=parseFloat(document.getElementById("editPriceHot").value)||null;
-  const priceFrappe=parseFloat(document.getElementById("editPriceFrappe").value)||null;
-  const category=document.getElementById("editCat").value.trim()||'Other';
-  const imageUrl=document.getElementById("editImage").value.trim();
-  const temperature=document.getElementById("editTemperature").value;
-  const popular=document.getElementById("editPopular").checked;
-  if(!name||isNaN(price)) { showToast("Name and Price required",true); return; }
-  try {
-    await updateDoc(doc(db,"menu",editingMenuId),{name,nameKh,price,priceHot,priceFrappe,category,imageUrl,temperature,popular});
-    closeEditMenuModal(); showToast("Updated!");
-  } catch(e) { showToast("Error",true); }
-};
-
-window.filterMenu = function() { currentMenuCat=document.getElementById('menuCatFilter').value; renderMenuTable(); };
-
-function updateCategoryDropdown() {
-  const select=document.getElementById('menuCatFilter'); if(!select) return;
-  const cats=[...new Set(menuItems.map(m=>m.category||'Other'))];
-  select.innerHTML=`<option value="All">All Categories</option>`;
-  cats.forEach(c=>{ select.innerHTML+=`<option value="${c}" ${currentMenuCat===c?'selected':''}>${c}</option>`; });
-}
-
-function getTempLabel(t) {
-  if(t==='ice') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-ice">🧊 Ice</span>`;
-  if(t==='hot') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-hot">☕ Hot</span>`;
-  if(t==='frappe') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-frappe">🥤 Frappe</span>`;
-  return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-both">🧊☕ Both</span>`;
-}
-
-function renderMenuTable() {
-  const tbody=document.getElementById("menuTableBody"); if(!tbody) return;
-  const filtered=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
-  tbody.innerHTML=filtered.map(m=>{
-    const finalPrice=m.price*(1-(m.discount||0)/100);
-    const inStock = m.inStock !== false; // default true
-    return `
-    <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
-      <td class="p-4 flex items-center gap-3">
-        <img src="${m.imageUrl||'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-10 h-10 rounded shadow object-cover border border-[#5c453b]" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'">
-        <div><div class="font-medium">${m.name}</div><div class="text-xs text-gray-400">${m.nameKh||''}</div></div>
-      </td>
-      <td class="p-4"><span class="bg-[#3a2a24] border border-[#5c453b] px-2 py-1 rounded text-xs">${m.category}</span></td>
-      <td class="p-4">${getTempLabel(m.temperature||'both')}</td>
-      <td class="p-4">
-        <button onclick="togglePopular('${m.id}',${!m.popular})" class="text-lg ${m.popular?'opacity-100':'opacity-25 hover:opacity-60'} transition" title="${m.popular?'Remove popular':'Mark popular'}">🔥</button>
-      </td>
-      <td class="p-4">
-        <button onclick="toggleInStock('${m.id}',${!inStock})"
-          class="px-3 py-1.5 rounded-lg text-xs font-bold transition border ${inStock
-            ? 'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43] hover:border-[#d44e43]/40'
-            : 'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b] hover:border-[#5db85b]/40'}"
-          title="${inStock?'Click to mark Out of Stock':'Click to mark In Stock'}">
-          ${inStock ? '✓ In Stock' : '✗ Out of Stock'}
-        </button>
-      </td>
-      <td class="p-4">$${Number(m.price).toFixed(2)}</td>
-      <td class="p-4">
-        <div class="flex items-center gap-1 bg-[#3a2a24] border border-[#5c453b] rounded p-1 w-20">
-          <input type="number" min="0" max="100" value="${m.discount||0}" onchange="updateDiscount('${m.id}',this.value)" class="w-full bg-transparent text-center border-none p-0 text-[#d44e43] font-bold focus:ring-0">
-          <span class="pr-2 text-gray-400 text-xs">%</span>
-        </div>
-      </td>
-      <td class="p-4 text-[#5db85b] font-bold">$${finalPrice.toFixed(2)}</td>
-      <td class="p-4 text-right">
-        <button onclick="openEditMenuModal('${m.id}')" class="text-gray-400 hover:text-[#5db85b] transition mr-3"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-        <button onclick="deleteMenuItem('${m.id}')" class="text-gray-400 hover:text-[#d44e43] transition"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ── TOPPINGS ──
-window.previewImg = function(inputId, imgId, previewId) {
-  const val=document.getElementById(inputId)?.value.trim();
-  const prev=document.getElementById(previewId); const img=document.getElementById(imgId);
-  if(val&&prev&&img) { img.src=val; prev.classList.remove("hidden"); }
-  else if(prev) prev.classList.add("hidden");
-};
-window.openAddToppingModal = () => { const m=document.getElementById("toppingModal"); m.classList.remove("hidden"); m.style.display="flex"; };
-window.closeAddToppingModal = () => { const m=document.getElementById("toppingModal"); m.classList.add("hidden"); m.style.display="none"; };
-window.saveTopping = async function() {
-  const name=document.getElementById("topName").value.trim();
-  const nameKh=document.getElementById("topNameKh").value.trim();
-  const price=parseFloat(document.getElementById("topPrice").value);
-  const imageUrl=document.getElementById("topImage").value.trim();
-  if(!name) { showToast("Name required!",true); return; }
-  if(isNaN(price)||price<0) { showToast("Valid price required!",true); return; }
-  try {
-    await addDoc(collection(db,"toppings"),{name,nameKh,price,imageUrl,inStock:true});
-    closeAddToppingModal();
-    ['topName','topNameKh','topPrice','topImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    document.getElementById("topImagePreview").classList.add("hidden");
-    showToast("Topping added!");
-  } catch(e) { showToast("Error: "+e.message,true); }
-};
-window.deleteTopping = async function(id) { 
-  if(!(await customConfirm("Remove this topping?", "Remove Topping"))) return; 
-  try{await deleteDoc(doc(db,"toppings",id));}catch(e){} 
-};
-
-window.openEditToppingModal = function(id) {
-  const tp=toppings.find(x=>x.id===id); if(!tp) return; editingToppingId=id;
-  document.getElementById("editTopName").value=tp.name||''; document.getElementById("editTopNameKh").value=tp.nameKh||'';
-  document.getElementById("editTopPrice").value=tp.price||0; document.getElementById("editTopImage").value=tp.imageUrl||'';
-  const prevImg=document.getElementById("editTopImagePreviewImg");
-  if(tp.imageUrl){prevImg.src=tp.imageUrl;document.getElementById("editTopImagePreview").style.display='block';}
-  else{document.getElementById("editTopImagePreview").style.display='none';}
-  const m=document.getElementById("editToppingModal"); m.classList.remove("hidden"); m.style.display="flex";
-};
-window.closeEditToppingModal = function() { editingToppingId=null; const m=document.getElementById("editToppingModal"); m.classList.add("hidden"); m.style.display="none"; };
-window.saveEditTopping = async function() {
-  if(!editingToppingId) return;
-  const name=document.getElementById("editTopName").value.trim();
-  const nameKh=document.getElementById("editTopNameKh").value.trim();
-  const price=parseFloat(document.getElementById("editTopPrice").value);
-  const imageUrl=document.getElementById("editTopImage").value.trim();
-  if(!name||isNaN(price)||price<0) { showToast("Invalid data",true); return; }
-  try { await updateDoc(doc(db,"toppings",editingToppingId),{name,nameKh,price,imageUrl}); closeEditToppingModal(); showToast("Updated!"); }
-  catch(e) { showToast("Error",true); }
-};
-
-window.toggleToppingStock = async function(id, val) {
-  try {
-    await updateDoc(doc(db,"toppings",id),{inStock:val});
-    showToast(val ? "Topping In Stock ✓" : "Topping Out of Stock ✗");
-  } catch(e) { showToast("Error",true); }
-};
-
-function renderToppings() {
-  const grid=document.getElementById("toppingsGrid"); if(!grid) return;
-  grid.innerHTML=toppings.map(tp=>{
-    const inStock = tp.inStock !== false;
-    return `
-    <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden shadow-sm">
-      ${tp.imageUrl?`<div class="h-28 bg-[#3a2a24] overflow-hidden"><img src="${tp.imageUrl}" alt="${tp.name}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/></div>`:`<div class="h-28 bg-[#3a2a24] flex items-center justify-center text-4xl opacity-30">🧁</div>`}
-      <div class="p-4 flex justify-between items-start">
-        <div class="flex-1 min-w-0 mr-2">
-          <p class="font-bold text-sm truncate">${tp.name}</p>
-          <p class="text-[10px] text-gray-400 mb-1 truncate">${tp.nameKh||''}</p>
-          <p class="text-[#5db85b] font-semibold text-sm">+$${Number(tp.price).toFixed(2)}</p>
-        </div>
-        <div class="flex gap-1 flex-shrink-0 items-center">
-          <button onclick="toggleToppingStock('${tp.id}',${!inStock})" class="px-2 py-1 rounded text-[10px] font-bold transition border ${inStock ? 'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43]' : 'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b]'}">${inStock ? '✓ Stock' : '✗ Out'}</button>
-          <button onclick="openEditToppingModal('${tp.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-          <button onclick="deleteTopping('${tp.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-        </div>
-      </div>
-    </div>
-  `}).join('');
-}
-
-// ── SLIDESHOW ──
-window.addSlide = async function() {
-  const step=parseInt(document.getElementById("slideStep").value)||(slideshowItems.length+1);
-  const imageUrl=document.getElementById("slideImage").value.trim();
-  const titleEn=document.getElementById("slideTitleEn").value.trim();
-  const titleKh=document.getElementById("slideTitleKh").value.trim();
-  const descEn=document.getElementById("slideDescEn").value.trim();
-  const descKh=document.getElementById("slideDescKh").value.trim();
-  if(!titleEn) { showToast("Title (EN) required",true); return; }
-  try {
-    await addDoc(collection(db,"slideshow"),{step,order:step,imageUrl,title:titleEn,titleKh,description:descEn,descKh});
-    ['slideStep','slideImage','slideTitleEn','slideTitleKh','slideDescEn','slideDescKh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    showToast("Slide added!");
-  } catch(e) { showToast("Error",true); }
-};
-window.deleteSlide = async function(id) { 
-  if(!(await customConfirm("Delete slide?", "Delete Slide"))) return; 
-  try{await deleteDoc(doc(db,"slideshow",id));showToast("Deleted.");}catch(e){showToast("Error",true);} 
-};
-
-window.openEditSlideModal = function(id) {
-  const slide=slideshowItems.find(s=>s.id===id); if(!slide) return; editingSlideId=id;
-  document.getElementById("editSlideStep").value=slide.step||'';
-  document.getElementById("editSlideImage").value=slide.imageUrl||'';
-  document.getElementById("editSlideTitleEn").value=slide.title||'';
-  document.getElementById("editSlideTitleKh").value=slide.titleKh||'';
-  document.getElementById("editSlideDescEn").value=slide.description||'';
-  document.getElementById("editSlideDescKh").value=slide.descKh||'';
-  const m=document.getElementById("editSlideModal"); m.classList.remove("hidden"); m.style.display="flex";
-};
-window.closeEditSlideModal = function() { editingSlideId=null; const m=document.getElementById("editSlideModal"); m.classList.add("hidden"); m.style.display="none"; };
-window.saveEditSlide = async function() {
-  if(!editingSlideId) return;
-  const step=parseInt(document.getElementById("editSlideStep").value)||1;
-  const imageUrl=document.getElementById("editSlideImage").value.trim();
-  const title=document.getElementById("editSlideTitleEn").value.trim();
-  const titleKh=document.getElementById("editSlideTitleKh").value.trim();
-  const description=document.getElementById("editSlideDescEn").value.trim();
-  const descKh=document.getElementById("editSlideDescKh").value.trim();
-  if(!title) { showToast("Title required",true); return; }
-  try { await updateDoc(doc(db,"slideshow",editingSlideId),{step,order:step,imageUrl,title,titleKh,description,descKh}); closeEditSlideModal(); showToast("Updated!"); }
-  catch(e) { showToast("Error",true); }
-};
-function renderSlideshowList() {
-  const container=document.getElementById("slideshowList"); if(!container) return;
-  if(!slideshowItems.length) { container.innerHTML=`<p class="text-center text-gray-400 py-8">No slides yet.</p>`; return; }
-  container.innerHTML=slideshowItems.map(slide=>`
-    <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden flex gap-0">
-      ${slide.imageUrl?`<div class="w-28 flex-shrink-0 bg-[#3a2a24]"><img src="${slide.imageUrl}" alt="Slide" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center text-3xl opacity-20\'>🖼️</div>'"/></div>`:`<div class="w-28 flex-shrink-0 bg-[#3a2a24] flex items-center justify-center text-3xl opacity-20">🖼️</div>`}
-      <div class="flex-1 p-4 flex justify-between items-start min-w-0">
-        <div class="flex-1 min-w-0 mr-3">
-          <div class="flex items-center gap-2 mb-1">
-            <span class="w-6 h-6 rounded-full bg-[#d44e43] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">${slide.step||'?'}</span>
-            <p class="font-bold text-sm truncate">${slide.title||'Untitled'}</p>
-          </div>
-          ${slide.titleKh?`<p class="text-xs text-gray-400 mb-1 truncate">${slide.titleKh}</p>`:''}
-          ${slide.description?`<p class="text-xs text-gray-500 line-clamp-2">${slide.description}</p>`:''}
-        </div>
-        <div class="flex gap-1 flex-shrink-0">
-          <button onclick="openEditSlideModal('${slide.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-          <button onclick="deleteSlide('${slide.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ── SOCIAL LINKS ──
-function updateSocialPreview() {
-  const fbVal=document.getElementById("fbUrl").value.trim();
-  const ttVal=document.getElementById("ttUrl").value.trim();
-  const pfb=document.getElementById("preview-fb"); const ptt=document.getElementById("preview-tt"); const pnone=document.getElementById("preview-none");
-  if(!pfb||!ptt||!pnone) return;
-  if(fbVal||ttVal) {
-    pnone.classList.add("hidden");
-    if(fbVal){pfb.classList.remove("hidden");pfb.style.display="flex";}else{pfb.classList.add("hidden");}
-    if(ttVal){ptt.classList.remove("hidden");ptt.style.display="flex";}else{ptt.classList.add("hidden");}
+  if(customItem.temperature === 'ice') {
+    btnIce.style.display = 'flex';
+    selectedTemp = 'ice';
+  } else if(customItem.temperature === 'hot') {
+    btnHot.style.display = 'flex';
+    selectedTemp = 'hot';
+  } else if(customItem.temperature === 'frappe') {
+    btnFrappe.style.display = 'flex';
+    selectedTemp = 'frappe';
   } else {
-    pfb.classList.add("hidden"); ptt.classList.add("hidden"); pnone.classList.remove("hidden");
+    btnIce.style.display = 'flex';
+    btnHot.style.display = 'flex';
+    if(selectedTemp === 'frappe') selectedTemp = 'ice';
   }
+
+  const availableToppings = allToppings.filter(t => t.inStock !== false);
+
+  document.getElementById("cm-top-list").innerHTML = availableToppings.length ? availableToppings.map(tp => {
+    const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
+    const isAct = selectedTops.includes(tp.id);
+    const imgHTML = tp.imageUrl
+      ? `<img src="${tp.imageUrl}" alt="${tName}" class="w-10 h-10 rounded-full object-cover border border-[var(--bdr)] flex-shrink-0" onerror="this.style.display='none'"/>`
+      : `<div class="w-10 h-10 rounded-full bg-[var(--sur2)] border border-[var(--bdr)] flex items-center justify-center flex-shrink-0 text-lg">🧁</div>`;
+    return `
+    <div onclick="toggleTop('${tp.id}')" id="top-${tp.id}" class="top-box ${isAct?'active':''} flex items-center gap-3 p-3 border border-[var(--bdr)] rounded-[1.25rem] cursor-pointer hover:border-[var(--gold)] transition-colors">
+      ${imgHTML}
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-[var(--txt)]">${tName}</p>
+      </div>
+      <span class="text-xs text-[var(--gold)] font-bold flex-shrink-0">+$${Number(tp.price).toFixed(2)}</span>
+      <div id="top-check-${tp.id}" class="w-[22px] h-[22px] rounded-full border-2 ${isAct?'border-[var(--gold)] flex items-center justify-center':'border-[var(--bdr)]'} transition-colors shrink-0">
+        ${isAct?`<div class="w-2.5 h-2.5 bg-[var(--gold)] rounded-full"></div>`:''}
+      </div>
+    </div>`;
+  }).join('') : `<p class="text-sm text-[var(--muted)] text-center py-4">No toppings available</p>`;
+
+  setTemp(selectedTemp); setSugar(selectedSugar); setIce(selectedIce);
+  updateCustomPrice();
+
+  document.getElementById("customModal").classList.remove("hidden");
+  document.getElementById("customModal").style.display = "flex";
 }
-document.getElementById("fbUrl").addEventListener("input", updateSocialPreview);
-document.getElementById("ttUrl").addEventListener("input", updateSocialPreview);
 
-window.saveSocialLinks = async function() {
-  const fbUrl=document.getElementById("fbUrl").value.trim();
-  const tiktokUrl=document.getElementById("ttUrl").value.trim();
-  try {
-    await setDoc(doc(db,"settings","socialLinks"),{facebookUrl:fbUrl,tiktokUrl:tiktokUrl});
-    showToast("Social links saved! Customers will see them on the order page.");
-    updateSocialPreview();
-  } catch(e) { showToast("Error saving: "+e.message,true); }
+window.closeCustomModal = function() {
+  editingCartId = null;
+  document.getElementById("customModal").classList.add("hidden");
+  document.getElementById("customModal").style.display = "none";
 };
 
-window.clearSocialLinks = async function() {
-  document.getElementById("fbUrl").value=''; document.getElementById("ttUrl").value='';
+window.setTemp = function(val) {
+  selectedTemp = val;
+  const iceSec = document.getElementById("cm-ice-section");
+  ['ice','hot','frappe'].forEach(v => {
+    const btn = document.getElementById(`temp-${v}`);
+    if(btn) btn.classList.toggle('active', v===val);
+  });
+  if(val==='hot') { iceSec.style.display='none'; }
+  else { iceSec.style.display='block'; }
+  updateCustomPrice();
+};
+
+window.setSugar = function(lvl) {
+  selectedSugar = lvl;
+  ['0','30','50','70','100'].forEach(v => {
+    const el = document.getElementById(`sug-${v}`);
+    if(el) el.classList.toggle('active', v+'%'===lvl);
+  });
+};
+
+window.setIce = function(lvl) {
+  selectedIce = lvl;
+  ['0','50','100'].forEach(v => {
+    const el = document.getElementById(`ice-${v}`);
+    if(el) el.classList.toggle('active', v+'%'===lvl);
+  });
+};
+
+window.toggleTop = function(tid) {
+  const el = document.getElementById(`top-${tid}`);
+  const check = document.getElementById(`top-check-${tid}`);
+  if(selectedTops.includes(tid)) {
+    selectedTops = selectedTops.filter(id=>id!==tid);
+    el.classList.remove('active');
+    if(check) { check.className='w-[22px] h-[22px] rounded-full border-2 border-[var(--bdr)] transition-colors shrink-0'; check.innerHTML=''; }
+  } else {
+    selectedTops.push(tid);
+    el.classList.add('active');
+    if(check) { check.className='w-[22px] h-[22px] rounded-full border-2 border-[var(--gold)] flex items-center justify-center transition-colors shrink-0'; check.innerHTML=`<div class="w-2.5 h-2.5 bg-[var(--gold)] rounded-full"></div>`; }
+  }
+  updateCustomPrice();
+};
+
+function updateCustomPrice() {
+  const topPrice = selectedTops.reduce((sum,tid)=>sum+(allToppings.find(t=>t.id===tid)?.price||0), 0);
+  
+  let baseVar = customItem.originalPrice || customItem.price;
+  if(selectedTemp === 'ice') baseVar = customItem.priceIce || baseVar;
+  if(selectedTemp === 'hot') baseVar = customItem.priceHot || baseVar;
+  if(selectedTemp === 'frappe') baseVar = customItem.priceFrappe || baseVar;
+
+  const discountMultiplier = 1 - ((customItem.discount || 0) / 100);
+  const discountedBase = baseVar * discountMultiplier;
+
+  const finalPrice = discountedBase + topPrice;
+  document.getElementById("cm-price").textContent = "$"+finalPrice.toFixed(2);
+}
+
+window.saveCustomization = function() {
+  const topPrice = selectedTops.reduce((sum,tid)=>sum+(allToppings.find(t=>t.id===tid)?.price||0), 0);
+  
+  let baseVar = customItem.originalPrice || customItem.price;
+  if(selectedTemp === 'ice') baseVar = customItem.priceIce || baseVar;
+  if(selectedTemp === 'hot') baseVar = customItem.priceHot || baseVar;
+  if(selectedTemp === 'frappe') baseVar = customItem.priceFrappe || baseVar;
+  
+  const discountMultiplier = 1 - ((customItem.discount || 0) / 100);
+  const discountedBase = baseVar * discountMultiplier;
+
+  const finalPrice = discountedBase + topPrice;
+  const tops = selectedTops.map(tid=>allToppings.find(t=>t.id===tid)).filter(Boolean);
+
+  if(editingCartId) {
+    const cartItem = cart.find(c=>c.cartId===editingCartId);
+    if(cartItem) {
+      cartItem.sugar = selectedSugar; cartItem.ice = selectedIce;
+      cartItem.temperature = selectedTemp;
+      cartItem.toppingsData = tops; cartItem.price = finalPrice;
+    }
+  } else {
+    cart.push({
+      cartId: 'cart_'+Date.now()+Math.random().toString(36).substr(2,5),
+      id: customItem.id, name: customItem.name, nameKh: customItem.nameKh||'',
+      imageUrl: customItem.imageUrl, basePrice: discountedBase,
+      price: finalPrice, qty: 1, sugar: selectedSugar, ice: selectedIce,
+      temperature: selectedTemp, toppingsData: tops,
+      originalPrice: customItem.originalPrice || customItem.price,
+      priceHot: customItem.priceHot, priceFrappe: customItem.priceFrappe, discount: customItem.discount
+    });
+    const b = document.getElementById("cartBadge");
+    b.classList.remove("hidden");
+    b.classList.add("pop-anim"); setTimeout(()=>b.classList.remove("pop-anim"),300);
+  }
+  renderCart();
+  closeCustomModal();
+};
+
+// ── CART ──
+window.openCart = function() { document.getElementById("cartOverlay").classList.remove("hidden"); document.getElementById("cartPanel").classList.add("show"); buildTableOptions(); };
+window.changeQty = function(cId, d) {
+  const item = cart.find(c=>c.cartId===cId);
+  if(!item) return;
+  item.qty += d;
+  if(item.qty <= 0) cart = cart.filter(c=>c.cartId!==cId);
+  renderCart();
+};
+window.clearCart = function() { cart=[]; appliedCoupon=null; document.getElementById("cartCoupon").value=""; renderCart(); };
+
+window.applyCoupon = function() {
+  const code = document.getElementById("cartCoupon").value.trim().toUpperCase();
+  if(!code) return;
+  const valid = dbCoupons.find(c => c.code === code && c.active);
+  if(valid) {
+    appliedCoupon = valid;
+    document.getElementById("cartCoupon").value = "";
+    showToast(t().couponApplied);
+    renderCart();
+  } else {
+    showToast(t().invalidCoupon);
+  }
+};
+
+window.removeCoupon = function() {
+  appliedCoupon = null;
+  renderCart();
+};
+
+function renderCart() {
+  const el = document.getElementById("cartItems");
+  const empty = document.getElementById("cartEmpty");
+  const badge = document.getElementById("cartBadge");
+  
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  let discountAmt = 0;
+  if (appliedCoupon) discountAmt = subtotal * (appliedCoupon.discount / 100);
+  const total = subtotal - discountAmt;
+  
+  const count = cart.reduce((s,c)=>s+c.qty, 0);
+  const tx = t();
+
+  // Handle totals UI
+  const subRow = document.getElementById("cart-subtotal-row");
+  const discRow = document.getElementById("cart-discount-row");
+  if(appliedCoupon) {
+    subRow.classList.remove("hidden");
+    discRow.classList.remove("hidden");
+    document.getElementById("cartSubtotal").textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById("cartDiscountAmt").textContent = `-$${discountAmt.toFixed(2)}`;
+  } else {
+    subRow.classList.add("hidden");
+    discRow.classList.add("hidden");
+  }
+
+  document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
+  badge.textContent = count;
+  count ? badge.classList.remove("hidden") : badge.classList.add("hidden");
+
+  // Handle Coupon Box UI
+  const inpBox = document.getElementById("coupon-input-box");
+  const appBox = document.getElementById("applied-coupon-box");
+  if (cart.length > 0) {
+    if(appliedCoupon) {
+      inpBox.classList.add("hidden"); appBox.classList.remove("hidden");
+      document.getElementById("ac-code").textContent = `${appliedCoupon.code} (-${appliedCoupon.discount}%)`;
+    } else {
+      inpBox.classList.remove("hidden"); appBox.classList.add("hidden");
+    }
+  } else {
+    inpBox.classList.add("hidden"); appBox.classList.add("hidden");
+  }
+
+  if(!cart.length) { el.innerHTML=""; empty.classList.remove("hidden"); empty.style.display="flex"; return; }
+  empty.classList.add("hidden"); empty.style.display="none";
+
+  el.innerHTML = cart.map(c => {
+    const dName = lang==='kh'&&c.nameKh ? c.nameKh : c.name;
+    const tempIcon = c.temperature==='hot' ? '☕ Hot' : c.temperature==='frappe' ? '🥤 Frappe' : '🧊 Iced';
+    let opts = `${tempIcon} | Sugar: ${c.sugar}`;
+    if(c.temperature!=='hot') opts += ` | Ice: ${c.ice}`;
+    let toppingsList = '';
+    if(c.toppingsData?.length > 0) {
+      toppingsList = c.toppingsData.map(tp => {
+        const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
+        return `<span class="inline-flex items-center gap-0.5 bg-[var(--sur)] px-1.5 py-0.5 rounded border border-[var(--bdr)] text-[10px]">${tName}</span>`;
+      }).join('');
+    }
+    
+    return `
+    <div class="bg-[var(--sur)] rounded-2xl p-3 flex flex-col gap-3 shadow-sm border border-[var(--bdr)]">
+      <div class="flex items-center gap-3">
+        <img src="${c.imageUrl||'https://placehold.co/48/f5ece3/3c2a21?text=☕'}" class="w-14 h-14 rounded-xl object-cover shrink-0" onerror="this.src='https://placehold.co/48/f5ece3/3c2a21?text=☕'"/>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold truncate text-[var(--txt)]">${dName}</p>
+          <p class="text-[11px] text-[var(--muted)] mt-1 bg-[var(--sur2)] px-2 py-1 rounded-lg border border-[var(--bdr)] w-max">${opts}</p>
+          ${toppingsList ? `<div class="flex flex-wrap gap-1 mt-1.5">${toppingsList}</div>` : ''}
+        </div>
+        <p class="text-[var(--gold)] font-bold text-sm shrink-0">$${(c.price*c.qty).toFixed(2)}</p>
+      </div>
+      <div class="flex items-center justify-between border-t border-[var(--sur2)] pt-2 mt-1">
+        <button onclick="editCartItem('${c.cartId}')" class="text-xs text-[var(--gold)] font-semibold flex items-center gap-1.5 bg-[var(--sur2)] px-3 py-1.5 rounded-full border border-[var(--bdr)] hover:border-[var(--gold)] transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          ${tx.addTopping}
+        </button>
+        <div class="flex items-center gap-2 bg-[var(--sur2)] rounded-full border border-[var(--bdr)] p-0.5">
+          <button onclick="changeQty('${c.cartId}',-1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)]">−</button>
+          <span class="w-4 text-center text-sm font-semibold">${c.qty}</span>
+          <button onclick="changeQty('${c.cartId}',1)" class="w-7 h-7 rounded-full text-sm flex items-center justify-center hover:bg-[var(--sur)] transition-colors cursor-pointer text-[var(--muted)]">+</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ── ORDER PLACEMENT ──
+window.placeOrder = async function() {
+  const table = document.getElementById("cartTable").value;
+  const note = document.getElementById("cartNote").value.trim();
+  const tx = t();
+  if(!table) { showToast("⚠️ "+tx.tableLbl+" Required!"); return; }
+  if(!cart.length) { showToast("⚠️ "+tx.emptyCart); return; }
+
+  const subtotal = cart.reduce((s,c)=>s+c.price*c.qty, 0);
+  let discountAmt = 0;
+  if(appliedCoupon) discountAmt = subtotal * (appliedCoupon.discount/100);
+  const total = subtotal - discountAmt;
+  
+  const items = cart.map(c=>({
+    id:c.id, name:c.name, nameKh:c.nameKh||'', price:c.price, qty:c.qty,
+    imageUrl:c.imageUrl||"", sugar:c.sugar, ice:c.ice, temperature:c.temperature,
+    toppingsData:c.toppingsData
+  }));
+
+  const btn = document.getElementById("placeBtn");
+  btn.disabled=true; btn.textContent="…";
+
   try {
-    await setDoc(doc(db,"settings","socialLinks"),{facebookUrl:'',tiktokUrl:''});
-    showToast("Social links cleared.");
-    updateSocialPreview();
+    const orderData = { 
+      tableNumber:table, items, total, subtotal, discountAmt, 
+      couponCode: appliedCoupon ? appliedCoupon.code : null,
+      note, status:"pending", lang:lang||"kh", createdAt:serverTimestamp?serverTimestamp():new Date() 
+    };
+    let orderId = "OFFLINE-"+Math.floor(Math.random()*100000);
+    if(db) {
+      const ref = await addDoc(collection(db,"orders"), orderData);
+      orderId = ref.id;
+      listenOrderStatus(orderId);
+    }
+    await sendTelegramAlert(orderData, orderId);
+
+    let orders = [];
+    try { orders = JSON.parse(safeStorage.get("chafe_orders")||"[]"); } catch(e) {}
+    orders.push({id:orderId,tableNumber:table,items,total,note,status:"pending",createdAt:new Date().toISOString()});
+    safeStorage.set("chafe_orders", JSON.stringify(orders));
+
+    cart = []; appliedCoupon = null; 
+    document.getElementById("cartNote").value = "";
+    document.getElementById("cartCoupon").value = "";
+    renderCart(); closePanels();
+    document.getElementById("conf-id").textContent = `#${orderId.slice(-8).toUpperCase()}`;
+    showConfirm();
+  } catch(e) {
+    showToast("❌ Error placing order. Please try again.");
+  }
+  btn.disabled=false; btn.textContent=tx.place;
+};
+
+// ── MY ORDERS ──
+function loadMyOrders() { try { return JSON.parse(safeStorage.get("chafe_orders")||"[]"); } catch(e) { return []; } }
+
+window.openMyOrders = function() {
+  renderMyOrders();
+  document.getElementById("cartOverlay").classList.remove("hidden");
+  document.getElementById("myOrdersPanel").classList.add("show");
+  if(db) { loadMyOrders().forEach(o=>{if(o.status==="pending"&&!o.id.startsWith("OFFLINE"))listenOrderStatus(o.id);}); }
+};
+
+function renderMyOrders() {
+  const orders = loadMyOrders();
+  const el = document.getElementById("myOrdersList");
+  const tx = t();
+  if(!orders.length) { el.innerHTML=`<p class="text-center py-10 text-[var(--muted)] text-sm">${tx.emptyCart}</p>`; return; }
+  el.innerHTML = [...orders].reverse().map(o => {
+    const sc = o.status==="completed"?"text-[var(--green)]":o.status==="cancelled"?"text-[var(--red)]":"text-[var(--gold)]";
+    const st = tx.status[o.status]||o.status;
+    const ts = o.createdAt ? new Date(o.createdAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}) : "";
+    const prog = o.status==='cancelled' ? '' : `
+    <div class="flex items-center gap-1 my-2">
+      ${['pending','completed'].map(s=>`
+        <div class="flex-1 h-1 rounded-full ${o.status===s||o.status==='completed'?'bg-[var(--gold)]':'bg-[var(--bdr)]'}"></div>
+      `).join('<div class="w-1"></div>')}
+    </div>`;
+    return `<div class="bg-[var(--sur2)] rounded-2xl p-4 border border-[var(--bdr)]">
+      <div class="flex items-start justify-between mb-2">
+        <div><p class="font-semibold text-sm">${tx.tableFor} ${o.tableNumber}</p><p class="text-[var(--muted)] text-xs">${ts} · #${o.id.slice(-6).toUpperCase()}</p></div>
+        <span class="text-xs font-semibold ${sc}">${st}</span>
+      </div>
+      ${prog}
+      <ul class="text-xs text-[var(--muted)] space-y-0.5 mb-2">${(o.items||[]).map(i=>{
+        const dn=lang==='kh'&&i.nameKh?i.nameKh:i.name;
+        const tempIcon = i.temperature==='hot'?'☕':i.temperature==='frappe'?'🥤':'🧊';
+        return `<li>${tempIcon} ${dn} ×${i.qty}</li>`;
+      }).join("")}</ul>
+      ${o.note?`<p class="text-xs text-[var(--txt)] bg-[var(--sur)] p-2 rounded-lg mb-3 border border-[var(--bdr)]">📝 ${o.note}</p>`:`<div class="mb-3"></div>`}
+      <div class="flex items-center justify-between border-t border-[var(--bdr)] pt-3 mt-1">
+        <span class="text-[var(--gold)] font-semibold text-sm">$${Number(o.total).toFixed(2)}</span>
+        ${o.status==="pending"?`<button onclick="showCancelModal('${o.id}')" class="r-btn text-xs px-3 py-1.5 rounded-full">${tx.cancelYes}</button>`:""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+const statusUnsubs = {};
+function listenOrderStatus(orderId) {
+  if(!db||orderId.startsWith("OFFLINE")||statusUnsubs[orderId]) return;
+  try {
+    statusUnsubs[orderId] = onSnapshot(doc(db,"orders",orderId), snap => {
+      if(!snap.exists()) return;
+      let orders = loadMyOrders(); const idx = orders.findIndex(o=>o.id===orderId);
+      if(idx<0) return;
+      orders[idx].status = snap.data().status;
+      safeStorage.set("chafe_orders", JSON.stringify(orders)); renderMyOrders();
+    }, e => {});
   } catch(e) {}
+}
+
+window.showCancelModal = id => { 
+  cancelTargetId=id; 
+  const m=document.getElementById("cancelModal"); 
+  m.classList.remove("hidden"); 
+  m.style.display="flex"; 
+};
+window.closeCancelModal = () => { 
+  cancelTargetId=null; 
+  const m=document.getElementById("cancelModal"); 
+  m.classList.add("hidden"); 
+  m.style.display="none"; 
+  document.getElementById("cancelReason").value = ""; 
+};
+window.confirmCancel = async function() {
+  if(!cancelTargetId) return;
+  const reason = document.getElementById("cancelReason").value.trim();
+  try {
+    if(db&&!cancelTargetId.startsWith("OFFLINE")) {
+      await updateDoc(doc(db,"orders",cancelTargetId),{
+        status:"cancelled",
+        cancelReason: reason
+      });
+    }
+    let orders=loadMyOrders(); const idx=orders.findIndex(o=>o.id===cancelTargetId);
+    let tableNum = "Unknown";
+    if(idx>=0){
+      tableNum = orders[idx].tableNumber;
+      orders[idx].status="cancelled";
+      safeStorage.set("chafe_orders",JSON.stringify(orders));
+    }
+    renderMyOrders(); showToast(t().cancelToast);
+    
+    // Alert Telegram when customer cancels their order
+    let reasonText = reason ? `\n💬 Reason: <b>${reason}</b>` : "";
+    const msg = `❌ <b>Order Cancelled by Customer</b>\n\n🆔 #${cancelTargetId.slice(-8).toUpperCase()}\n🪑 Table: ${tableNum}\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}${reasonText}`;
+    fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})}).catch(()=>{});
+
+  } catch(e) { showToast("❌ Error cancelling order."); }
+  closeCancelModal();
 };
 
-// Init
-fetchData();
+function showConfirm() { const m=document.getElementById("confirmModal"); m.classList.remove("hidden"); m.style.display="flex"; }
+window.closeConfirm = function() { const m=document.getElementById("confirmModal"); m.classList.add("hidden"); m.style.display="none"; };
 
-// Refresh elapsed timers every minute
-setInterval(()=>{ if(document.getElementById('view-orders')&&!document.getElementById('view-orders').classList.contains('hidden')) renderOrders(); }, 60000);
+function showToast(msg) {
+  const el=document.getElementById("toast"); el.textContent=msg; el.style.opacity="1"; el.style.transform="translateX(-50%) translateY(0)";
+  clearTimeout(el._t); el._t=setTimeout(()=>{el.style.opacity="0";el.style.transform="translateX(-50%) translateY(12px)";},2800);
+}
+
+// BOOTSTRAP
+try {
+  applyLang(); buildTableOptions(); loadData();
+  if(db) { loadMyOrders().forEach(o=>{if(o.status==="pending")listenOrderStatus(o.id);}); }
+} catch(e) { document.getElementById("menuSkeleton").classList.add("hidden"); }
 </script>
 </body>
 </html>

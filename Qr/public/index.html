@@ -381,7 +381,7 @@ const T = {
     toppings:"Add Toppings", saveChanges:"Save Changes", addTopping:"Customize", note:"Note",
     howToOrder:"How to Order", prev:"Prev", next:"Next", popular:"Popular",
     tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe",
-    ordersCount:"orders", customBtn:"Edit", totalOrders:"Total Orders",
+    ordersCount:"orders", customBtn:"Add Topping", totalOrders:"Total Orders",
     cancelReasonPlaceholder: "Reason for cancellation (optional)",
     promoPlaceholder: "Promo code", apply: "Apply", remove: "Remove",
     couponApplied: "Coupon applied!", invalidCoupon: "Invalid or inactive coupon",
@@ -401,7 +401,7 @@ const T = {
     toppings:"បន្ថែម Toppings", saveChanges:"រក្សាទុក", addTopping:"កំណត់ Toppings", note:"ចំណាំ",
     howToOrder:"របៀបបញ្ជាទិញ", prev:"ថយក្រោយ", next:"បន្ត", popular:"ពេញនិយម",
     tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ",
-    ordersCount:"ការបញ្ជា", customBtn:"កែប្រែ", totalOrders:"ការកាម្មងសរុប",
+    ordersCount:"ការបញ្ជា", customBtn:"បន្ថែម Topping", totalOrders:"ការកាម្មងសរុប",
     cancelReasonPlaceholder: "មូលហេតុ (ជម្រើស)",
     promoPlaceholder: "លេខកូដបញ្ចុះតម្លៃ", apply: "ប្រើប្រាស់", remove: "លុបចេញ",
     couponApplied: "បានប្រើប្រាស់កូដ!", invalidCoupon: "កូដមិនត្រឹមត្រូវ",
@@ -967,13 +967,18 @@ function renderCart() {
   itemsEl.innerHTML = cart.map((item, idx) => {
     const tempIcon = item.temperature==='hot'?'☕ Hot':item.temperature==='frappe'?'🥤 Frappe':'🧊 Iced';
     
-    let specsHtml = `<span class="px-1.5 py-0.5 bg-[var(--sur2)] rounded text-[var(--txt)]">${tempIcon}</span>`;
-            if (item.toppingsData && item.toppingsData.length > 0) {
-              item.toppingsData.forEach(tp => {
-                const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
-                specsHtml += `<span class="px-1.5 py-0.5 bg-[var(--gold)]/10 text-[var(--gold)] rounded border border-[var(--gold)]/20">+${tName}</span>`;
-              });
-            }
+    let specsHtml = `<span class="px-2 py-1 bg-[var(--sur2)] rounded-md text-[var(--txt)] border border-[var(--bdr)]/60">${tempIcon}</span>`;
+    specsHtml += `<span class="px-2 py-1 bg-[var(--sur2)] rounded-md text-[var(--txt)] border border-[var(--bdr)]/60">Sug: ${item.sugar}</span>`;
+    if(item.temperature!=='hot') specsHtml += `<span class="px-2 py-1 bg-[var(--sur2)] rounded-md text-[var(--txt)] border border-[var(--bdr)]/60">Ice: ${item.ice}</span>`;
+
+    let toppingsHtml = '';
+    if (item.toppingsData && item.toppingsData.length > 0) {
+      const topPills = item.toppingsData.map(tp => {
+        const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
+        return `<span class="px-2 py-1 bg-[var(--gold)]/10 text-[var(--gold)] rounded-md border border-[var(--gold)]/20">+${tName}</span>`;
+      }).join('');
+      toppingsHtml = `<div class="flex flex-wrap gap-1.5 text-[10px] mt-1.5 font-medium pr-4">${topPills}</div>`;
+    }
 
     return `<div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl p-3 flex gap-3 shadow-sm relative group fade-up">
       <img src="${item.imageUrl||'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-20 h-20 rounded-xl object-cover border border-[var(--sur2)] flex-shrink-0" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'"/>
@@ -983,9 +988,10 @@ function renderCart() {
             <h4 class="text-sm font-bold text-[var(--txt)] leading-tight pr-6 line-clamp-1">${item.name}</h4>
             <button onclick="removeFromCart(${idx})" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-[var(--muted)] hover:text-[var(--red)] transition-colors rounded-full hover:bg-[var(--red)]/10">×</button>
           </div>
-          <div class="flex flex-wrap gap-1 text-[10px] mt-1.5 font-medium pr-4">
+          <div class="flex flex-wrap gap-1.5 text-[10px] mt-1.5 font-medium pr-4">
             ${specsHtml}
           </div>
+          ${toppingsHtml}
         </div>
         <div class="flex items-end justify-between mt-3">
           <button onclick="openCustomModal('${item.id}', ${idx})" class="text-[10px] font-bold text-[var(--txt)] bg-[var(--sur2)] border border-[var(--bdr)] px-3 py-1.5 rounded-lg shadow-sm hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors flex items-center gap-1">

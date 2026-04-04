@@ -3,1554 +3,1313 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Chafé Admin Panel</title>
+<title>Chafé — Order</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<!-- Khmer OS Muol Light -->
-<link href="https://fonts.googleapis.com/css2?family=Khmer&display=swap" rel="stylesheet"/>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap');
-  @font-face {
-    font-family: 'Khmer OS Muol Light';
-    src: url('https://cdn.jsdelivr.net/gh/seanghay/khmer-fonts@main/fonts/KhmerOSmuollight.woff2') format('woff2'),
-         url('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/khmer/Khmer-Regular.ttf') format('truetype');
-    font-weight: normal;
-  }
-  body{font-family:'Outfit',sans-serif;background-color:#3e2a24;color:#e6e0d8;margin:0;min-height:100vh;overflow-x:hidden;}
-  .serif{font-family:'Cormorant Garamond',serif;}
-  .khmer{font-family:'Battambang','Khmer OS Muol Light','Khmer',sans-serif;}
-  .btn-primary{background:#d44e43;color:white;transition:background .2s;}
-  .btn-primary:hover{background:#b83f36;}
-  .btn-success{background:#5db85b;color:white;transition:background .2s;}
-  .btn-success:hover{background:#4cae4c;}
-  input,select,textarea{background-color:#5c453b;border:1px solid #5c453b;color:white;outline:none;border-radius:6px;padding:8px 12px;}
-  input:focus,select:focus,textarea:focus{border-color:#d44e43;}
-  input::placeholder,textarea::placeholder{color:#a3958f;}
-  ::-webkit-scrollbar{width:6px;height:6px;}
-  ::-webkit-scrollbar-track{background:#3a2a24;}
-  ::-webkit-scrollbar-thumb{background:#5c453b;border-radius:4px;}
-  .status-pending{background:#d1a14a22;color:#d1a14a;border:1px solid #d1a14a44;}
-  .status-completed{background:#5db85b22;color:#5db85b;border:1px solid #5db85b44;}
-  .status-cancelled{background:#d44e4322;color:#d44e43;border:1px solid #d44e4344;}
-  .order-card-pending{border-color:#d1a14a60;}
-  .order-card-completed{border-color:#5db85b60;opacity:.75;}
-  .order-card-cancelled{border-color:#d44e4360;opacity:.6;}
-  .order-timer{font-size:11px;font-weight:600;color:#d1a14a;}
-  .tp-ice{background:#1d4ed822;color:#60a5fa;border:1px solid #1d4ed844;}
-  .tp-hot{background:#b91c1c22;color:#f87171;border:1px solid #b91c1c44;}
-  .tp-frappe{background:#4f46e522;color:#818cf8;border:1px solid #4f46e544;}
-  .tp-both{background:#37415122;color:#9ca3af;border:1px solid #37415144;}
-  #totalOrderBanner{background:linear-gradient(135deg,#d44e43,#a6332f);border-radius:16px;padding:20px 24px;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-  .fade-up{animation:fadeUp .3s ease both;}
-  #orderNotifPopup{position:fixed;top:20px;right:20px;z-index:9999;max-width:360px;pointer-events:none;}
-  .notif-card{background:#4e3b32;border:1px solid #d1a14a;border-left:4px solid #d1a14a;border-radius:16px;padding:16px 18px;margin-bottom:10px;box-shadow:0 8px 32px rgba(0,0,0,0.5);pointer-events:auto;animation:slideInRight .4s ease;}
-  @keyframes slideInRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
-  @keyframes slideOutRight{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(60px)}}
-  .notif-card.dismissing{animation:slideOutRight .3s ease forwards;}
-  #kitchenMode{display:none;position:fixed;inset:0;background:#1a0f0a;z-index:10000;overflow-y:auto;padding:20px;}
-  #kitchenMode.active{display:block;}
-  .kitchen-card{background:#2a1a14;border:2px solid #d1a14a;border-radius:20px;padding:20px;break-inside:avoid;}
-  .kitchen-card.urgent{border-color:#d44e43;animation:urgentPulse 1.5s ease infinite;}
-  @keyframes urgentPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,78,67,0)}50%{box-shadow:0 0 0 8px rgba(212,78,67,0.2)}}
-  #liveChartCanvas{width:100%;height:200px;}
-  .sound-on{color:#5db85b;}
-  .sound-off{color:#d44e43;}
-
-  /* ── Temp Toggle Buttons ── */
-  .temp-toggle-btn {
-    display: flex; align-items: center; gap: 8px;
-    padding: 10px 14px; border-radius: 10px; cursor: pointer;
-    border: 2px solid transparent; font-weight: 600; font-size: 13px;
-    transition: all .2s; user-select: none;
-  }
-  .temp-toggle-btn.ice { background: #1d4ed822; color: #60a5fa; border-color: #1d4ed844; }
-  .temp-toggle-btn.hot { background: #b91c1c22; color: #f87171; border-color: #b91c1c44; }
-  .temp-toggle-btn.frappe { background: #4f46e522; color: #818cf8; border-color: #4f46e544; }
-  .temp-toggle-btn.ice.active { background: #1d4ed8; color: white; border-color: #1d4ed8; }
-  .temp-toggle-btn.hot.active { background: #b91c1c; color: white; border-color: #b91c1c; }
-  .temp-toggle-btn.frappe.active { background: #4f46e5; color: white; border-color: #4f46e5; }
-  .temp-toggle-btn.ice.disabled { opacity: .35; cursor: not-allowed; }
-  .temp-toggle-btn.hot.disabled { opacity: .35; cursor: not-allowed; }
-  .temp-toggle-btn.frappe.disabled { opacity: .35; cursor: not-allowed; }
-  .price-field-disabled { opacity: .4; pointer-events: none; }
-
-  /* ── Top Items Period Tabs ── */
-  .period-tab { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid #5c453b; color: #a3958f; transition: all .2s; }
-  .period-tab.active { background: #d44e43; color: white; border-color: #d44e43; }
-
-  /* ── Telegram Broadcast ── */
-  #tgBroadcastSection { background: linear-gradient(135deg, #1a2a3a, #0d1a2a); border: 1px solid #1e88e544; border-radius: 16px; padding: 20px; }
+:root{--bg:#faf6eb;--sur:#ffffff;--sur2:#f5ece3;--bdr:#e6d6c8;--gold:#bf3c37;--gold2:#a6332f;--txt:#3c2a21;--muted:#8c6b5d;--green:#48a863;--red:#bf3c37;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;padding-bottom:70px;}
+.serif{font-family:'Cormorant Garamond',serif;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:var(--sur);}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");opacity:.4;}
+.cat-pill{border:1px solid var(--bdr);color:var(--muted);transition:all .2s;white-space:nowrap;cursor:pointer;}
+.cat-pill:hover{border-color:var(--gold);color:var(--gold);}
+.cat-pill.on{background:var(--gold);color:#faf6eb;border-color:var(--gold);font-weight:600;}
+.m-card{background:var(--sur);border:1px solid var(--bdr);transition:border-color .2s,transform .2s,box-shadow .2s;}
+.m-card:hover{border-color:rgba(191,60,55,.4);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.1);}
+.m-card.out-stock{opacity:.5;pointer-events:none;}
+.out-stock-badge{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;border-radius:inherit;}
+#cartPanel,#myOrdersPanel{transition:transform .35s cubic-bezier(.4,0,.2,1);}
+#cartPanel.show{transform:translateX(0)!important;}
+#myOrdersPanel.show{transform:translateX(0) translateY(0)!important;}
+.g-btn{background:var(--gold);color:#faf6eb;font-weight:700;cursor:pointer;transition:background .18s,transform .1s;border:none;}
+.g-btn:hover{background:var(--gold2);}
+.g-btn:active{transform:scale(.97);}
+.g-btn:disabled{background:var(--bdr);color:var(--muted);cursor:not-allowed;}
+.r-btn{background:transparent;border:1px solid var(--red);color:var(--red);cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
+.r-btn:hover{background:var(--red);color:#fff;}
+#toast{transition:opacity .3s,transform .3s;pointer-events:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}.fade-up{animation:fadeUp .35s ease both;}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.shimmer{background:linear-gradient(90deg,var(--sur) 25%,var(--sur2) 50%,var(--sur) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.4)}}.pop-anim{animation:pop .25s ease;}
+select,input,textarea{background:var(--bg);border:1px solid var(--bdr);color:var(--txt);font-family:'Outfit',sans-serif;}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--gold);}
+select option{background:var(--sur);}
+.lang-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--sur);border:1px solid var(--bdr);border-radius:14px;overflow:hidden;min-width:130px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:999;}
+.lang-opt{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;cursor:pointer;transition:background .15s;}
+.lang-opt:hover{background:var(--sur2);}
+.lang-opt.active{color:var(--gold);}
+.opt-btn{transition:all 0.15s;background:transparent;}
+.opt-btn.active{background:var(--gold);color:#fff;border-color:var(--gold);}
+.top-box.active{border-color:var(--gold);background:rgba(191,60,55,0.03);}
+.temp-btn{transition:all .15s;background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.temp-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(191,60,55,.05);}
+#slideshow-section{position:relative;}
+.slide-dot{width:6px;height:6px;border-radius:50%;background:rgba(191,60,55,0.2);cursor:pointer;transition:all .3s ease;}
+.slide-dot.on{background:var(--gold);width:24px;border-radius:4px;}
+.step-badge{width:28px;height:28px;border-radius:50%;background:var(--gold);color:#faf6eb;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.popular-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:800;padding:3px 7px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;box-shadow:0 2px 8px rgba(239,68,68,.4);}
+.temp-badge{font-size:9px;padding:2px 6px;border-radius:10px;font-weight:600;letter-spacing:.3px;}
+.temp-ice{background:#dbeafe;color:#1d4ed8;}
+.temp-hot{background:#fee2e2;color:#b91c1c;}
+.temp-frappe{background:#e0e7ff;color:#4338ca;}
+#socialBar{position:fixed;bottom:24px;right:24px;z-index:45;background:transparent;border:none;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;pointer-events:none;}
+#socialBar.hidden-bar{display:none;}
+.social-link{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;pointer-events:auto;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.social-fb{background:#1877f2;color:#fff;}
+.social-fb:hover{background:#166fe5;transform:translateY(-2px) scale(1.05);}
+.social-tiktok{background:#000;color:#fff;}
+.social-tiktok:hover{background:#111;transform:translateY(-2px) scale(1.05);}
+@keyframes addBounce{0%{transform:scale(1)}30%{transform:scale(1.05)}60%{transform:scale(.97)}100%{transform:scale(1)}}
+.add-bounce{animation:addBounce .4s ease;}
+@keyframes newItemGlow{0%{box-shadow:0 0 0 3px rgba(191,60,55,0.5),0 8px 32px rgba(0,0,0,.1)}100%{box-shadow:0 0 0 0 rgba(191,60,55,0),0 8px 32px rgba(0,0,0,.1)}}
+.new-item-flash{animation:newItemGlow 1s ease 2;}
 </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body>
 
-<!-- ORDER NOTIF POPUP -->
-<div id="orderNotifPopup"></div>
-
-<!-- MOBILE OVERLAY -->
-<div id="mobileOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden backdrop-blur-sm transition-opacity opacity-0"></div>
-
-<!-- SIDEBAR -->
-<div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out bg-[#3a2a24] border-r border-[#4a352a] flex flex-col shrink-0 shadow-2xl md:shadow-none">
-  <div class="p-6 border-b border-[#4a352a] flex justify-between items-center">
-    <div>
-      <h1 class="text-3xl font-serif text-[#d44e43] font-bold">Chafé</h1>
-      <p class="text-xs text-gray-400 uppercase tracking-widest mt-1">Admin Panel</p>
-    </div>
-    <button onclick="toggleSidebar()" class="md:hidden text-gray-400 hover:text-white">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-    </button>
-  </div>
-  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-    <button onclick="switchTab('stats')" id="tab-stats" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors bg-[#8a382f]/20 text-[#d44e43] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-      Statistics
-    </button>
-    <button onclick="switchTab('orders')" id="tab-orders" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-      Live Orders <span id="pendingBadge" class="ml-auto bg-[#d44e43] text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
-    </button>
-    <button onclick="openKitchenMode()" id="tab-kitchen" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-      Kitchen Display
-    </button>
-    <button onclick="switchTab('history')" id="tab-history" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      Order History
-    </button>
-    <button onclick="switchTab('menu')" id="tab-menu" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-      Menu Manager
-    </button>
-    <button onclick="switchTab('slideshow')" id="tab-slideshow" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      How-to Slides
-    </button>
-    <button onclick="switchTab('social')" id="tab-social" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-      Social Links
-    </button>
-    <button onclick="switchTab('coupons')" id="tab-coupons" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors text-gray-400 hover:bg-[#4a352a] font-medium">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
-      Coupons
-    </button>
-  </nav>
-  <div class="p-4 border-t border-[#4a352a]">
-    <button onclick="toggleSound()" id="soundToggleBtn" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl bg-[#3a2a24] border border-[#5c453b] text-sm font-medium transition hover:bg-[#4a352a]">
-      <svg id="soundIcon" class="w-4 h-4 sound-on" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M12 6v12m-3.536-9.536a5 5 0 000 7.072M6.464 8.464a7 7 0 000 10.072M17.536 6.464a7 7 0 010 10.072"/></svg>
-      <span id="soundLabel" class="text-[#5db85b]">Sound Alerts: ON</span>
-    </button>
-  </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-  <!-- MOBILE HEADER -->
-  <div class="md:hidden flex items-center justify-between bg-[#3a2a24] p-4 border-b border-[#4a352a] shrink-0 z-30 shadow-md">
+<!-- HEADER -->
+<header class="sticky top-0 z-40 bg-[var(--bg)]/95 backdrop-blur-md" style="box-shadow:0 1px 0 var(--bdr),0 4px 20px rgba(0,0,0,.06)">
+  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
     <div class="flex items-center gap-3">
-      <button onclick="toggleSidebar()" class="text-gray-300 hover:text-white p-1">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      <img src="../src/img/logo/Icon.png" alt="Chafé Logo" class="h-8 w-auto object-contain" onerror="this.src='https://placehold.co/100x40/faf6eb/bf3c37?text=Chaf%C3%A9'" />
+      <span class="hidden sm:block text-[var(--bdr)]">|</span>
+      <p class="hidden sm:block text-xs text-[var(--muted)] tracking-widest uppercase mt-0.5" id="h-sub">Order</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="relative" id="langWrap">
+        <button onclick="toggleLangDropdown()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] transition-colors border border-[var(--bdr)] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 cursor-pointer">
+          <span id="langFlag">🇬🇧</span>
+          <span id="langLabel" class="hidden sm:inline text-[11px]">EN</span>
+          <svg class="w-2.5 h-2.5 opacity-50" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div id="langDropdown" class="lang-dropdown hidden">
+          <div class="lang-opt" onclick="setLang('en')"><span>🇬🇧</span><span>English</span></div>
+          <div class="lang-opt" onclick="setLang('kh')"><span>🇰🇭</span><span>ភាសាខ្មែរ</span></div>
+        </div>
+      </div>
+      <button onclick="openMyOrders()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] border border-[var(--bdr)] px-3 py-1.5 rounded-full transition-colors cursor-pointer flex items-center gap-1 relative">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <span id="h-myorders" class="hidden sm:inline">My Orders</span>
+        <span id="liveOrderDot" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[var(--green)] border-2 border-[var(--bg)] hidden"></span>
       </button>
-      <h1 class="text-2xl font-serif text-[#d44e43] font-bold leading-none mt-1">Chafé</h1>
+      <button onclick="openCart()" class="relative g-btn flex items-center gap-2 px-4 py-2 rounded-full text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <span id="h-cart" class="hidden sm:inline">Cart</span>
+        <span id="cartBadge" class="absolute -top-1 -right-1 bg-white text-[var(--gold)] text-[9px] font-bold w-4 h-4 rounded-full items-center justify-center hidden shadow-md border border-[var(--gold)]">0</span>
+      </button>
     </div>
-    <span id="pendingBadgeMobile" class="bg-[#d44e43] text-white text-xs px-2 py-0.5 rounded-full hidden">0 pending</span>
   </div>
+</header>
 
-  <div class="flex-1 overflow-y-auto p-4 md:p-8 relative" id="main-area">
-
-    <!-- ═══ STATISTICS ═══ -->
-    <div id="view-stats" class="max-w-6xl mx-auto block">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 class="text-3xl serif">Statistics</h2>
-        <div class="flex items-center gap-2 text-xs text-[#5db85b]">
-          <div class="w-2 h-2 rounded-full bg-[#5db85b] animate-pulse"></div>
-          Live Updates Active
-        </div>
-      </div>
-
-      <div id="totalOrderBanner" class="mb-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-3 mb-1">
-            <p class="text-xs uppercase tracking-widest opacity-70">Total Orders All Time</p>
-            <button onclick="sendTotalStatsToTelegram()" class="bg-white/20 hover:bg-white/40 text-white rounded px-2 py-0.5 flex items-center gap-1 transition text-[10px]" title="Send to Telegram">
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send
-            </button>
-          </div>
-          <p class="text-5xl font-bold" id="stat-all">0</p>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full sm:w-auto">
-          <div class="bg-white/10 rounded-xl p-3 text-center">
-            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Pending</p>
-            <p class="text-2xl font-bold" id="stat-pending">0</p>
-          </div>
-          <div class="bg-white/10 rounded-xl p-3 text-center">
-            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Completed</p>
-            <p class="text-2xl font-bold" id="stat-completed">0</p>
-          </div>
-          <div class="bg-white/10 rounded-xl p-3 text-center col-span-2 sm:col-span-1">
-            <p class="text-[10px] uppercase tracking-wide opacity-70 mb-1">Revenue</p>
-            <p class="text-2xl font-bold" id="stat-rev">$0</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hourly Chart -->
-      <div class="bg-[#4e3b32] p-5 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-sm uppercase tracking-wider text-gray-400 font-bold">📈 Today's Orders (Hourly)</h3>
-          <span id="todayTotal" class="text-[#d44e43] font-bold text-sm">0 today</span>
-        </div>
-        <canvas id="liveChartCanvas"></canvas>
-      </div>
-
-      <!-- ═══ TOP ITEMS with period filter ═══ -->
-      <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#5c453b] pb-3 mb-4 gap-3">
-          <h3 class="text-sm uppercase tracking-wider text-gray-400 font-bold">🔥 Most Ordered Items</h3>
-          <div class="flex items-center gap-2 flex-wrap">
-            <!-- Period tabs -->
-            <div class="flex gap-1">
-              <button onclick="setTopItemsPeriod('today')" id="top-period-today" class="period-tab active">Today</button>
-              <button onclick="setTopItemsPeriod('week')" id="top-period-week" class="period-tab">This Week</button>
-              <button onclick="setTopItemsPeriod('all')" id="top-period-all" class="period-tab">All Time</button>
-            </div>
-            <button onclick="sendTopItemsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition ml-1">
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send list
-            </button>
-          </div>
-        </div>
-        <div id="topItemsPeriodLabel" class="text-xs text-[#d1a14a] mb-3 font-semibold"></div>
-        <div id="topItemsList" class="space-y-2"><p class="text-gray-500 text-sm">Loading...</p></div>
-      </div>
-
-      <!-- ═══ TELEGRAM BROADCAST ═══ -->
-      <div id="tgBroadcastSection" class="mb-6">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-8 h-8 rounded-lg bg-[#1e88e5]/30 flex items-center justify-center">
-            <svg class="w-4 h-4 text-[#42a5f5]" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-[#42a5f5] uppercase tracking-wider">Broadcast Message</h3>
-            <p class="text-xs text-gray-500">Send news or staff announcements to Telegram</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-          <div class="md:col-span-1">
-            <label class="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider font-bold">Type</label>
-            <select id="tgBroadcastType" class="w-full bg-[#1a2a3a] border border-[#1e88e544] rounded-xl px-3 py-2.5 text-sm text-white focus:border-[#42a5f5]">
-              <option value="📢 News">📢 News</option>
-              <option value="👥 Staff Notice">👥 Staff Notice</option>
-              <option value="⚠️ Alert">⚠️ Alert</option>
-              <option value="🎉 Promotion">🎉 Promotion</option>
-              <option value="📋 Update">📋 Update</option>
-            </select>
-          </div>
-          <div class="md:col-span-3">
-            <label class="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider font-bold">Message</label>
-            <div class="flex gap-2">
-              <textarea id="tgBroadcastMsg" placeholder="Type your message to send to the Telegram group..." rows="2" class="flex-1 bg-[#1a2a3a] border border-[#1e88e544] rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#42a5f5] resize-none placeholder-gray-600"></textarea>
-              <button onclick="sendBroadcastToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-5 rounded-xl font-bold text-sm flex flex-col items-center justify-center gap-1 min-w-[80px] transition shadow-lg">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                <span class="text-[10px]">Send</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Period Calculation -->
-      <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
-        <div class="flex justify-between items-center border-b border-[#5c453b] pb-2 mb-4">
-          <h3 class="text-sm uppercase tracking-wider text-gray-400 font-bold">Period Calculation</h3>
-          <button onclick="sendFilteredStatsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send report
-          </button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
-          <div><label class="block text-xs text-gray-400 mb-2">Start Date</label><input type="date" id="statStartDate" onchange="calculateFilteredStats()" class="w-full"></div>
-          <div><label class="block text-xs text-gray-400 mb-2">End Date</label><input type="date" id="statEndDate" onchange="calculateFilteredStats()" class="w-full"></div>
-          <div><label class="block text-xs text-gray-400 mb-2">Subtract (%)</label><input type="number" id="statSubtract" oninput="calculateFilteredStats()" placeholder="0" class="w-full"></div>
-          <div><label class="block text-xs text-gray-400 mb-2">Note</label><input type="text" id="statNote" placeholder="Optional note..." class="w-full"></div>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#5c453b]">
-          <div><p class="text-xs text-gray-400 mb-1">Orders</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-orders">0</p></div>
-          <div><p class="text-xs text-gray-400 mb-1">Gross Total</p><p class="text-xl font-bold" id="stat-f-gross">$0.00</p></div>
-          <div><p class="text-xs text-gray-400 mb-1" id="stat-f-sub-lbl">Subtract (0%)</p><p class="text-xl font-bold text-[#d44e43]" id="stat-f-sub-amt">-$0.00</p></div>
-          <div><p class="text-xs text-gray-400 mb-1">Net Total</p><p class="text-xl font-bold text-[#5db85b]" id="stat-f-net">$0.00</p></div>
-        </div>
-      </div>
+<!-- SLIDESHOW -->
+<div id="slideshow-section" class="hidden max-w-4xl mx-auto px-4 mt-6 mb-6">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl overflow-hidden shadow-sm">
+    <div class="px-5 pt-4 pb-3 border-b border-[var(--bdr)] flex items-center justify-between">
+      <h2 class="serif text-lg text-[var(--gold)] font-bold" id="slideshow-title">How to Order</h2>
+      <div class="flex items-center gap-1.5" id="slide-dots"></div>
     </div>
-
-    <!-- ═══ LIVE ORDERS ═══ -->
-    <div id="view-orders" class="max-w-6xl mx-auto hidden">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
-        <h2 class="text-3xl serif">Live Orders</h2>
-        <div class="flex gap-2 flex-wrap">
-          <button onclick="setOrderFilter('all')" id="ofilter-all" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#d44e43] text-white transition">All</button>
-          <button onclick="setOrderFilter('pending')" id="ofilter-pending" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">⏳ Pending</button>
-          <button onclick="setOrderFilter('completed')" id="ofilter-completed" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✓ Completed</button>
-          <button onclick="setOrderFilter('cancelled')" id="ofilter-cancelled" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#4e3b32] text-gray-300 border border-[#5c453b] hover:bg-[#5c453b] transition">✗ Cancelled</button>
-          <button onclick="openKitchenMode()" class="px-3 py-1.5 rounded-full text-xs font-bold bg-[#d1a14a]/20 text-[#d1a14a] border border-[#d1a14a]/40 hover:bg-[#d1a14a]/30 transition">🍳 Kitchen Mode</button>
-        </div>
-      </div>
-      <div id="ordersGrid" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
-      <p id="noOrders" class="text-center text-gray-400 py-10 hidden">No orders found.</p>
+    
+    <div class="overflow-hidden relative w-full">
+      <div id="slides-container" class="flex transition-transform duration-500 ease-in-out min-h-[160px]"></div>
     </div>
-
-    <!-- ═══ ORDER HISTORY ═══ -->
-    <div id="view-history" class="max-w-6xl mx-auto hidden">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 class="text-3xl serif">Order History</h2>
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-          <div class="flex items-center gap-3 bg-[#4e3b32] p-2 rounded-xl border border-[#5c453b]">
-            <span class="text-xs text-gray-400 font-bold ml-1">From</span>
-            <input type="date" id="historyStartDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
-            <span class="text-xs text-gray-400 font-bold">To</span>
-            <input type="date" id="historyEndDate" onchange="renderHistory()" class="bg-[#3a2a24] border-none rounded px-2 py-1.5 text-sm text-gray-300 outline-none">
-          </div>
-          <button onclick="sendHistoryToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-4 py-2 rounded-lg font-bold flex items-center justify-center gap-2 text-sm">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-            Send to Telegram
-          </button>
-        </div>
-      </div>
-      <div class="bg-[#4e3b32] rounded-xl border border-[#5c453b] overflow-x-auto">
-        <table class="w-full text-left text-sm whitespace-nowrap">
-          <thead class="bg-[#3a2a24] border-b border-[#5c453b]">
-            <tr>
-              <th class="p-4 font-medium text-gray-300">Order ID</th>
-              <th class="p-4 font-medium text-gray-300">Date/Time</th>
-              <th class="p-4 font-medium text-gray-300">Table</th>
-              <th class="p-4 font-medium text-gray-300">Items</th>
-              <th class="p-4 font-medium text-gray-300">Total</th>
-              <th class="p-4 font-medium text-[#d44e43]">Status</th>
-              <th class="p-4 font-medium text-gray-300 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ═══ MENU MANAGER ═══ -->
-    <div id="view-menu" class="max-w-6xl mx-auto hidden space-y-10">
-      <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-[#d44e43] to-transparent opacity-10 rounded-bl-full pointer-events-none"></div>
-        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-6 font-bold flex items-center gap-3">
-          <div class="p-2 bg-[#d44e43]/20 rounded-lg">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-          </div>
-          Create New Drink
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 relative z-10">
-          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (EN)</label><input type="text" id="addName" placeholder="Matcha Latte" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
-          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH) <span class="khmer text-[#d1a14a]">ភាសាខ្មែរ</span></label><input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d] khmer"></div>
-          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Category</label><input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
-
-          <!-- ═══ Temperature Toggles with Prices ═══ -->
-          <div class="col-span-12">
-            <label class="block text-[10px] text-gray-400 mb-3 uppercase tracking-wider font-bold">Temperature Options & Prices — Toggle to Enable/Disable</label>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-              <!-- ICE -->
-              <div class="bg-[#3a2a24] border border-[#1d4ed844] rounded-xl p-4">
-                <div class="flex items-center justify-between mb-3">
-                  <button type="button" onclick="toggleTempOption('ice')" id="toggle-ice" class="temp-toggle-btn ice active">
-                    <span id="toggle-ice-icon">✓</span>
-                    🧊 Iced
-                  </button>
-                  <span class="text-[10px] text-gray-500" id="toggle-ice-status">Enabled</span>
-                </div>
-                <div id="price-ice-wrap">
-                  <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Ice/Base Price ($)</label>
-                  <input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#2a1a14] border border-[#5c453b] rounded-xl px-4 py-2.5 text-sm focus:border-[#60a5fa] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-                </div>
-              </div>
-
-              <!-- HOT -->
-              <div class="bg-[#3a2a24] border border-[#b91c1c44] rounded-xl p-4">
-                <div class="flex items-center justify-between mb-3">
-                  <button type="button" onclick="toggleTempOption('hot')" id="toggle-hot" class="temp-toggle-btn hot active">
-                    <span id="toggle-hot-icon">✓</span>
-                    ☕ Hot
-                  </button>
-                  <span class="text-[10px] text-gray-500" id="toggle-hot-status">Enabled</span>
-                </div>
-                <div id="price-hot-wrap">
-                  <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Hot Price ($)</label>
-                  <input type="number" id="addPriceHot" placeholder="0.00" step="0.01" class="w-full bg-[#2a1a14] border border-[#5c453b] rounded-xl px-4 py-2.5 text-sm focus:border-[#f87171] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-                </div>
-              </div>
-
-              <!-- FRAPPE -->
-              <div class="bg-[#3a2a24] border border-[#4f46e544] rounded-xl p-4">
-                <div class="flex items-center justify-between mb-3">
-                  <button type="button" onclick="toggleTempOption('frappe')" id="toggle-frappe" class="temp-toggle-btn frappe active">
-                    <span id="toggle-frappe-icon">✓</span>
-                    🥤 Frappe
-                  </button>
-                  <span class="text-[10px] text-gray-500" id="toggle-frappe-status">Enabled</span>
-                </div>
-                <div id="price-frappe-wrap">
-                  <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Frappe Price ($)</label>
-                  <input type="number" id="addPriceFrappe" placeholder="0.00" step="0.01" class="w-full bg-[#2a1a14] border border-[#5c453b] rounded-xl px-4 py-2.5 text-sm focus:border-[#818cf8] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-                </div>
-              </div>
-
-            </div>
-            <p class="text-[10px] text-gray-500 mt-2">💡 Disabled options won't save a price. Temperature dropdown auto-updates based on your selections.</p>
-          </div>
-
-          <div class="col-span-12 md:col-span-2 flex items-end pb-0">
-            <label class="flex items-center gap-2 cursor-pointer bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 w-full">
-              <input type="checkbox" id="addPopular" class="w-4 h-4 accent-[#d44e43]">
-              <span class="text-sm text-gray-300">🔥 Popular</span>
-            </label>
-          </div>
-
-          <!-- Image URL Input -->
-          <div class="col-span-12 md:col-span-10">
-            <label class="block text-[10px] text-gray-400 mb-2 uppercase tracking-wider font-bold">Drink Image URL</label>
-            <input type="text" id="addImage" placeholder="https://example.com/image.jpg" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]" oninput="previewUrlImg(this.value,'addUrlPreview')">
-            <img id="addUrlPreview" src="" class="hidden mt-2 w-20 h-20 object-cover rounded-xl border border-[#5c453b]" onerror="this.style.display='none'"/>
-          </div>
-
-          <div class="col-span-12 flex justify-end mt-2">
-            <button onclick="addMenuItem()" class="w-full md:w-auto bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Add to Menu
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Menu List -->
-      <div>
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-          <h3 class="text-2xl serif">Current Menu & Discounts</h3>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-            <select id="menuCatFilter" onchange="filterMenu()" class="w-full sm:w-40 bg-[#3a2a24] border border-[#5c453b] rounded-lg px-3 py-2 text-sm text-gray-300 outline-none focus:border-[#d44e43]">
-              <option value="All">All Categories</option>
-            </select>
-            <div class="flex items-center bg-[#3a2a24] rounded-lg border border-[#5c453b] overflow-hidden shrink-0">
-              <input type="number" id="bulkDiscountInput" placeholder="Discount %" class="w-28 bg-transparent border-none text-sm outline-none px-3 py-2 text-[#d44e43] font-bold">
-              <button onclick="applyBulkDiscount()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-4 py-2 text-xs font-bold transition whitespace-nowrap border-l border-[#5c453b]">Apply All</button>
-            </div>
-          </div>
-        </div>
-        <div class="bg-[#4e3b32] rounded-xl border border-[#5c453b] overflow-x-auto">
-          <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-[#3a2a24] border-b border-[#5c453b]">
-              <tr>
-                <th class="p-4 text-sm font-medium text-gray-300">Name & Image</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Category</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Temp</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Popular</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Stock</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Base Price</th>
-                <th class="p-4 text-sm font-medium text-[#d44e43]">Discount (%)</th>
-                <th class="p-4 text-sm font-medium text-[#5db85b]">Final Price</th>
-                <th class="p-4 text-sm font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="menuTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Toppings -->
-      <div>
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-2xl serif">Dynamic Toppings</h3>
-          <button onclick="openAddToppingModal()" class="btn-success px-4 py-2 rounded text-sm font-bold flex items-center gap-2"><span>+</span> Add Topping</button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="toppingsGrid"></div>
-      </div>
-    </div>
-
-    <!-- ═══ HOW-TO SLIDES ═══ -->
-    <div id="view-slideshow" class="max-w-4xl mx-auto hidden space-y-8">
-      <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg">
-        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-2 font-bold">Add How-to-Order Slide</h3>
-        <p class="text-xs text-gray-400 mb-5">These slides appear on the ordering page to guide customers.</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Step Number</label><input type="number" id="slideStep" placeholder="1" min="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Slide Image URL</label><input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label><textarea id="slideTitleEn" placeholder="Scan the QR Code" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><textarea id="slideTitleKh" placeholder="ស្កែន QR" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none khmer"></textarea></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (EN)</label><textarea id="slideDescEn" placeholder="Use your phone camera..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (KH)</label><textarea id="slideDescKh" placeholder="ប្រើកាមេរ៉ាទូរស័ព្ទ..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none khmer"></textarea></div>
-        </div>
-        <div class="flex justify-end mt-6">
-          <button onclick="addSlide()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-            Add Slide
-          </button>
-        </div>
-      </div>
-      <div>
-        <h3 class="text-2xl serif mb-4">Current Slides</h3>
-        <div id="slideshowList" class="space-y-4"><p class="text-center text-gray-400 py-8">No slides yet.</p></div>
-      </div>
-    </div>
-
-    <!-- ═══ SOCIAL LINKS ═══ -->
-    <div id="view-social" class="max-w-2xl mx-auto hidden">
-      <h2 class="text-3xl serif mb-2">Social Links</h2>
-      <p class="text-gray-400 text-sm mb-6">Add Facebook and TikTok links. They will appear as floating icons for customers.</p>
-      <div class="bg-[#4e3b32] p-6 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg space-y-6">
-        <div>
-          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold flex items-center gap-2">
-            <svg class="w-4 h-4 text-[#1877f2]" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            Facebook Page URL
-          </label>
-          <input type="url" id="fbUrl" placeholder="https://facebook.com/yourpage" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#1877f2] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-        </div>
-        <div>
-          <label class="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold">TikTok Profile URL</label>
-          <input type="url" id="ttUrl" placeholder="https://tiktok.com/@yourprofile" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
-        </div>
-        <div class="flex items-center gap-4 pt-2 border-t border-[#5c453b]">
-          <button onclick="saveSocialLinks()" class="flex-1 bg-[#d44e43] hover:bg-[#b83f36] text-white py-3 rounded-xl font-bold text-sm transition">Save Social Links</button>
-          <button onclick="clearSocialLinks()" class="px-4 py-3 border border-[#5c453b] rounded-xl text-gray-400 hover:text-white hover:bg-[#3a2a24] text-sm transition">Clear</button>
-        </div>
-        <div class="pt-4 border-t border-[#5c453b]">
-          <p class="text-xs text-gray-500 uppercase tracking-wider mb-3 font-bold">Preview</p>
-          <div class="bg-[#3a2a24] rounded-xl p-4 flex items-center justify-center gap-4 border border-[#5c453b] min-h-[80px]">
-            <span id="preview-fb" class="hidden items-center justify-center w-10 h-10 rounded-full bg-[#1877f2] text-white shadow-md">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            </span>
-            <span id="preview-tt" class="hidden items-center justify-center w-10 h-10 rounded-full bg-black text-white shadow-md">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
-            </span>
-            <span id="preview-none" class="text-gray-600 text-xs">No floating icons saved yet</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ COUPONS ═══ -->
-    <div id="view-coupons" class="max-w-4xl mx-auto hidden space-y-8">
-      <div class="bg-[#4e3b32] p-5 md:p-8 rounded-2xl border border-[#5c453b] shadow-lg">
-        <h3 class="text-xl md:text-2xl serif text-[#d44e43] mb-4 font-bold">Create Discount Coupon</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Coupon Code</label><input type="text" id="addCouponCode" placeholder="e.g. SUMMER20" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] uppercase"></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Discount (%)</label><input type="number" id="addCouponPct" placeholder="e.g. 20" min="1" max="100" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8]"></div>
-        </div>
-        <div class="flex justify-end mt-6">
-          <button onclick="addCoupon()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg">Add Coupon</button>
-        </div>
-      </div>
-      <div>
-        <h3 class="text-2xl serif mb-4">Active Coupons</h3>
-        <div class="bg-[#4e3b32] rounded-xl border border-[#5c453b] overflow-x-auto">
-          <table class="w-full text-left whitespace-nowrap">
-            <thead class="bg-[#3a2a24] border-b border-[#5c453b]">
-              <tr>
-                <th class="p-4 text-sm font-medium text-gray-300">Code</th>
-                <th class="p-4 text-sm font-medium text-[#d44e43]">Discount</th>
-                <th class="p-4 text-sm font-medium text-gray-300">Status</th>
-                <th class="p-4 text-sm font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="couponsTableBody"></tbody>
-          </table>
-        </div>
-      </div>
+    
+    <div class="px-5 py-3 flex items-center justify-between border-t border-[var(--bdr)] bg-[var(--bg)]/50">
+      <button onclick="prevSlide()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <span id="slide-prev-lbl">Prev</span>
+      </button>
+      <p class="text-xs font-bold text-[var(--muted)]" id="slide-counter">1 / 1</p>
+      <button onclick="nextSlide()" class="text-xs text-[var(--muted)] hover:text-[var(--gold)] flex items-center gap-1 transition-colors cursor-pointer">
+        <span id="slide-next-lbl">Next</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
     </div>
   </div>
 </div>
 
-<!-- KITCHEN DISPLAY MODE -->
-<div id="kitchenMode">
-  <div class="flex items-center justify-between mb-6">
-    <div class="flex items-center gap-4">
-      <h1 class="text-4xl font-serif text-[#d1a14a] font-bold">Kitchen Display</h1>
-      <div class="flex items-center gap-2 text-sm text-[#5db85b]">
-        <div class="w-2 h-2 rounded-full bg-[#5db85b] animate-pulse"></div>
-        Live
-      </div>
-    </div>
-    <div class="flex gap-3 items-center">
-      <span id="kitchenTime" class="text-2xl text-gray-300 font-mono font-bold"></span>
-      <button onclick="closeKitchenMode()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">✕ Exit</button>
+<!-- CATEGORY PILLS -->
+<div class="sticky top-[57px] z-30 bg-[var(--bg)]/90 backdrop-blur-sm border-b border-[var(--bdr)]">
+  <div class="max-w-4xl mx-auto px-4 py-2.5 overflow-x-auto" style="scrollbar-width:none">
+    <div id="catRow" class="flex gap-2 min-w-max">
+      <div class="shimmer w-14 h-8 rounded-full"></div>
+      <div class="shimmer w-20 h-8 rounded-full"></div>
+      <div class="shimmer w-16 h-8 rounded-full"></div>
     </div>
   </div>
-  <div id="kitchenGrid" class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 space-y-5"></div>
+</div>
+
+<!-- POPULAR SECTION -->
+<section id="popularSection" class="hidden max-w-4xl mx-auto px-4 pt-6">
+  <div class="flex items-center gap-2 mb-3">
+    <span class="text-lg">🔥</span>
+    <h2 class="serif text-xl text-[var(--gold)] font-bold" id="popular-title">Popular</h2>
+  </div>
+  <div id="popularGrid" class="flex gap-3 overflow-x-auto pb-2" style="scrollbar-width:none"></div>
+</section>
+
+<!-- MENU -->
+<main class="max-w-4xl mx-auto px-4 py-6">
+  <div id="menuSkeleton" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div class="shimmer h-52 rounded-2xl"></div><div class="shimmer h-52 rounded-2xl"></div>
+    <div class="shimmer h-52 rounded-2xl"></div><div class="shimmer h-52 rounded-2xl"></div>
+  </div>
+  <div id="menuGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 hidden"></div>
+  <p id="emptyMenu" class="text-center py-20 text-[var(--muted)] text-sm hidden"></p>
+</main>
+
+<!-- CART OVERLAY & PANEL -->
+<div id="cartOverlay" onclick="closePanels()" class="fixed inset-0 bg-black/60 z-50 hidden transition-opacity" style="backdrop-filter:blur(4px)"></div>
+<aside id="cartPanel" class="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-[var(--bg)] z-50 flex flex-col shadow-2xl sm:rounded-l-3xl border-l border-[var(--bdr)]" style="transform:translateX(100%)">
+  <div class="px-5 py-4 flex items-center justify-between bg-[var(--sur)] border-b border-[var(--bdr)] sm:rounded-tl-3xl shrink-0">
+    <div>
+      <h2 class="serif text-2xl text-[var(--gold)] font-bold" id="c-title">Your Order</h2>
+      <p class="text-xs text-[var(--muted)] mt-0.5" id="c-sub">Review before placing</p>
+    </div>
+    <button onclick="closePanels()" class="text-[var(--muted)] hover:bg-[var(--sur2)] transition-colors text-2xl w-9 h-9 rounded-full flex items-center justify-center cursor-pointer">×</button>
+  </div>
+  
+  <div id="cartItems" class="flex-1 overflow-y-auto px-4 py-4 space-y-3"></div>
+  
+  <div id="cartEmpty" class="flex-1 items-center justify-center flex-col gap-4 hidden">
+    <div class="w-24 h-24 rounded-full bg-[var(--sur2)] flex items-center justify-center opacity-70">
+      <svg class="w-10 h-10 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+    </div>
+    <p class="text-[var(--muted)] text-sm font-medium" id="c-empty">Your cart is empty</p>
+  </div>
+
+  <div class="bg-[var(--sur)] sm:rounded-bl-3xl border-t border-[var(--bdr)] shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+    <!-- Promo Code Area -->
+    <div class="px-5 pt-4 pb-2 border-b border-[var(--bdr)] border-dashed">
+      <div class="flex gap-2" id="coupon-input-box">
+        <input type="text" id="cartCoupon" placeholder="Promo code" class="flex-1 bg-[var(--sur2)] border border-transparent rounded-xl px-4 py-2.5 text-sm focus:border-[var(--gold)] focus:bg-white uppercase outline-none transition-all placeholder:text-[var(--muted)]"/>
+        <button onclick="applyCoupon()" class="bg-[var(--txt)] text-white px-5 rounded-xl text-sm font-bold shadow-sm hover:bg-black transition-colors" id="c-apply-btn">Apply</button>
+      </div>
+      <div id="applied-coupon-box" class="hidden flex justify-between items-center bg-[var(--green)]/10 border border-[var(--green)]/30 rounded-xl px-4 py-2.5">
+        <span class="text-[var(--green)] text-sm font-bold flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span id="ac-code"></span>
+        </span>
+        <button onclick="removeCoupon()" class="text-[var(--muted)] hover:text-[var(--red)] transition-colors text-xs font-bold uppercase tracking-wider" id="c-remove-btn">Remove</button>
+      </div>
+    </div>
+
+    <!-- Inputs Area -->
+    <div class="px-5 py-4 flex gap-3">
+      <div class="w-1/3">
+        <label class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-wider block mb-1.5 ml-1" id="c-table-lbl">Table</label>
+        <select id="cartTable" class="w-full bg-[var(--sur2)] border border-transparent rounded-xl px-2 py-3 text-sm font-bold text-center text-[var(--gold)] focus:border-[var(--gold)] focus:bg-white outline-none transition-all appearance-none">
+          <option value="">—</option>
+        </select>
+      </div>
+      <div class="flex-1">
+        <label class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-wider block mb-1.5 ml-1" id="c-note-lbl">Note</label>
+        <input type="text" id="cartNote" placeholder="Any special requests?" class="w-full bg-[var(--sur2)] border border-transparent rounded-xl px-4 py-3 text-sm focus:border-[var(--gold)] focus:bg-white outline-none transition-all placeholder:text-[var(--muted)]"/>
+      </div>
+    </div>
+
+    <!-- Total Area -->
+    <div class="px-5 pb-5">
+      <div id="cart-subtotal-row" class="flex justify-between items-center mb-1.5 hidden text-[var(--muted)] text-sm">
+        <span id="c-subtotal-lbl">Subtotal</span>
+        <span id="cartSubtotal" class="font-semibold">$0.00</span>
+      </div>
+      <div id="cart-discount-row" class="flex justify-between items-center mb-3 hidden text-[var(--green)] text-sm">
+        <span id="c-discount-lbl">Discount</span>
+        <span id="cartDiscountAmt" class="font-bold">-$0.00</span>
+      </div>
+      <div class="flex justify-between items-end mb-4 pt-2 border-t border-[var(--bdr)] border-dashed">
+        <span class="text-[var(--txt)] text-base font-bold pb-1" id="c-total-lbl">Total</span>
+        <span id="cartTotal" class="text-4xl serif font-bold text-[var(--gold)] leading-none">$0.00</span>
+      </div>
+      <button onclick="placeOrder()" id="placeBtn" class="g-btn w-full py-4 rounded-2xl text-[15px] tracking-wide font-bold shadow-lg shadow-red-900/20">Place Order</button>
+      <button onclick="clearCart()" class="mt-4 w-full text-xs text-[var(--muted)] hover:text-[var(--red)] transition-colors cursor-pointer font-medium" id="c-clear">Clear cart</button>
+    </div>
+  </div>
+</aside>
+
+<!-- MY ORDERS PANEL -->
+<aside id="myOrdersPanel" class="fixed bottom-0 left-0 right-0 sm:top-0 sm:left-auto sm:right-0 sm:h-full sm:w-[400px] bg-[var(--sur)] z-50 flex flex-col shadow-2xl border-t sm:border-t-0 sm:border-l border-[var(--bdr)] rounded-t-3xl sm:rounded-none max-h-[85vh] sm:max-h-full" style="transform:translateY(100%) translateX(0)">
+  <div class="px-5 py-4 border-b border-[var(--bdr)] flex items-center justify-between">
+    <h2 class="serif text-2xl text-[var(--gold)]" id="mo-title">My Orders</h2>
+    <button onclick="closePanels()" class="text-[var(--muted)] hover:text-[var(--txt)] transition-colors text-2xl cursor-pointer">×</button>
+  </div>
+  <div id="myOrdersList" class="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-[var(--bg)]"></div>
+</aside>
+
+<!-- CUSTOMIZE MODAL -->
+<div id="customModal" class="fixed inset-0 z-[998] bg-black/60 items-center justify-center hidden" style="backdrop-filter:blur(4px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-[2rem] p-6 w-full max-w-[360px] mx-4 shadow-2xl fade-up flex flex-col max-h-[90vh]">
+    <div class="flex justify-between items-start shrink-0 mb-4 border-b border-[var(--bdr)] pb-4">
+      <div>
+        <h3 class="serif text-[22px] text-[var(--gold)] leading-tight font-bold" id="cm-title">Drink Name</h3>
+        <p class="text-xs text-[var(--muted)] mt-1 tracking-wide" id="cm-subtitle">Add Toppings</p>
+      </div>
+      <button onclick="closeCustomModal()" class="text-2xl text-[var(--muted)] hover:text-[var(--txt)] leading-none">&times;</button>
+    </div>
+    <div class="flex-1 overflow-y-auto space-y-6 pr-2" style="scrollbar-width:none">
+      <div id="cm-temp-wrap">
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-temp-lbl">Temperature</label>
+        <div class="flex gap-3">
+          <button onclick="setTemp('ice')" id="temp-ice" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">🧊</span> <span id="temp-ice-lbl">Iced</span> <span class="text-[10px] ml-1" id="price-lbl-ice"></span>
+          </button>
+          <button onclick="setTemp('hot')" id="temp-hot" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">☕</span> <span id="temp-hot-lbl">Hot</span> <span class="text-[10px] ml-1" id="price-lbl-hot"></span>
+          </button>
+          <button onclick="setTemp('frappe')" id="temp-frappe" class="temp-btn flex-1 hidden items-center justify-center gap-1.5 py-2.5 rounded-full font-bold text-xs shadow-sm">
+            <span class="text-sm">🥤</span> <span id="temp-frappe-lbl">Frappe</span> <span class="text-[10px] ml-1" id="price-lbl-frappe"></span>
+          </button>
+        </div>
+      </div>
+      <div>
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-sugar-lbl">Sugar Level</label>
+        <div class="flex gap-2">
+          <button onclick="setSugar('0%')" id="sug-0" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">0%</button>
+          <button onclick="setSugar('30%')" id="sug-30" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">30%</button>
+          <button onclick="setSugar('50%')" id="sug-50" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">50%</button>
+          <button onclick="setSugar('70%')" id="sug-70" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">70%</button>
+          <button onclick="setSugar('100%')" id="sug-100" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">100%</button>
+        </div>
+      </div>
+      <div id="cm-ice-section">
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-ice-lbl">Ice Level</label>
+        <div class="flex gap-2">
+          <button onclick="setIce('0%')" id="ice-0" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">0%</button>
+          <button onclick="setIce('50%')" id="ice-50" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">50%</button>
+          <button onclick="setIce('100%')" id="ice-100" class="opt-btn flex-1 py-2 text-[11px] font-bold rounded-full border border-[var(--bdr)] text-[var(--muted)] shadow-sm">100%</button>
+        </div>
+      </div>
+      <div>
+        <label class="text-[13px] font-bold mb-3 block text-[var(--txt)]" id="cm-top-lbl">Add Toppings</label>
+        <div class="space-y-3" id="cm-top-list"></div>
+      </div>
+    </div>
+    <div class="pt-5 shrink-0 mt-2 border-t border-[var(--sur2)]">
+      <button onclick="saveCustomization()" class="g-btn w-full py-4 rounded-2xl text-sm flex justify-between px-5 items-center shadow-lg shadow-red-900/20">
+        <span id="cm-add-btn-txt" class="font-bold tracking-wide">Save Changes</span>
+        <span class="font-bold text-[17px]" id="cm-price">$0.00</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- CONFIRM MODAL -->
-<div id="confirmModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[1000] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold" id="confirmTitle">Confirm</h3>
-    <p class="text-gray-300 text-sm mb-6" id="confirmMessage">Are you sure?</p>
+<div id="confirmModal" class="fixed inset-0 z-[998] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-sm mx-4 shadow-2xl fade-up text-center">
+    <div class="w-14 h-14 rounded-full bg-[var(--green)]/15 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-7 h-7 text-[var(--green)]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+    </div>
+    <h3 class="serif text-2xl text-[var(--gold)] mb-1" id="conf-title">Order Placed!</h3>
+    <p class="text-[var(--muted)] text-sm mb-1" id="conf-msg">We're preparing your order.</p>
+    <p class="text-xs text-[var(--muted)] mb-5" id="conf-id"></p>
+    <button onclick="closeConfirm()" class="g-btn w-full py-3 rounded-2xl text-sm" id="conf-btn">Done</button>
+  </div>
+</div>
+
+<!-- CANCEL MODAL -->
+<div id="cancelModal" class="fixed inset-0 z-[998] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-6 w-full max-w-sm mx-4 shadow-2xl fade-up">
+    <h3 class="serif text-2xl text-[var(--red)] mb-2" id="can-title">Cancel Order?</h3>
+    <p class="text-[var(--muted)] text-sm mb-4" id="can-msg">This will remove your order from the queue.</p>
+    <input type="text" id="cancelReason" placeholder="Reason (optional)" class="w-full bg-[var(--sur2)] border border-[var(--bdr)] rounded-xl px-3 py-2.5 text-sm outline-none transition mb-6 text-[var(--txt)] focus:border-[#bf3c37]" />
     <div class="flex gap-3">
-      <button id="confirmCancelBtn" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button id="confirmOkBtn" class="flex-1 py-2 btn-primary rounded font-bold">Yes</button>
+      <button onclick="closeCancelModal()" class="flex-1 py-3 rounded-2xl border border-[var(--bdr)] text-sm text-[var(--muted)] hover:text-[var(--txt)] transition-colors cursor-pointer" id="can-no">No, keep it</button>
+      <button onclick="confirmCancel()" class="flex-1 py-3 rounded-2xl bg-[var(--red)] text-[#faf6eb] text-sm font-semibold hover:bg-[#a6332f] transition-colors cursor-pointer" id="can-yes">Yes, cancel</button>
     </div>
   </div>
 </div>
 
-<!-- EDIT MENU MODAL -->
-<div id="editMenuModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4 overflow-y-auto">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-lg shadow-2xl my-4">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Edit Drink</h3>
-    <div class="grid grid-cols-3 gap-4 mb-4">
-      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
-      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full khmer"></div>
-      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Ice Price</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Hot Price</label><input type="number" id="editPriceHot" step="0.01" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Frap Price</label><input type="number" id="editPriceFrappe" step="0.01" class="w-full"></div>
-      <div class="col-span-3"><label class="text-xs text-gray-400 mb-1 block">Temperature</label>
-        <select id="editTemperature" class="w-full">
-          <option value="both">🧊☕ Ice & Hot</option>
-          <option value="ice">🧊 Iced Only</option>
-          <option value="hot">☕ Hot Only</option>
-          <option value="frappe">🥤 Frappe Only</option>
-        </select>
-      </div>
-      <div class="col-span-3 flex items-center">
-        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editPopular" class="w-4 h-4 accent-[#d44e43]"><span class="text-sm text-gray-300">🔥 Popular</span></label>
-      </div>
-      <div class="col-span-3">
-        <label class="text-xs text-gray-400 mb-1 block">Image URL</label>
-        <input type="text" id="editImage" class="w-full" placeholder="https://..." oninput="previewUrlImg(this.value,'editUrlPreview')">
-        <img id="editUrlPreview" src="" class="hidden mt-2 w-16 h-16 object-cover rounded-xl border border-[#5c453b]" onerror="this.style.display='none'"/>
-      </div>
+<!-- GEOFENCE ALERT MODAL -->
+<div id="geoModal" class="fixed inset-0 z-[999] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
+  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl text-center">
+    <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-[var(--red)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
     </div>
-    <div class="flex gap-3">
-      <button onclick="closeEditMenuModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveEditMenu()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
+    <h3 class="serif text-2xl text-[var(--gold)] mb-2">ជិតដល់ហាងហើយ!</h3>
+    <p class="text-[var(--muted)] text-sm mb-6">សូមអភ័យទោស! លោកអ្នកអាចកុម្ម៉ង់បាន លុះត្រាតែស្ថិតនៅក្នុងចម្ងាយ <b>500 ម៉ែត្រ</b> ជុំវិញហាង Chafé ប៉ុណ្ណោះ។</p>
+    <button onclick="document.getElementById('geoModal').classList.add('hidden'); document.getElementById('geoModal').style.display='none';" class="g-btn w-full py-3 rounded-2xl text-sm">យល់ព្រម</button>
   </div>
 </div>
 
-<!-- ADD TOPPING MODAL -->
-<div id="toppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">New Topping</h3>
-    <div class="space-y-3 mb-6">
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="topName" placeholder="e.g. Boba" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="topNameKh" placeholder="e.g. គុជ" class="w-full khmer"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="topPrice" placeholder="0.50" step="0.01" class="w-full"></div>
-      <div>
-        <label class="text-xs text-gray-400 mb-1 block">Photo URL</label>
-        <input type="text" id="topImage" placeholder="Paste URL..." class="w-full mt-1" oninput="previewImg('topImage','topUrlPreviewImg','topUrlPreview')">
-        <div id="topUrlPreview" class="mt-2 hidden"><img id="topUrlPreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview"/></div>
-      </div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="closeAddToppingModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveTopping()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
-  </div>
-</div>
+<!-- SOCIAL BAR -->
+<div id="socialBar" class="hidden-bar"></div>
 
-<!-- EDIT TOPPING MODAL -->
-<div id="editToppingModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-sm shadow-2xl">
-    <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Topping</h3>
-    <div class="space-y-3 mb-6">
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editTopName" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editTopNameKh" class="w-full khmer"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="editTopPrice" step="0.01" class="w-full"></div>
-      <div>
-        <label class="text-xs text-gray-400 mb-1 block">Photo URL</label>
-        <input type="text" id="editTopImage" class="w-full" placeholder="https://..." oninput="previewImg('editTopImage','editTopImagePreviewImg','editTopImagePreview')">
-        <div id="editTopImagePreview" class="mt-2"><img id="editTopImagePreviewImg" class="w-16 h-16 rounded-xl object-cover border border-[#5c453b]" src="" alt="Preview" onerror="this.parentElement.style.display='none'"/></div>
-      </div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="closeEditToppingModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveEditTopping()" class="flex-1 py-2 btn-success rounded font-bold">Update</button>
-    </div>
-  </div>
-</div>
-
-<!-- EDIT SLIDE MODAL -->
-<div id="editSlideModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-md shadow-2xl">
-    <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Slide</h3>
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <div><label class="text-xs text-gray-400 mb-1 block">Step No.</label><input type="number" id="editSlideStep" class="w-full" min="1"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editSlideImage" class="w-full" placeholder="https://..."></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Title (EN)</label><input type="text" id="editSlideTitleEn" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Title (KH)</label><input type="text" id="editSlideTitleKh" class="w-full khmer"></div>
-      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Description (EN)</label><textarea id="editSlideDescEn" rows="2" class="w-full resize-none"></textarea></div>
-      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Description (KH)</label><textarea id="editSlideDescKh" rows="2" class="w-full resize-none khmer"></textarea></div>
-    </div>
-    <div class="flex gap-3">
-      <button onclick="closeEditSlideModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
-      <button onclick="saveEditSlide()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- EDIT ORDER STATUS MODAL -->
-<div id="editOrderModal" class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-[999] backdrop-blur-sm p-4">
-  <div class="bg-[#4e3b32] border border-[#5c453b] p-6 rounded-xl w-full max-w-[300px] shadow-2xl text-center">
-    <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Update Status</h3>
-    <select id="editOrderStatus" class="w-full mb-6 py-3 text-center font-bold bg-[#3a2a24]">
-      <option value="pending">⏳ Pending</option>
-      <option value="completed">✓ Completed</option>
-      <option value="cancelled">✗ Cancelled</option>
-    </select>
-    <div class="flex gap-3">
-      <button onclick="closeEditOrderModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Close</button>
-      <button onclick="saveEditOrder()" class="flex-1 py-2 btn-success rounded font-bold">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="toast" class="fixed bottom-6 left-1/2 bg-[#5db85b] text-white px-5 py-2.5 rounded shadow-xl opacity-0 transition-opacity pointer-events-none transform -translate-x-1/2 font-medium z-[9999]">Success!</div>
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 left-1/2 bg-[var(--sur2)] border border-[var(--bdr)] text-[var(--txt)] px-5 py-2.5 rounded-full text-xs shadow-2xl opacity-0 z-[9999] whitespace-nowrap pointer-events-none" style="transform:translateX(-50%) translateY(16px)"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ====== កំណត់ទីតាំងហាងរបស់អ្នកនៅទីនេះ ======
+const SHOP_LAT = 11.5564; // Latitude (ឧទាហរណ៍: ដូរទៅតាមទីតាំងពិតប្រាកដ)
+const SHOP_LON = 104.9282; // Longitude (ឧទាហរណ៍: ដូរទៅតាមទីតាំងពិតប្រាកដ)
+// ============================================
+
+const safeStorage = {
+  get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+  set: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} }
+};
 
 const FB = {
-  apiKey:"AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
-  authDomain:"lortcha.firebaseapp.com",
-  projectId:"lortcha",
-  storageBucket:"lortcha.appspot.com",
-  messagingSenderId:"51187909854",
-  appId:"1:51187909854:web:f4d7ace62c0a367a192e4f"
+  apiKey: "AIzaSyAg1UrP4yh9bKG9mBgQPdWebnUYNs78r5o",
+  authDomain: "lortcha.firebaseapp.com",
+  projectId: "lortcha",
+  storageBucket: "lortcha.appspot.com",
+  messagingSenderId: "51187909854",
+  appId: "1:51187909854:web:f4d7ace62c0a367a192e4f"
 };
-const app = initializeApp(FB);
-const db = getFirestore(app);
+
+let db;
+try { const app = initializeApp(FB); db = getFirestore(app); } catch(e) {}
 
 const TG_TOKEN = "8797903629:AAH2RM-wnqgUiSM3amF7xxaXOwZzbdlYzAY";
 const TG_CHAT = "-1003706744326";
 
-let menuItems=[], toppings=[], orders=[], slideshowItems=[], coupons=[];
-let currentMenuCat='All', editingMenuId=null, editingToppingId=null;
-let editingOrderId=null, editingSlideId=null;
-let currentHistoryFilteredOrders=[];
-let orderFilter='all';
-let soundEnabled=true;
-let knownOrderIds=new Set();
-let audioCtx=null;
-let topItemsPeriod = 'today'; // 'today' | 'week' | 'all'
-
-// ── TEMP TOGGLES ──
-const tempStates = { ice: true, hot: true, frappe: true };
-
-window.toggleTempOption = function(type) {
-  tempStates[type] = !tempStates[type];
-  const btn = document.getElementById(`toggle-${type}`);
-  const wrap = document.getElementById(`price-${type}-wrap`);
-  const status = document.getElementById(`toggle-${type}-status`);
-  const icon = document.getElementById(`toggle-${type}-icon`);
-  const input = document.getElementById(type === 'ice' ? 'addPrice' : `addPrice${type.charAt(0).toUpperCase()+type.slice(1)}`);
-
-  if(tempStates[type]) {
-    btn.classList.remove('disabled');
-    btn.classList.add('active');
-    wrap.classList.remove('price-field-disabled');
-    status.textContent = 'Enabled';
-    icon.textContent = '✓';
-    if(input) input.disabled = false;
-  } else {
-    btn.classList.add('disabled');
-    btn.classList.remove('active');
-    wrap.classList.add('price-field-disabled');
-    status.textContent = 'Disabled';
-    icon.textContent = '✕';
-    if(input) { input.disabled = true; input.value = ''; }
-  }
-};
-
-function getAddTemperature() {
-  const ice = tempStates.ice, hot = tempStates.hot, frappe = tempStates.frappe;
-  if(ice && hot && frappe) return 'both'; // ice+hot+frappe = "both" (covers all)
-  if(ice && hot) return 'both';
-  if(ice && frappe) return 'frappe'; // prioritize frappe label
-  if(hot && frappe) return 'frappe';
-  if(ice) return 'ice';
-  if(hot) return 'hot';
-  if(frappe) return 'frappe';
-  return 'ice'; // default
-}
-
-// ── TOP ITEMS PERIOD ──
-window.setTopItemsPeriod = function(period) {
-  topItemsPeriod = period;
-  ['today','week','all'].forEach(p => {
-    const btn = document.getElementById(`top-period-${p}`);
-    if(btn) btn.classList.toggle('active', p === period);
-  });
-  renderTopItems();
-};
-
-// ── SOUND ──
-function getAudioCtx() {
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-function playNotifSound() {
-  if(!soundEnabled) return;
+async function sendTelegramAlert(order, orderId) {
   try {
-    const ctx = getAudioCtx();
-    const playTone = (freq, start, dur) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.value = freq; osc.type = 'sine';
-      gain.gain.setValueAtTime(0, ctx.currentTime + start);
-      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + start + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
-      osc.start(ctx.currentTime + start);
-      osc.stop(ctx.currentTime + start + dur);
-    };
-    playTone(880, 0, 0.15); playTone(1100, 0.18, 0.15); playTone(1320, 0.36, 0.3);
+    const itemLines = order.items.map(i => {
+      let opts = `Temp: ${i.temperature === 'hot' ? '☕ Hot' : i.temperature === 'frappe' ? '🥤 Frappe' : '🧊 Iced'} | Sugar: ${i.sugar} | Ice: ${i.ice}`;
+      if(i.toppingsData?.length) opts += ` | Tops: ${i.toppingsData.map(t=> lang==='kh'&&t.nameKh?t.nameKh:t.name).join(', ')}`;
+      return `  • <b>${i.name}</b> ×${i.qty}  ($${(i.price*i.qty).toFixed(2)})\n    <i>[${opts}]</i>`;
+    }).join("\n");
+    const noteText = order.note ? `\n📝 <b>Note:</b> ${order.note}\n` : "";
+    const discountLine = order.couponCode ? `\n🏷️ <b>Coupon:</b> ${order.couponCode} (-$${order.discountAmt.toFixed(2)})` : "";
+    const msg = `🛍️ <b>New Order!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}${discountLine}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`;
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
   } catch(e) {}
 }
-window.toggleSound = function() {
-  soundEnabled = !soundEnabled;
-  document.getElementById('soundIcon').className = 'w-4 h-4 ' + (soundEnabled ? 'sound-on' : 'sound-off');
-  const lbl = document.getElementById('soundLabel');
-  lbl.className = soundEnabled ? 'text-[#5db85b]' : 'text-[#d44e43]';
-  lbl.textContent = soundEnabled ? 'Sound Alerts: ON' : 'Sound Alerts: OFF';
-};
 
-// ── NOTIF POPUP ──
-function showOrderNotif(order) {
-  const popup = document.getElementById('orderNotifPopup');
-  const card = document.createElement('div');
-  card.className = 'notif-card';
-  const items = (order.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ');
-  card.innerHTML = `
-    <div class="flex items-start justify-between gap-3">
-      <div class="flex-1">
-        <div class="flex items-center gap-2 mb-1">
-          <span class="text-[#d1a14a] font-bold text-sm">🛍️ New Order!</span>
-          <span class="text-xs text-gray-400">Table ${order.tableNumber}</span>
-        </div>
-        <p class="text-xs text-gray-300 truncate">${items}</p>
-        <p class="text-[#5db85b] font-bold text-sm mt-1">$${Number(order.total).toFixed(2)}</p>
-      </div>
-      <button onclick="this.closest('.notif-card').classList.add('dismissing');setTimeout(()=>this.closest('.notif-card').remove(),300)" class="text-gray-500 hover:text-white text-lg leading-none">×</button>
-    </div>`;
-  popup.appendChild(card);
-  playNotifSound();
-  setTimeout(() => { if(card.parentNode){card.classList.add('dismissing');setTimeout(()=>card.parentNode&&card.remove(),300);} }, 6000);
+// ── Geofence Helper ──
+function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; 
 }
 
-// ── IMAGE PREVIEW ──
-window.previewUrlImg = function(url,previewId) {
-  const img=document.getElementById(previewId); if(!img) return;
-  if(url){img.src=url;img.classList.remove('hidden');img.style.display='block';}else{img.classList.add('hidden');}
-};
-window.previewImg = function(inputId,imgId,previewId) {
-  const val=document.getElementById(inputId)?.value.trim();
-  const prev=document.getElementById(previewId); const img=document.getElementById(imgId);
-  if(val&&prev&&img){img.src=val;prev.classList.remove('hidden');}else if(prev) prev.classList.add('hidden');
+// ── I18N ──
+const T = {
+  en: {
+    sub:"Order", cart:"Cart", myorders:"My Orders",
+    tableLbl:"Table No.", cartTitle:"Your Order", cartSub:"Review before placing",
+    totalLbl:"Total", place:"Place Order", clear:"Clear cart", emptyCart:"Your cart is empty",
+    confirmTitle:"Order Placed! 🎉", confirmMsg:"We're preparing your order.", confirmBtn:"Done",
+    confirmTrack:"A live status bar will appear below tracking your order.",
+    cancelTitle:"Cancel Order?", cancelMsg:"This will remove your order from the queue.", cancelNo:"No, keep it", cancelYes:"Cancel Order",
+    moTitle:"My Orders", status:{pending:"Pending ⏳", completed:"Completed ✓", cancelled:"Cancelled ✗"},
+    addedToast:"added to cart", cancelToast:"Order cancelled.", noItems:"No items in this category.",
+    tableFor:"Table", outOfStock:"Out of Stock", sugar:"Sugar Level", ice:"Ice Level",
+    toppings:"Add Toppings", saveChanges:"Save Changes", addTopping:"Customize", note:"Note",
+    howToOrder:"How to Order", prev:"Prev", next:"Next", popular:"Popular",
+    tempLbl:"Temperature", tempIce:"Iced", tempHot:"Hot", tempFrappe:"Frappe",
+    ordersCount:"orders", customBtn:"Add Topping", totalOrders:"Total Orders",
+    cancelReasonPlaceholder: "Reason for cancellation (optional)",
+    promoPlaceholder: "Promo code", apply: "Apply", remove: "Remove",
+    couponApplied: "Coupon applied!", invalidCoupon: "Invalid or inactive coupon",
+    subtotal: "Subtotal", discount: "Discount",
+    statusPending: "Order is being prepared...", statusCompleted: "Your order is ready!", statusCancelled: "Order was cancelled"
+  },
+  kh: {
+    sub:"បញ្ជាទិញ", cart:"កន្ត្រក", myorders:"ការបញ្ជា",
+    tableLbl:"លេខតុ", cartTitle:"ការបញ្ជាទិញ", cartSub:"ពិនិត្យមុនបញ្ជា",
+    totalLbl:"សរុប", place:"ដាក់ការបញ្ជា", clear:"លុបកន្ត្រក", emptyCart:"កន្ត្រករបស់អ្នកទទេ",
+    confirmTitle:"បានជោគជ័យ! 🎉", confirmMsg:"យើងកំពុងរៀបចំ។", confirmBtn:"រួចរាល់",
+    confirmTrack:"របាររស្ថានភាពការបញ្ជានឹងលេចឡើងខាងក្រោម។",
+    cancelTitle:"លុបការបញ្ជា?", cancelMsg:"ការបញ្ជារបស់អ្នកនឹងត្រូវដក។", cancelNo:"ទេ", cancelYes:"លុបចោល",
+    moTitle:"ការបញ្ជារបស់ខ្ញុំ", status:{pending:"រង់ចាំ ⏳", completed:"បានបញ្ចប់ ✓", cancelled:"បានលុប ✗"},
+    addedToast:"បានបន្ថែម", cancelToast:"បានលុបការបញ្ជា", noItems:"មិនមានទំនិញ",
+    tableFor:"តុ", outOfStock:"អស់ស្តុក", sugar:"កម្រិតស្ករ", ice:"កម្រិតទឹកកក",
+    toppings:"បន្ថែម Toppings", saveChanges:"រក្សាទុក", addTopping:"កំណត់ Toppings", note:"ចំណាំ",
+    howToOrder:"របៀបបញ្ជាទិញ", prev:"ថយក្រោយ", next:"បន្ត", popular:"ពេញនិយម",
+    tempLbl:"សីតុណ្ហភាព", tempIce:"ទឹកកក", tempHot:"ក្តៅ", tempFrappe:"ហ្វ្រាប៉េ",
+    ordersCount:"ការបញ្ជា", customBtn:"បន្ថែម Topping", totalOrders:"ការកាម្មងសរុប",
+    cancelReasonPlaceholder: "មូលហេតុ (ជម្រើស)",
+    promoPlaceholder: "លេខកូដបញ្ចុះតម្លៃ", apply: "ប្រើប្រាស់", remove: "លុបចេញ",
+    couponApplied: "បានប្រើប្រាស់កូដ!", invalidCoupon: "កូដមិនត្រឹមត្រូវ",
+    subtotal: "សរុបរង", discount: "បញ្ចុះតម្លៃ",
+    statusPending: "ការបញ្ជាកំពុងត្រូវបានរៀបចំ...", statusCompleted: "ការបញ្ជារបស់អ្នករួចរាល់!", statusCancelled: "ការបញ្ជាត្រូវបានលុបចោល"
+  }
 };
 
-// ── KITCHEN DISPLAY ──
-let kitchenTimerInterval;
-window.openKitchenMode = function() {
-  document.getElementById('kitchenMode').classList.add('active');
-  document.body.style.overflow='hidden';
-  renderKitchen();
-  kitchenTimerInterval=setInterval(()=>{
-    const el=document.getElementById('kitchenTime');
-    if(el) el.textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    renderKitchen();
-  },1000);
-};
-window.closeKitchenMode = function() {
-  document.getElementById('kitchenMode').classList.remove('active');
-  document.body.style.overflow='';
-  clearInterval(kitchenTimerInterval);
-};
-function renderKitchen() {
-  const grid=document.getElementById('kitchenGrid'); if(!grid) return;
-  const pending=orders.filter(o=>o.status==='pending');
-  if(!pending.length){ grid.innerHTML=`<div class="col-span-full flex flex-col items-center justify-center py-20 text-center"><p class="text-6xl mb-4">✓</p><p class="text-3xl text-[#5db85b] font-bold">All caught up!</p><p class="text-gray-400 mt-2">No pending orders</p></div>`; return; }
-  const tempIcon=i=>i.temperature==='hot'?'☕':i.temperature==='frappe'?'🥤':'🧊';
-  grid.innerHTML=pending.map(o=>{
-    const mins=o.createdAt?Math.floor((Date.now()-(o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt)).getTime())/60000):0;
-    const urgent=mins>=10;
-    return `<div class="kitchen-card ${urgent?'urgent':''} mb-5">
-      <div class="flex justify-between items-center mb-4">
-        <div><span class="text-3xl font-bold text-[#d44e43]">Table ${o.tableNumber}</span><span class="ml-3 text-lg text-gray-400">#${o.id.slice(-4).toUpperCase()}</span></div>
-        <div class="text-right"><span class="text-xl font-bold ${urgent?'text-[#d44e43]':'text-[#d1a14a]'}">${mins}m</span>${urgent?'<p class="text-xs text-[#d44e43] font-bold">URGENT</p>':''}</div>
-      </div>
-      <div class="space-y-3 mb-4">
-        ${(o.items||[]).map(i=>`<div class="bg-[#1a0f0a] rounded-xl p-3">
-          <div class="flex justify-between items-center"><span class="text-xl font-bold text-white">${i.qty}× ${i.name}</span><span class="text-2xl">${tempIcon(i)}</span></div>
-          <div class="text-sm text-gray-400 mt-1">Sugar: ${i.sugar}${i.temperature!=='hot'?' | Ice: '+i.ice:''}${i.toppingsData?.length?' | +'+i.toppingsData.map(tp=>tp.name).join(', '):''}</div>
-        </div>`).join('')}
-      </div>
-      ${o.note?`<div class="bg-[#2a1a14] border border-[#d1a14a]/30 rounded-lg p-3 mb-4 text-sm text-[#d1a14a]">📝 ${o.note}</div>`:''}
-      <button onclick="quickStatus('${o.id}','completed');renderKitchen();" class="w-full bg-[#5db85b] hover:bg-[#4cae4c] text-white py-3 rounded-xl font-bold text-lg transition">✓ Mark Complete</button>
-    </div>`;
-  }).join('');
+let lang = safeStorage.get("chafe_lang") || "kh";
+let cancelTargetId = null;
+let itemOrderCounts = {};
+
+function getUrlTable() {
+  try { return new URLSearchParams(window.location.search).get('table'); } catch(e) { return null; }
 }
 
-// ── TABS ──
-window.toggleSidebar = function() {
-  const sb=document.getElementById('sidebar'), ov=document.getElementById('mobileOverlay');
-  if(sb.classList.contains('-translate-x-full')){ sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); setTimeout(()=>ov.classList.add('opacity-100'),10); }
-  else { sb.classList.add('-translate-x-full'); ov.classList.remove('opacity-100'); setTimeout(()=>ov.classList.add('hidden'),300); }
-};
-window.switchTab = function(tab) {
-  ['stats','orders','history','menu','slideshow','social','coupons'].forEach(t=>{
-    const v=document.getElementById(`view-${t}`), b=document.getElementById(`tab-${t}`);
-    if(v) v.classList.add('hidden');
-    if(b){b.classList.remove('bg-[#8a382f]/20','text-[#d44e43]');b.classList.add('text-gray-400');}
-  });
-  const av=document.getElementById(`view-${tab}`), ab=document.getElementById(`tab-${tab}`);
-  if(av) av.classList.remove('hidden');
-  if(ab){ab.classList.remove('text-gray-400');ab.classList.add('bg-[#8a382f]/20','text-[#d44e43]');}
-  if(tab==='stats') setTimeout(renderHourlyChart,100);
-  if(window.innerWidth<768){ const sb=document.getElementById('sidebar'); if(!sb.classList.contains('-translate-x-full')) window.toggleSidebar(); }
+window.setLang = function(l) {
+  lang = l;
+  safeStorage.set("chafe_lang", l);
+  document.getElementById("langFlag").textContent = l==="kh"?"🇰🇭":"🇬🇧";
+  document.getElementById("langLabel").textContent = l==="kh"?"KH":"EN";
+  document.getElementById("langDropdown").classList.add("hidden");
+  applyLang();
+  buildTableOptions();
+  if(slides.length > 0) renderSlideshow();
 };
 
-function showToast(msg,isErr=false) {
-  const t=document.getElementById('toast'); if(!t) return;
-  t.textContent=msg; t.style.backgroundColor=isErr?'#d44e43':'#5db85b';
-  t.style.opacity='1'; setTimeout(()=>t.style.opacity='0',3000);
+window.toggleLangDropdown = () => document.getElementById("langDropdown").classList.toggle("hidden");
+document.addEventListener("click", e => {
+  const wrap = document.getElementById("langWrap");
+  if(!wrap.contains(e.target)) document.getElementById("langDropdown").classList.add("hidden");
+});
+
+function t() { return T[lang||"en"]; }
+
+function applyLang() {
+  const tx = t();
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  set("h-sub",tx.sub); set("h-cart",tx.cart); set("h-myorders",tx.myorders);
+  set("c-table-lbl",tx.tableLbl); set("c-title",tx.cartTitle); set("c-sub",tx.cartSub);
+  set("c-total-lbl",tx.totalLbl); set("placeBtn",tx.place); set("c-clear",tx.clear);
+  set("c-empty",tx.emptyCart); set("conf-title",tx.confirmTitle); set("conf-msg",tx.confirmMsg);
+  set("conf-btn",tx.confirmBtn); set("can-title",tx.cancelTitle); set("can-msg",tx.cancelMsg);
+  set("can-no",tx.cancelNo); set("can-yes",tx.cancelYes); set("mo-title",tx.moTitle);
+  set("emptyMenu",tx.noItems); set("cm-sugar-lbl",tx.sugar); set("cm-ice-lbl",tx.ice);
+  set("cm-top-lbl",tx.toppings); set("cm-add-btn-txt",tx.saveChanges); set("cm-subtitle",tx.addTopping);
+  set("c-note-lbl",tx.note); set("slideshow-title",tx.howToOrder);
+  set("popular-title",tx.popular); set("cm-temp-lbl",tx.tempLbl);
+  set("temp-ice-lbl",tx.tempIce); set("temp-hot-lbl",tx.tempHot); set("temp-frappe-lbl",tx.tempFrappe);
+  set("c-apply-btn",tx.apply); set("c-remove-btn",tx.remove);
+  set("c-subtotal-lbl",tx.subtotal); set("c-discount-lbl",tx.discount);
+  const cancelReasonInput = document.getElementById("cancelReason");
+  if (cancelReasonInput) cancelReasonInput.placeholder = tx.cancelReasonPlaceholder;
+  const couponInput = document.getElementById("cartCoupon");
+  if (couponInput) couponInput.placeholder = tx.promoPlaceholder;
+  if(currentItems.length > 0) { renderMenu(currentItems); renderPopular(); }
+  renderCart(); renderMyOrders();
 }
 
-// ── FETCH DATA ──
-async function fetchData() {
-  onSnapshot(collection(db,'menu'),snap=>{
-    menuItems=snap.docs.map(d=>({id:d.id,...d.data()}));
-    updateCategoryDropdown(); renderMenuTable();
-  });
-  onSnapshot(collection(db,'toppings'),snap=>{
-    toppings=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderToppings();
-  });
-  const q=query(collection(db,'orders'),orderBy('createdAt','desc'));
-  onSnapshot(q,snap=>{
-    const isFirst=knownOrderIds.size===0;
-    snap.docChanges().forEach(change=>{
-      if(change.type==='added'&&!isFirst){
-        const order={id:change.doc.id,...change.doc.data()};
-        if(order.status==='pending') showOrderNotif(order);
+// ── TABLES ──
+function buildTableOptions() {
+  const sel = document.getElementById("cartTable");
+  sel.innerHTML = `<option value="" disabled selected>—</option>`;
+  for(let i=1;i<=20;i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
+  const urlTable = getUrlTable();
+  if(urlTable) { sel.value = urlTable; safeStorage.set("chafe_table", urlTable); }
+  else { const saved = safeStorage.get("chafe_table"); if(saved) sel.value = saved; }
+}
+document.getElementById("cartTable").addEventListener("change", e => safeStorage.set("chafe_table", e.target.value));
+
+// ── STATE ──
+let allItems=[], currentItems=[], currentCat="All", cart=[], allToppings=[], slides=[], currentSlide=0;
+let dbCoupons=[], appliedCoupon=null;
+
+async function loadOrderCounts() {
+  try {
+    if(!db) return;
+    const snap = await getDocs(collection(db,"orders"));
+    const counts = {};
+    snap.docs.forEach(d => {
+      const order = d.data();
+      if(order.status === 'completed') {
+        (order.items||[]).forEach(item => { counts[item.name] = (counts[item.name] || 0) + (item.qty || 1); });
       }
     });
-    orders=snap.docs.map(d=>({id:d.id,...d.data()}));
-    snap.docs.forEach(d=>knownOrderIds.add(d.id));
-    renderOrders(); renderHistory(); updateStats(); calculateFilteredStats(); renderTopItems(); renderHourlyChart();
-  });
-  onSnapshot(collection(db,'slideshow'),snap=>{
-    slideshowItems=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
-    renderSlideshowList();
-  });
-  onSnapshot(collection(db,'coupons'),snap=>{
-    coupons=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderCoupons();
-  });
+    itemOrderCounts = counts;
+  } catch(e) {}
+}
+
+async function loadData() {
   try {
-    const snap=await getDocs(collection(db,'settings'));
-    const settings={};
-    snap.docs.forEach(d=>Object.assign(settings,d.data(),{_docId:d.id}));
-    if(settings.facebookUrl) document.getElementById('fbUrl').value=settings.facebookUrl;
-    if(settings.tiktokUrl) document.getElementById('ttUrl').value=settings.tiktokUrl;
-    window._settingsDocId=settings._docId;
-    updateSocialPreview();
-  } catch(e){}
-}
+    if(!db) throw new Error("No DB");
+    try {
+      const tSnap = await getDocs(collection(db,"toppings"));
+      allToppings = tSnap.docs.map(d=>({id:d.id,...d.data()}));
+    } catch(e) {}
+    await loadOrderCounts();
 
-// ── STATS ──
-function updateStats() {
-  const pending=orders.filter(o=>o.status==='pending');
-  const completed=orders.filter(o=>o.status==='completed');
-  const rev=completed.reduce((s,o)=>s+Number(o.total),0);
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('stat-all',orders.length); set('stat-pending',pending.length); set('stat-completed',completed.length); set('stat-rev',`$${rev.toFixed(2)}`);
-  const badge=document.getElementById('pendingBadge'); const badgeMob=document.getElementById('pendingBadgeMobile');
-  if(badge){if(pending.length>0){badge.textContent=pending.length;badge.classList.remove('hidden');}else badge.classList.add('hidden');}
-  if(badgeMob){if(pending.length>0){badgeMob.textContent=`${pending.length} pending`;badgeMob.classList.remove('hidden');}else badgeMob.classList.add('hidden');}
-}
-
-// ── TOP ITEMS with period filter ──
-function renderTopItems() {
-  const counts={};
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const weekStart = new Date(todayStart); weekStart.setDate(weekStart.getDate() - 7);
-
-  let filtered = orders.filter(o=>o.status==='completed');
-
-  if(topItemsPeriod === 'today') {
-    filtered = filtered.filter(o=>{
-      if(!o.createdAt) return false;
-      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
-      return d >= todayStart;
+    onSnapshot(collection(db,"menu"), snap => {
+      const prevCount = allItems.length;
+      allItems = snap.docs.map(d=>({id:d.id,...d.data()}));
+      buildCats();
+      filterByCat(currentCat);
+      renderPopular();
+      if(prevCount > 0) {
+        snap.docChanges().forEach(change => {
+          if(change.type === 'modified' || change.type === 'added') {
+            setTimeout(() => {
+              const card = document.querySelector(`[data-item-id="${change.doc.id}"]`);
+              if(card) card.classList.add('new-item-flash');
+            }, 100);
+          }
+        });
+      }
+      document.getElementById("menuSkeleton").classList.add("hidden");
     });
-  } else if(topItemsPeriod === 'week') {
-    filtered = filtered.filter(o=>{
-      if(!o.createdAt) return false;
-      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
-      return d >= weekStart;
+
+    onSnapshot(collection(db,"toppings"), snap => {
+      allToppings = snap.docs.map(d=>({id:d.id,...d.data()})).filter(t=>t.inStock!==false);
     });
+
+    onSnapshot(collection(db,"coupons"), snap => {
+      dbCoupons = snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(appliedCoupon) {
+        const stillValid = dbCoupons.find(c => c.code === appliedCoupon.code && c.active);
+        if(!stillValid) { appliedCoupon = null; renderCart(); }
+      }
+    });
+
+    onSnapshot(collection(db,"orders"), snap => {
+      const counts = {};
+      snap.docs.forEach(d => {
+        const order = d.data();
+        if(order.status === 'completed') {
+          (order.items||[]).forEach(item => { counts[item.name] = (counts[item.name] || 0) + (item.qty || 1); });
+        }
+      });
+      itemOrderCounts = counts;
+      const myOrders = loadMyOrders();
+      let changed = false;
+      myOrders.forEach(o => {
+        const dbOrder = snap.docs.find(d=>d.id===o.id);
+        if(dbOrder) {
+          const newStatus = dbOrder.data().status;
+          if(newStatus !== o.status) { o.status = newStatus; changed = true; }
+        }
+      });
+      if(changed) {
+        safeStorage.set("chafe_orders", JSON.stringify(myOrders));
+        renderMyOrders();
+      }
+      if(currentItems.length > 0) { renderMenu(currentItems); renderPopular(); }
+    });
+
+    await loadSocialLinks();
+    await loadSlideshow();
+  } catch(e) {
+    allToppings = [
+      {id:"t1",name:"Boba",nameKh:"គុជ",price:0.50},
+      {id:"t2",name:"Coffee Jelly",nameKh:"ចាហួយកាហ្វេ",price:0.50},
+      {id:"t3",name:"Cheese Foam",nameKh:"ហ្វូមឈីស",price:0.75}
+    ];
+    allItems = [];
+    buildCats(); filterByCat("All"); renderPopular();
+    document.getElementById("menuSkeleton").classList.add("hidden");
   }
-
-  filtered.forEach(o=>{
-    (o.items||[]).forEach(i=>{
-      if(!counts[i.name]) counts[i.name]={name:i.name,qty:0};
-      counts[i.name].qty+=i.qty;
-    });
-  });
-
-  const sorted=Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,8);
-  const el=document.getElementById('topItemsList'); if(!el) return;
-
-  const labelEl = document.getElementById('topItemsPeriodLabel');
-  if(labelEl) {
-    const labels = { today: `📅 ${now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}`, week: '📅 Last 7 days', all: '📅 All time' };
-    labelEl.textContent = labels[topItemsPeriod];
-  }
-
-  if(!sorted.length){el.innerHTML='<p class="text-gray-500 text-sm">No completed orders for this period.</p>';return;}
-  const max=sorted[0].qty;
-  el.innerHTML=sorted.map((item,i)=>{
-    const medals = ['🥇','🥈','🥉'];
-    const medal = i < 3 ? medals[i] : `<span class="text-xs text-gray-500 font-bold">${i+1}</span>`;
-    return `
-    <div class="flex items-center gap-3">
-      <span class="text-sm w-6 text-center">${medal}</span>
-      <div class="flex-1">
-        <div class="flex justify-between text-sm mb-1"><span class="font-medium">${item.name}</span><span class="text-[#d44e43] font-bold">${item.qty}×</span></div>
-        <div class="h-1.5 bg-[#3a2a24] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[#d44e43] to-[#d1a14a] rounded-full transition-all duration-500" style="width:${(item.qty/max*100).toFixed(0)}%"></div></div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-window.calculateFilteredStats = function() {
-  const startDate=document.getElementById('statStartDate')?.value;
-  const endDate=document.getElementById('statEndDate')?.value;
-  const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
-  let filtered=orders.filter(o=>o.status==='completed');
-  if(startDate||endDate){
-    filtered=filtered.filter(o=>{
-      if(!o.createdAt) return false;
-      const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
-      const iso=new Date(d.getTime()-(d.getTimezoneOffset()*60000)).toISOString().split('T')[0];
-      if(startDate&&iso<startDate) return false; if(endDate&&iso>endDate) return false; return true;
-    });
-  }
-  const gross=filtered.reduce((s,o)=>s+Number(o.total),0);
-  const subAmt=gross*(subPct/100); const net=gross-subAmt;
-  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('stat-f-orders',filtered.length); set('stat-f-gross',`$${gross.toFixed(2)}`);
-  set('stat-f-sub-lbl',`Subtract (${subPct}%)`); set('stat-f-sub-amt',`-$${subAmt.toFixed(2)}`); set('stat-f-net',`$${net.toFixed(2)}`);
-};
-
-function renderHourlyChart() {
-  const canvas=document.getElementById('liveChartCanvas'); if(!canvas) return;
-  const ctx=canvas.getContext('2d');
-  const now=new Date(); const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  const todayOrders=orders.filter(o=>{ if(!o.createdAt) return false; const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt); return d>=today; });
-  document.getElementById('todayTotal').textContent=`${todayOrders.length} today`;
-  const hourCounts=Array(24).fill(0);
-  todayOrders.forEach(o=>{ const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt); hourCounts[d.getHours()]++; });
-  const currentHour=now.getHours(); const maxCount=Math.max(...hourCounts,1);
-  const width=canvas.offsetWidth||600; const height=200;
-  canvas.width=width; canvas.height=height; ctx.clearRect(0,0,width,height);
-  const barW=(width-40)/24; const maxH=height-40;
-  hourCounts.forEach((count,h)=>{
-    const x=20+h*barW; const barH=(count/maxCount)*maxH; const y=height-20-barH;
-    ctx.fillStyle=h===currentHour?'#d44e43':'#5c453b';
-    ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(x+2,y,barW-4,barH,3); else ctx.rect(x+2,y,barW-4,barH);
-    ctx.fill();
-    if(count>0){ ctx.fillStyle='#d1a14a'; ctx.font='10px Outfit'; ctx.textAlign='center'; ctx.fillText(count,x+barW/2,y-4); }
-  });
-  ctx.fillStyle='#5c453b'; ctx.font='9px Outfit'; ctx.textAlign='center';
-  [0,6,12,18,23].forEach(h=>{ const x=20+h*barW+barW/2; ctx.fillText(h+'h',x,height-4); });
-}
-
-async function sendTG(msg) {
-  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'HTML'})}); showToast('Sent to Telegram!'); }
-  catch(e){ showToast('Error sending',true); }
-}
-
-// ── TELEGRAM BROADCAST ──
-window.sendBroadcastToTelegram = async function() {
-  const type = document.getElementById('tgBroadcastType').value;
-  const msg = document.getElementById('tgBroadcastMsg').value.trim();
-  if(!msg) { showToast('Please enter a message',true); return; }
-  const time = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const fullMsg = `${type}\n\n${msg}\n\n<i>— Sent by Admin · ${time}</i>`;
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:fullMsg,parse_mode:'HTML'})});
-    showToast('Message sent to Telegram! 📤');
-    document.getElementById('tgBroadcastMsg').value = '';
-  } catch(e){ showToast('Error sending',true); }
-};
-
-window.sendTotalStatsToTelegram = function() {
-  const s=id=>document.getElementById(id)?.textContent||'';
-  sendTG(`📊 <b>All-Time Overview</b>\n\n📦 <b>Total Orders:</b> ${s('stat-all')}\n⏳ <b>Pending:</b> ${s('stat-pending')}\n✓ <b>Completed:</b> ${s('stat-completed')}\n💵 <b>Total Revenue:</b> ${s('stat-rev')}`);
-};
-
-window.sendTopItemsToTelegram = function() {
-  const counts={};
-  const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const weekStart = new Date(todayStart); weekStart.setDate(weekStart.getDate() - 7);
-  let filtered = orders.filter(o=>o.status==='completed');
-  if(topItemsPeriod === 'today') filtered = filtered.filter(o=>{ if(!o.createdAt) return false; const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt); return d >= todayStart; });
-  else if(topItemsPeriod === 'week') filtered = filtered.filter(o=>{ if(!o.createdAt) return false; const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt); return d >= weekStart; });
-  filtered.forEach(o=>{(o.items||[]).forEach(i=>{if(!counts[i.name])counts[i.name]={name:i.name,qty:0};counts[i.name].qty+=i.qty;});});
-  const sorted=Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,10);
-  if(!sorted.length) return showToast('No completed orders for this period',true);
-  const periodLabels = {today:'Today',week:'This Week',all:'All Time'};
-  sendTG(`🔥 <b>Top Ordered Items — ${periodLabels[topItemsPeriod]}</b>\n\n${sorted.map((item,i)=>`${i+1}. ${item.name} - <b>${item.qty}</b>`).join('\n')}`);
-};
-
-window.sendFilteredStatsToTelegram = function() {
-  const s=id=>document.getElementById(id)?.textContent||'';
-  const startDate=document.getElementById('statStartDate')?.value;
-  const endDate=document.getElementById('statEndDate')?.value;
-  const subPct=parseFloat(document.getElementById('statSubtract')?.value)||0;
-  const note=document.getElementById('statNote')?.value.trim()||'None';
-  let periodStr='All Time';
-  if(startDate&&endDate) periodStr=`${startDate} to ${endDate}`;
-  else if(startDate) periodStr=`From ${startDate}`;
-  else if(endDate) periodStr=`Until ${endDate}`;
-  sendTG(`📅 <b>Period Report</b>\n\n🗓️ <b>Period:</b> ${periodStr}\n📝 <b>Note:</b> ${note}\n\n📦 <b>Orders:</b> ${s('stat-f-orders')}\n💵 <b>Gross Total:</b> ${s('stat-f-gross')}\n📉 <b>Subtract (${subPct}%):</b> ${s('stat-f-sub-amt')}\n💰 <b>Net Total:</b> ${s('stat-f-net')}`);
-};
-async function sendStatusAlert(orderId,status) {
-  if(status==='pending') return;
-  const o=orders.find(x=>x.id===orderId); if(!o) return;
-  const itemLines=(o.items||[]).map(i=>`  • <b>${i.name}</b> ×${i.qty}`).join('\n');
-  const icon=status==='completed'?'✅':'❌';
-  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:`${icon} <b>Order ${status.toUpperCase()}</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`,parse_mode:'HTML'})}); } catch(e){}
-}
-
-// ── LIVE ORDERS ──
-window.setOrderFilter = function(f) {
-  orderFilter=f;
-  ['all','pending','completed','cancelled'].forEach(fv=>{
-    const btn=document.getElementById(`ofilter-${fv}`); if(!btn) return;
-    if(fv===f){btn.classList.remove('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]');btn.classList.add('bg-[#d44e43]','text-white');}
-    else{btn.classList.add('bg-[#4e3b32]','text-gray-300','border','border-[#5c453b]');btn.classList.remove('bg-[#d44e43]','text-white');}
-  });
-  renderOrders();
-};
-function getElapsedTime(createdAt) {
-  if(!createdAt) return '';
-  const d=createdAt.toDate?createdAt.toDate():new Date(createdAt);
-  const mins=Math.floor((Date.now()-d.getTime())/60000);
-  if(mins<1) return 'just now'; if(mins<60) return `${mins}m ago`; return `${Math.floor(mins/60)}h ${mins%60}m ago`;
-}
-function renderOrders() {
-  const grid=document.getElementById('ordersGrid'); const noOrd=document.getElementById('noOrders');
-  if(!grid||!noOrd) return;
-  let filtered=orderFilter!=='all'?orders.filter(o=>o.status===orderFilter):orders;
-  filtered=filtered.slice(0,60);
-  if(!filtered.length){grid.innerHTML='';noOrd.classList.remove('hidden');return;}
-  noOrd.classList.add('hidden');
-  const tempIcon=item=>item.temperature==='hot'?'☕':item.temperature==='frappe'?'🥤':'🧊';
-  grid.innerHTML=filtered.map(o=>{
-    const elapsed=getElapsedTime(o.createdAt);
-    const mins=o.createdAt?Math.floor((Date.now()-(o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt)).getTime())/60000):0;
-    return `<div class="bg-[#4e3b32] rounded-xl border order-card-${o.status} overflow-hidden shadow-lg flex flex-col fade-up">
-      <div class="p-3 border-b border-[#5c453b] flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-[#d44e43] text-sm">Table ${o.tableNumber}</span>
-          <span class="text-xs text-gray-400">#${o.id.slice(-5).toUpperCase()}</span>
-          ${o.status==='pending'&&mins>=10?'<span class="text-[9px] bg-[#d44e43] text-white px-1.5 py-0.5 rounded font-bold animate-pulse">URGENT</span>':''}
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="order-timer">${elapsed}</span>
-          <span class="text-[10px] font-bold px-2 py-1 rounded-full status-${o.status}">${o.status==='pending'?'⏳ Pending':o.status==='completed'?'✓ Completed':'✗ Cancelled'}</span>
-        </div>
-      </div>
-      <div class="p-4 flex-1 space-y-2">
-        ${(o.items||[]).map(i=>{
-          let opts=`${tempIcon(i)} | Sugar:${i.sugar}`;
-          if(i.temperature!=='hot') opts+=` | Ice:${i.ice}`;
-          if(i.toppingsData?.length) opts+=` | +${i.toppingsData.length} tops`;
-          return `<div class="border-b border-[#5c453b] pb-2 last:border-0 last:pb-0">
-            <div class="flex justify-between text-sm"><span class="font-bold">${i.qty}× ${i.name}</span><span>$${(i.price*i.qty).toFixed(2)}</span></div>
-            <p class="text-xs text-gray-400 mt-0.5">${opts}</p>
-          </div>`;
-        }).join('')}
-        ${o.note?`<div class="mt-2 p-2 bg-[#3a2a24] rounded border border-[#5c453b] text-xs text-gray-300">📝 ${o.note}</div>`:''}
-      </div>
-      <div class="bg-[#3a2a24] p-3 border-t border-[#5c453b] flex items-center justify-between">
-        <span class="font-bold text-[#5db85b]">$${Number(o.total).toFixed(2)}</span>
-        <div class="flex gap-2">
-          ${o.status==='pending'
-            ?`<button onclick="quickStatus('${o.id}','completed')" class="bg-[#5db85b] hover:bg-[#4cae4c] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">✓ Complete</button>
-               <button onclick="quickStatus('${o.id}','cancelled')" class="bg-[#d44e43]/30 hover:bg-[#d44e43] text-[#d44e43] hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-[#d44e43]/50 transition">✗ Cancel</button>`
-            :`<button onclick="openEditOrderModal('${o.id}')" class="bg-[#5c453b] hover:bg-[#6b5040] text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit Status</button>`}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-window.quickStatus = async function(id,status) {
-  try { await updateDoc(doc(db,'orders',id),{status}); showToast(`Order ${status}!`); sendStatusAlert(id,status); }
-  catch(e){ showToast('Error updating',true); }
-};
-
-// ── ORDER HISTORY ──
-window.renderHistory = function() {
-  const startDate=document.getElementById('historyStartDate')?.value;
-  const endDate=document.getElementById('historyEndDate')?.value;
-  const tbody=document.getElementById('historyTableBody'); if(!tbody) return;
-  let filtered=orders;
-  if(startDate||endDate){
-    filtered=orders.filter(o=>{
-      if(!o.createdAt) return false;
-      const d=o.createdAt.toDate?o.createdAt.toDate():new Date(o.createdAt);
-      const iso=new Date(d.getTime()-(d.getTimezoneOffset()*60000)).toISOString().split('T')[0];
-      if(startDate&&iso<startDate) return false; if(endDate&&iso>endDate) return false; return true;
-    });
-  }
-  currentHistoryFilteredOrders=filtered;
-  if(!filtered.length){tbody.innerHTML=`<tr><td colspan="7" class="p-8 text-center text-gray-400">No orders for this range.</td></tr>`;return;}
-  tbody.innerHTML=filtered.map(o=>{
-    const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleString():'';
-    const itemsTxt=(o.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ');
-    const sc=o.status==='completed'?'text-[#5db85b]':o.status==='cancelled'?'text-red-500':'text-[#d1a14a]';
-    return `<tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
-      <td class="p-4 text-xs font-mono">#${o.id.slice(-6).toUpperCase()}</td>
-      <td class="p-4 text-xs text-gray-400">${time}</td>
-      <td class="p-4">T${o.tableNumber}</td>
-      <td class="p-4 text-xs max-w-[180px] truncate" title="${itemsTxt}">${itemsTxt}</td>
-      <td class="p-4 font-bold">$${Number(o.total).toFixed(2)}</td>
-      <td class="p-4 font-bold ${sc} uppercase text-xs">${o.status}</td>
-      <td class="p-4 text-right flex items-center justify-end gap-3 h-full pt-4">
-        <button onclick="sendSingleOrderToTelegram('${o.id}')" class="text-blue-400 hover:text-blue-300 transition" title="Send"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></button>
-        <button onclick="openEditOrderModal('${o.id}')" class="text-gray-400 hover:text-[#5db85b] transition" title="Edit"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-        <button onclick="deleteOrderHistory('${o.id}')" class="text-gray-400 hover:text-[#d44e43] transition" title="Delete"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-      </td>
-    </tr>`;
-  }).join('');
-};
-window.sendHistoryToTelegram = async function() {
-  if(!currentHistoryFilteredOrders.length) return showToast('No orders to send',true);
-  let listTxt='', listTotal=0;
-  currentHistoryFilteredOrders.forEach(o=>{
-    const time=o.createdAt?new Date(o.createdAt.toDate?o.createdAt.toDate():o.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-    listTxt+=`• <b>#${o.id.slice(-6).toUpperCase()}</b> (${time}) - $${Number(o.total).toFixed(2)} [${o.status.toUpperCase()}]\n`;
-    if(o.status==='completed') listTotal+=Number(o.total);
-  });
-  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:`📋 <b>Order List Export</b>\n\n📦 <b>Total:</b> ${currentHistoryFilteredOrders.length}\n💰 <b>Completed Sum:</b> $${listTotal.toFixed(2)}\n\n${listTxt}`,parse_mode:'HTML'})}); showToast('List sent to Telegram!'); }
-  catch(e){ showToast('Failed to send',true); }
-};
-window.sendSingleOrderToTelegram = async function(id) {
-  const o=orders.find(x=>x.id===id); if(!o) return;
-  const itemLines=(o.items||[]).map(i=>`  • ${i.qty}× ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join('\n');
-  try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:`🧾 <b>Order Receipt</b>\n\n🆔 #${o.id.slice(-6).toUpperCase()}\n🪑 Table: ${o.tableNumber}\n📌 Status: <b>${o.status.toUpperCase()}</b>\n\n<b>Items:</b>\n${itemLines}\n\n💰 <b>Total: $${Number(o.total).toFixed(2)}</b>`,parse_mode:'HTML'})}); showToast('Order sent!'); }
-  catch(e){ showToast('Failed',true); }
-};
-window.deleteOrderHistory = async function(id) {
-  if(await customConfirm('Permanently delete this order?','Delete Order')){ try{ await deleteDoc(doc(db,'orders',id)); showToast('Deleted.'); } catch(e){ showToast('Error',true); } }
-};
-window.openEditOrderModal = function(id) {
-  editingOrderId=id; const o=orders.find(x=>x.id===id); if(!o) return;
-  document.getElementById('editOrderStatus').value=o.status||'pending';
-  const m=document.getElementById('editOrderModal'); m.classList.remove('hidden'); m.style.display='flex';
-};
-window.closeEditOrderModal = function(){ editingOrderId=null; const m=document.getElementById('editOrderModal'); m.classList.add('hidden'); m.style.display='none'; };
-window.saveEditOrder = async function() {
-  if(!editingOrderId) return;
-  const status=document.getElementById('editOrderStatus').value;
-  try{ await updateDoc(doc(db,'orders',editingOrderId),{status}); closeEditOrderModal(); showToast('Status updated!'); sendStatusAlert(editingOrderId,status); }
-  catch(e){ showToast('Error',true); }
-};
-
-// ── MENU MANAGER ──
-window.addMenuItem = async function() {
-  const name=document.getElementById('addName').value.trim();
-  const nameKh=document.getElementById('addNameKh').value.trim();
-  const cat=document.getElementById('addCat').value.trim();
-  const popular=document.getElementById('addPopular').checked;
-
-  // Gather prices only from enabled toggles
-  const price = tempStates.ice ? parseFloat(document.getElementById('addPrice').value) : null;
-  const priceHot = tempStates.hot ? parseFloat(document.getElementById('addPriceHot').value) : null;
-  const priceFrappe = tempStates.frappe ? parseFloat(document.getElementById('addPriceFrappe').value) : null;
-
-  if(!name){ showToast('Name is required',true); return; }
-
-  // At least one temp must be enabled with a price
-  const hasValidPrice = (tempStates.ice && !isNaN(price)) || (tempStates.hot && !isNaN(priceHot)) || (tempStates.frappe && !isNaN(priceFrappe));
-  if(!hasValidPrice){ showToast('At least one enabled option needs a price',true); return; }
-
-  // Base price is whichever is first enabled
-  const basePrice = tempStates.ice && !isNaN(price) ? price : (tempStates.hot && !isNaN(priceHot) ? priceHot : priceFrappe);
-  const temperature = getAddTemperature();
-
-  const imgUrl=document.getElementById('addImage')?.value.trim()||'';
-  try {
-    await addDoc(collection(db,'menu'),{
-      name,nameKh,
-      price: basePrice,
-      priceHot: tempStates.hot && !isNaN(priceHot) ? priceHot : null,
-      priceFrappe: tempStates.frappe && !isNaN(priceFrappe) ? priceFrappe : null,
-      category:cat||'Other',imageUrl:imgUrl,discount:0,inStock:true,temperature,popular
-    });
-    ['addName','addNameKh','addCat','addImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    ['addPrice','addPriceHot','addPriceFrappe'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    document.getElementById('addPopular').checked=false;
-    previewUrlImg('','addUrlPreview');
-    showToast('Item added!');
-  } catch(e){ showToast('Error adding item',true); }
-};
-window.applyBulkDiscount = async function() {
-  const pctInput=document.getElementById('bulkDiscountInput').value;
-  const pct=parseInt(pctInput);
-  if(pctInput===''||isNaN(pct)||pct<0||pct>100) return showToast('Enter 0-100',true);
-  const itemsToUpdate=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
-  if(!itemsToUpdate.length) return showToast('No items found',true);
-  if(!(await customConfirm(`Apply ${pct}% discount to ${itemsToUpdate.length} items?`,'Apply Discount'))) return;
-  try { await Promise.all(itemsToUpdate.map(m=>updateDoc(doc(db,'menu',m.id),{discount:pct}))); document.getElementById('bulkDiscountInput').value=''; showToast(`${pct}% applied!`); }
-  catch(e){ showToast('Error',true); }
-};
-window.updateDiscount = async function(id,val){ try{ await updateDoc(doc(db,'menu',id),{discount:parseInt(val)||0}); }catch(e){} };
-window.togglePopular = async function(id,val){ try{ await updateDoc(doc(db,'menu',id),{popular:val}); showToast(val?'Marked popular!':'Removed from popular'); }catch(e){} };
-window.toggleInStock = async function(id,val){ try{ await updateDoc(doc(db,'menu',id),{inStock:val}); showToast(val?'In Stock ✓':'Out of Stock ✗'); }catch(e){} };
-window.deleteMenuItem = async function(id){ if(!(await customConfirm('Delete this drink?','Delete Drink'))) return; try{ await deleteDoc(doc(db,'menu',id)); showToast('Deleted.'); }catch(e){ showToast('Error',true); } };
-window.openEditMenuModal = function(id) {
-  const item=menuItems.find(m=>m.id===id); if(!item) return; editingMenuId=id;
-  document.getElementById('editName').value=item.name||''; document.getElementById('editNameKh').value=item.nameKh||'';
-  document.getElementById('editPrice').value=item.price||0; document.getElementById('editPriceHot').value=item.priceHot||'';
-  document.getElementById('editPriceFrappe').value=item.priceFrappe||''; document.getElementById('editCat').value=item.category||'';
-  document.getElementById('editImage').value=item.imageUrl||'';
-  previewUrlImg(item.imageUrl||'', 'editUrlPreview');
-  document.getElementById('editTemperature').value=item.temperature||'both'; document.getElementById('editPopular').checked=!!item.popular;
-  const m=document.getElementById('editMenuModal'); m.classList.remove('hidden'); m.style.display='flex';
-};
-window.closeEditMenuModal = function(){ editingMenuId=null; const m=document.getElementById('editMenuModal'); m.classList.add('hidden'); m.style.display='none'; };
-window.saveEditMenu = async function() {
-  if(!editingMenuId) return;
-  const name=document.getElementById('editName').value.trim(); const nameKh=document.getElementById('editNameKh').value.trim();
-  const price=parseFloat(document.getElementById('editPrice').value); const priceHot=parseFloat(document.getElementById('editPriceHot').value)||null;
-  const priceFrappe=parseFloat(document.getElementById('editPriceFrappe').value)||null; const category=document.getElementById('editCat').value.trim()||'Other';
-  const temperature=document.getElementById('editTemperature').value; const popular=document.getElementById('editPopular').checked;
-  if(!name||isNaN(price)){ showToast('Name and Price required',true); return; }
-  const imageUrl=document.getElementById('editImage')?.value.trim()||'';
-  try{ await updateDoc(doc(db,'menu',editingMenuId),{name,nameKh,price,priceHot,priceFrappe,category,imageUrl,temperature,popular}); closeEditMenuModal(); showToast('Updated!'); }
-  catch(e){ showToast('Error',true); }
-};
-window.filterMenu = function(){ currentMenuCat=document.getElementById('menuCatFilter').value; renderMenuTable(); };
-function updateCategoryDropdown() {
-  const select=document.getElementById('menuCatFilter'); if(!select) return;
-  const cats=[...new Set(menuItems.map(m=>m.category||'Other'))]; const prev=select.value;
-  select.innerHTML='<option value="All">All Categories</option>';
-  cats.forEach(c=>{ select.innerHTML+=`<option value="${c}" ${prev===c?'selected':''}>${c}</option>`; });
-}
-function getTempLabel(t) {
-  if(t==='ice') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-ice">🧊 Ice</span>`;
-  if(t==='hot') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-hot">☕ Hot</span>`;
-  if(t==='frappe') return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-frappe">🥤 Frappe</span>`;
-  return `<span class="text-[10px] px-2 py-0.5 rounded-full tp-both">🧊☕ Both</span>`;
-}
-function renderMenuTable() {
-  const tbody=document.getElementById('menuTableBody'); if(!tbody) return;
-  const filtered=currentMenuCat==='All'?menuItems:menuItems.filter(m=>(m.category||'Other')===currentMenuCat);
-  tbody.innerHTML=filtered.map(m=>{
-    const finalPrice=m.price*(1-(m.discount||0)/100); const inStock=m.inStock!==false;
-    return `<tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
-      <td class="p-4 flex items-center gap-3">
-        <img src="${m.imageUrl||'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-10 h-10 rounded shadow object-cover border border-[#5c453b]" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'">
-        <div><div class="font-medium">${m.name}</div><div class="text-xs text-gray-400 khmer">${m.nameKh||''}</div></div>
-      </td>
-      <td class="p-4"><span class="bg-[#3a2a24] border border-[#5c453b] px-2 py-1 rounded text-xs">${m.category}</span></td>
-      <td class="p-4">${getTempLabel(m.temperature||'both')}</td>
-      <td class="p-4"><button onclick="togglePopular('${m.id}',${!m.popular})" class="text-lg ${m.popular?'opacity-100':'opacity-25 hover:opacity-60'} transition">🔥</button></td>
-      <td class="p-4"><button onclick="toggleInStock('${m.id}',${!inStock})" class="px-3 py-1.5 rounded-lg text-xs font-bold transition border ${inStock?'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40 hover:bg-[#d44e43]/20 hover:text-[#d44e43] hover:border-[#d44e43]/40':'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40 hover:bg-[#5db85b]/20 hover:text-[#5db85b] hover:border-[#5db85b]/40'}">${inStock?'✓ In Stock':'✗ Out'}</button></td>
-      <td class="p-4">$${Number(m.price).toFixed(2)}</td>
-      <td class="p-4"><div class="flex items-center gap-1 bg-[#3a2a24] border border-[#5c453b] rounded p-1 w-20"><input type="number" min="0" max="100" value="${m.discount||0}" onchange="updateDiscount('${m.id}',this.value)" class="w-full bg-transparent text-center border-none p-0 text-[#d44e43] font-bold focus:ring-0"><span class="pr-2 text-gray-400 text-xs">%</span></div></td>
-      <td class="p-4 text-[#5db85b] font-bold">$${finalPrice.toFixed(2)}</td>
-      <td class="p-4 text-right">
-        <button onclick="openEditMenuModal('${m.id}')" class="text-gray-400 hover:text-[#5db85b] transition mr-3"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-        <button onclick="deleteMenuItem('${m.id}')" class="text-gray-400 hover:text-[#d44e43] transition"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ── TOPPINGS ──
-window.openAddToppingModal = ()=>{ const m=document.getElementById('toppingModal'); m.classList.remove('hidden'); m.style.display='flex'; };
-window.closeAddToppingModal = ()=>{ const m=document.getElementById('toppingModal'); m.classList.add('hidden'); m.style.display='none'; };
-window.saveTopping = async function() {
-  const name=document.getElementById('topName').value.trim(); const nameKh=document.getElementById('topNameKh').value.trim();
-  const price=parseFloat(document.getElementById('topPrice').value);
-  const imageUrl=document.getElementById('topImage').value.trim();
-  if(!name){ showToast('Name required!',true); return; } if(isNaN(price)||price<0){ showToast('Valid price required!',true); return; }
-  try {
-    await addDoc(collection(db,'toppings'),{name,nameKh,price,imageUrl,inStock:true});
-    closeAddToppingModal();
-    ['topName','topNameKh','topPrice','topImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    previewImg('','topUrlPreviewImg','topUrlPreview');
-    showToast('Topping added!');
-  } catch(e){ showToast('Error: '+e.message,true); }
-};
-window.deleteTopping = async function(id){ if(!(await customConfirm('Remove this topping?','Remove Topping'))) return; try{ await deleteDoc(doc(db,'toppings',id)); }catch(e){} };
-window.openEditToppingModal = function(id) {
-  const tp=toppings.find(x=>x.id===id); if(!tp) return; editingToppingId=id;
-  document.getElementById('editTopName').value=tp.name||''; document.getElementById('editTopNameKh').value=tp.nameKh||'';
-  document.getElementById('editTopPrice').value=tp.price||0; document.getElementById('editTopImage').value=tp.imageUrl||'';
-  const prevImg=document.getElementById('editTopImagePreviewImg');
-  if(tp.imageUrl){prevImg.src=tp.imageUrl;document.getElementById('editTopImagePreview').style.display='block';}
-  else document.getElementById('editTopImagePreview').style.display='none';
-  const m=document.getElementById('editToppingModal'); m.classList.remove('hidden'); m.style.display='flex';
-};
-window.closeEditToppingModal = function(){ editingToppingId=null; const m=document.getElementById('editToppingModal'); m.classList.add('hidden'); m.style.display='none'; };
-window.saveEditTopping = async function() {
-  if(!editingToppingId) return;
-  const name=document.getElementById('editTopName').value.trim(); const nameKh=document.getElementById('editTopNameKh').value.trim();
-  const price=parseFloat(document.getElementById('editTopPrice').value); const imageUrl=document.getElementById('editTopImage').value.trim();
-  if(!name||isNaN(price)||price<0){ showToast('Invalid data',true); return; }
-  try{ await updateDoc(doc(db,'toppings',editingToppingId),{name,nameKh,price,imageUrl}); closeEditToppingModal(); showToast('Updated!'); }
-  catch(e){ showToast('Error',true); }
-};
-window.toggleToppingStock = async function(id,val){ try{ await updateDoc(doc(db,'toppings',id),{inStock:val}); showToast(val?'Topping In Stock ✓':'Out of Stock ✗'); }catch(e){} };
-function renderToppings() {
-  const grid=document.getElementById('toppingsGrid'); if(!grid) return;
-  grid.innerHTML=toppings.map(tp=>{
-    const inStock=tp.inStock!==false;
-    return `<div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden shadow-sm">
-      ${tp.imageUrl?`<div class="h-28 bg-[#3a2a24] overflow-hidden"><img src="${tp.imageUrl}" alt="${tp.name}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/></div>`:`<div class="h-28 bg-[#3a2a24] flex items-center justify-center text-4xl opacity-30">🧁</div>`}
-      <div class="p-4 flex justify-between items-start">
-        <div class="flex-1 min-w-0 mr-2">
-          <p class="font-bold text-sm truncate">${tp.name}</p>
-          <p class="text-[10px] text-gray-400 mb-1 truncate khmer">${tp.nameKh||''}</p>
-          <p class="text-[#5db85b] font-semibold text-sm">+$${Number(tp.price).toFixed(2)}</p>
-        </div>
-        <div class="flex gap-1 flex-shrink-0 items-center">
-          <button onclick="toggleToppingStock('${tp.id}',${!inStock})" class="px-2 py-1 rounded text-[10px] font-bold transition border ${inStock?'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40':'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40'}">${inStock?'✓':'✗'}</button>
-          <button onclick="openEditToppingModal('${tp.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-          <button onclick="deleteTopping('${tp.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ── SLIDESHOW ──
-window.addSlide = async function() {
-  const step=parseInt(document.getElementById('slideStep').value)||(slideshowItems.length+1);
-  const imageUrl=document.getElementById('slideImage')?.value.trim()||'';
-  const titleEn=document.getElementById('slideTitleEn').value.trim(); const titleKh=document.getElementById('slideTitleKh').value.trim();
-  const descEn=document.getElementById('slideDescEn').value.trim(); const descKh=document.getElementById('slideDescKh').value.trim();
-  if(!titleEn){ showToast('Title (EN) required',true); return; }
-  try {
-    await addDoc(collection(db,'slideshow'),{step,order:step,imageUrl,title:titleEn,titleKh,description:descEn,descKh});
-    ['slideStep','slideImage','slideTitleEn','slideTitleKh','slideDescEn','slideDescKh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    showToast('Slide added!');
-  } catch(e){ showToast('Error',true); }
-};
-window.deleteSlide = async function(id){ if(!(await customConfirm('Delete slide?','Delete Slide'))) return; try{ await deleteDoc(doc(db,'slideshow',id)); showToast('Deleted.'); }catch(e){ showToast('Error',true); } };
-window.openEditSlideModal = function(id) {
-  const slide=slideshowItems.find(s=>s.id===id); if(!slide) return; editingSlideId=id;
-  document.getElementById('editSlideStep').value=slide.step||''; document.getElementById('editSlideImage').value=slide.imageUrl||'';
-  document.getElementById('editSlideTitleEn').value=slide.title||''; document.getElementById('editSlideTitleKh').value=slide.titleKh||'';
-  document.getElementById('editSlideDescEn').value=slide.description||''; document.getElementById('editSlideDescKh').value=slide.descKh||'';
-  const m=document.getElementById('editSlideModal'); m.classList.remove('hidden'); m.style.display='flex';
-};
-window.closeEditSlideModal = function(){ editingSlideId=null; const m=document.getElementById('editSlideModal'); m.classList.add('hidden'); m.style.display='none'; };
-window.saveEditSlide = async function() {
-  if(!editingSlideId) return;
-  const step=parseInt(document.getElementById('editSlideStep').value)||1;
-  const imageUrl=document.getElementById('editSlideImage').value.trim();
-  const title=document.getElementById('editSlideTitleEn').value.trim(); const titleKh=document.getElementById('editSlideTitleKh').value.trim();
-  const description=document.getElementById('editSlideDescEn').value.trim(); const descKh=document.getElementById('editSlideDescKh').value.trim();
-  if(!title){ showToast('Title required',true); return; }
-  try{ await updateDoc(doc(db,'slideshow',editingSlideId),{step,order:step,imageUrl,title,titleKh,description,descKh}); closeEditSlideModal(); showToast('Updated!'); }
-  catch(e){ showToast('Error',true); }
-};
-function renderSlideshowList() {
-  const container=document.getElementById('slideshowList'); if(!container) return;
-  if(!slideshowItems.length){container.innerHTML='<p class="text-center text-gray-400 py-8">No slides yet.</p>';return;}
-  container.innerHTML=slideshowItems.map(slide=>`
-    <div class="bg-[#4e3b32] border border-[#5c453b] rounded-xl overflow-hidden flex">
-      ${slide.imageUrl?`<div class="w-28 flex-shrink-0 bg-[#3a2a24]"><img src="${slide.imageUrl}" alt="Slide" class="w-full h-full object-cover"/></div>`:`<div class="w-28 flex-shrink-0 bg-[#3a2a24] flex items-center justify-center text-3xl opacity-20">🖼️</div>`}
-      <div class="flex-1 p-4 flex justify-between items-start min-w-0">
-        <div class="flex-1 min-w-0 mr-3">
-          <div class="flex items-center gap-2 mb-1">
-            <span class="w-6 h-6 rounded-full bg-[#d44e43] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">${slide.step||'?'}</span>
-            <p class="font-bold text-sm truncate">${slide.title||'Untitled'}</p>
-          </div>
-          ${slide.titleKh?`<p class="text-xs text-gray-400 mb-1 truncate khmer">${slide.titleKh}</p>`:''}
-          ${slide.description?`<p class="text-xs text-gray-500 line-clamp-2">${slide.description}</p>`:''}
-        </div>
-        <div class="flex gap-1 flex-shrink-0">
-          <button onclick="openEditSlideModal('${slide.id}')" class="text-gray-400 hover:text-[#5db85b] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
-          <button onclick="deleteSlide('${slide.id}')" class="text-gray-400 hover:text-[#d44e43] p-1.5 transition rounded hover:bg-[#3a2a24]"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-        </div>
-      </div>
-    </div>`).join('');
 }
 
 // ── SOCIAL LINKS ──
-function updateSocialPreview() {
-  const fbVal=document.getElementById('fbUrl').value.trim(); const ttVal=document.getElementById('ttUrl').value.trim();
-  const pfb=document.getElementById('preview-fb'); const ptt=document.getElementById('preview-tt'); const pnone=document.getElementById('preview-none');
-  if(!pfb||!ptt||!pnone) return;
-  if(fbVal||ttVal){
-    pnone.classList.add('hidden');
-    if(fbVal){pfb.classList.remove('hidden');pfb.style.display='flex';}else pfb.classList.add('hidden');
-    if(ttVal){ptt.classList.remove('hidden');ptt.style.display='flex';}else ptt.classList.add('hidden');
-  } else { pfb.classList.add('hidden'); ptt.classList.add('hidden'); pnone.classList.remove('hidden'); }
+async function loadSocialLinks() {
+  try {
+    const snap = await getDocs(collection(db,"settings"));
+    const settings = {};
+    snap.docs.forEach(d => Object.assign(settings, d.data()));
+    renderSocialBar(settings.facebookUrl, settings.tiktokUrl);
+  } catch(e) {}
 }
-document.getElementById('fbUrl').addEventListener('input',updateSocialPreview);
-document.getElementById('ttUrl').addEventListener('input',updateSocialPreview);
-window.saveSocialLinks = async function() {
-  const fbUrl=document.getElementById('fbUrl').value.trim(); const tiktokUrl=document.getElementById('ttUrl').value.trim();
-  try{ await setDoc(doc(db,'settings','socialLinks'),{facebookUrl:fbUrl,tiktokUrl}); showToast('Social links saved!'); updateSocialPreview(); }
-  catch(e){ showToast('Error saving: '+e.message,true); }
-};
-window.clearSocialLinks = async function() {
-  document.getElementById('fbUrl').value=''; document.getElementById('ttUrl').value='';
-  try{ await setDoc(doc(db,'settings','socialLinks'),{facebookUrl:'',tiktokUrl:''}); showToast('Cleared.'); updateSocialPreview(); }catch(e){}
-};
-
-// ── COUPONS ──
-window.addCoupon = async function() {
-  const code=document.getElementById('addCouponCode').value.trim().toUpperCase();
-  const pct=parseInt(document.getElementById('addCouponPct').value);
-  if(!code||isNaN(pct)||pct<=0||pct>100) return showToast('Invalid code or percentage',true);
-  try{ await addDoc(collection(db,'coupons'),{code,discount:pct,active:true}); document.getElementById('addCouponCode').value=''; document.getElementById('addCouponPct').value=''; showToast('Coupon added!'); }
-  catch(e){ showToast('Error adding coupon',true); }
-};
-window.toggleCoupon = async function(id,val){ try{ await updateDoc(doc(db,'coupons',id),{active:val}); showToast(val?'Coupon activated':'Coupon deactivated'); }catch(e){} };
-window.deleteCoupon = async function(id){ if(await customConfirm('Delete this coupon?','Delete Coupon')){ try{ await deleteDoc(doc(db,'coupons',id)); showToast('Deleted'); }catch(e){} } };
-function renderCoupons() {
-  const tbody=document.getElementById('couponsTableBody'); if(!tbody) return;
-  if(!coupons.length){tbody.innerHTML='<tr><td colspan="4" class="p-8 text-center text-gray-400">No coupons created yet.</td></tr>';return;}
-  tbody.innerHTML=coupons.map(c=>`
-    <tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
-      <td class="p-4 font-bold text-white tracking-widest">${c.code}</td>
-      <td class="p-4 text-[#d44e43] font-bold">-${c.discount}%</td>
-      <td class="p-4"><button onclick="toggleCoupon('${c.id}',${!c.active})" class="px-3 py-1 rounded text-[10px] uppercase font-bold border transition ${c.active?'bg-[#5db85b]/20 text-[#5db85b] border-[#5db85b]/40':'bg-[#d44e43]/20 text-[#d44e43] border-[#d44e43]/40'}">${c.active?'✓ Active':'✗ Inactive'}</button></td>
-      <td class="p-4 text-right"><button onclick="deleteCoupon('${c.id}')" class="text-gray-400 hover:text-[#d44e43] transition"><svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button></td>
-    </tr>`).join('');
+function renderSocialBar(fbUrl, ttUrl) {
+  const bar = document.getElementById("socialBar");
+  if(!fbUrl && !ttUrl) { bar.classList.add("hidden-bar"); return; }
+  bar.classList.remove("hidden-bar");
+  let html = '';
+  if(fbUrl) html += `<a href="${fbUrl}" target="_blank" rel="noopener" class="social-link social-fb">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+  </a>`;
+  if(ttUrl) html += `<a href="${ttUrl}" target="_blank" rel="noopener" class="social-link social-tiktok">
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+  </a>`;
+  bar.innerHTML = html;
 }
 
-// ── CONFIRM MODAL ──
-window.customConfirm = function(message,title='Confirm Action') {
-  return new Promise(resolve=>{
-    const modal=document.getElementById('confirmModal');
-    document.getElementById('confirmTitle').innerText=title;
-    document.getElementById('confirmMessage').innerText=message;
-    modal.classList.remove('hidden');
-    const okBtn=document.getElementById('confirmOkBtn'); const cancelBtn=document.getElementById('confirmCancelBtn');
-    const cleanup=()=>{ modal.classList.add('hidden'); okBtn.replaceWith(okBtn.cloneNode(true)); cancelBtn.replaceWith(cancelBtn.cloneNode(true)); };
-    document.getElementById('confirmOkBtn').addEventListener('click',()=>{cleanup();resolve(true);});
-    document.getElementById('confirmCancelBtn').addEventListener('click',()=>{cleanup();resolve(false);});
+// ── SLIDESHOW REDESIGN ──
+let _slideshowTimer;
+async function loadSlideshow() {
+  try {
+    const snap = await getDocs(collection(db,"slideshow"));
+    slides = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+    if(slides.length > 0) {
+      currentSlide = 0;
+      renderSlideshow();
+      document.getElementById("slideshow-section").classList.remove("hidden");
+      startSlideshow();
+    }
+  } catch(e) {}
+}
+function startSlideshow() {
+  clearInterval(_slideshowTimer);
+  if(slides.length <= 1) return;
+  _slideshowTimer = setInterval(() => { currentSlide = (currentSlide + 1) % slides.length; updateSlide(); }, 6000);
+}
+function renderSlideshow() {
+  const container = document.getElementById("slides-container");
+  const dotsEl = document.getElementById("slide-dots");
+  if(!container || !slides.length) return;
+  
+  container.innerHTML = slides.map((slide, i) => {
+    const title = lang==='kh'&&slide.titleKh ? slide.titleKh : slide.title||'';
+    const desc = lang==='kh'&&slide.descKh ? slide.descKh : slide.description||'';
+    return `
+      <div class="slide-item w-full flex-shrink-0 flex flex-col items-center p-5" data-index="${i}">
+        <div class="w-full max-w-lg rounded-2xl overflow-hidden border border-[var(--bdr)] bg-[var(--sur2)] p-1.5 shadow-sm mb-5">
+          ${slide.imageUrl
+            ? `<img src="${slide.imageUrl}" alt="Step ${slide.step||(i+1)}" class="w-full h-auto rounded-xl object-contain bg-[var(--bg)] border border-[var(--bdr)]/50" style="aspect-ratio: 16/9; max-height: 250px;"/>`
+            : `<div class="w-full rounded-xl bg-[var(--sur)] flex items-center justify-center border border-[var(--bdr)]/50" style="aspect-ratio: 16/9; max-height: 250px;">
+                 <div class="step-badge text-2xl w-16 h-16">${slide.step||(i+1)}</div>
+               </div>`
+          }
+        </div>
+        <div class="flex items-center gap-3 justify-center mb-2">
+          <div class="step-badge w-8 h-8 text-sm">${slide.step||(i+1)}</div>
+          <h3 class="font-bold text-[var(--txt)] text-lg">
+            ${title}
+          </h3>
+        </div>
+        <p class="text-sm text-[var(--muted)] text-center max-w-md">
+          ${desc}
+        </p>
+      </div>
+    `;
+  }).join('');
+  
+  // Dots
+  dotsEl.innerHTML = slides.map((_, i) =>
+    `<div class="slide-dot ${i===currentSlide?'on':''}" onclick="goToSlide(${i})"></div>`
+  ).join('');
+  
+  const counterEl = document.getElementById("slide-counter");
+  if(counterEl) counterEl.textContent = `${currentSlide + 1} / ${slides.length}`;
+  
+  updateSlide();
+}
+function updateSlide() {
+  const container = document.getElementById("slides-container");
+  if(container) container.style.transform = `translateX(-${currentSlide * 100}%)`;
+  const dots = document.querySelectorAll(".slide-dot");
+  dots.forEach((d,i) => d.classList.toggle("on", i===currentSlide));
+  
+  const counterEl = document.getElementById("slide-counter");
+  if(counterEl) counterEl.textContent = `${currentSlide + 1} / ${slides.length}`;
+}
+window.prevSlide = function() { currentSlide = (currentSlide - 1 + slides.length) % slides.length; updateSlide(); startSlideshow(); };
+window.nextSlide = function() { currentSlide = (currentSlide + 1) % slides.length; updateSlide(); startSlideshow(); };
+window.goToSlide = function(i) { currentSlide = i; updateSlide(); startSlideshow(); };
+
+// ── CATEGORIES ──
+function buildCats() {
+  const cats = ["All", ...new Set(allItems.map(i=>i.category||"Other"))];
+  const catRow = document.getElementById("catRow");
+  catRow.innerHTML = cats.map(c =>
+    `<button class="cat-pill px-4 py-1.5 rounded-full text-xs font-semibold ${c===currentCat?'on':''}" onclick="filterByCat('${c}')">${c}</button>`
+  ).join('');
+}
+window.filterByCat = function(cat) {
+  currentCat = cat;
+  const filtered = cat==="All" ? allItems : allItems.filter(i=>(i.category||"Other")===cat);
+  currentItems = filtered;
+  renderMenu(filtered);
+  buildCats();
+};
+
+// ── POPULAR ──
+function renderPopular() {
+  const popularItems = allItems.filter(i=>i.popular && i.inStock!==false);
+  const section = document.getElementById("popularSection");
+  const grid = document.getElementById("popularGrid");
+  if(!popularItems.length) { section.classList.add("hidden"); return; }
+  section.classList.remove("hidden");
+  grid.innerHTML = popularItems.map(item => {
+    const finalPrice = item.price * (1 - (item.discount||0)/100);
+    const count = itemOrderCounts[item.name] || 0;
+    return `<div class="m-card rounded-2xl overflow-hidden cursor-pointer flex-shrink-0 w-36" onclick="openCustomModal('${item.id}')">
+      <div class="relative w-full bg-[var(--sur2)]" style="aspect-ratio:1">
+        <img src="${item.imageUrl||'https://placehold.co/200/f5ece3/3c2a21?text=☕'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200/f5ece3/3c2a21?text=☕'"/>
+        <div class="popular-badge">🔥 Popular</div>
+      </div>
+      <div class="p-2.5">
+        <p class="text-xs font-bold leading-tight truncate">${lang==='kh'&&item.nameKh?item.nameKh:item.name}</p>
+        <p class="text-[var(--gold)] font-bold text-sm mt-1">$${finalPrice.toFixed(2)}</p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── MENU ──
+function renderMenu(items) {
+  const grid = document.getElementById("menuGrid");
+  const empty = document.getElementById("emptyMenu");
+  if(!items.length) {
+    grid.classList.add("hidden"); empty.classList.remove("hidden"); return;
+  }
+  empty.classList.add("hidden");
+  grid.classList.remove("hidden");
+  grid.innerHTML = items.map(item => {
+    const finalPrice = item.price * (1 - (item.discount||0)/100);
+    const inStock = item.inStock !== false;
+    const count = itemOrderCounts[item.name] || 0;
+    const tempBadge = item.temperature==='ice' ? `<span class="temp-badge temp-ice">🧊</span>`
+      : item.temperature==='hot' ? `<span class="temp-badge temp-hot">☕</span>`
+      : item.temperature==='frappe' ? `<span class="temp-badge temp-frappe">🥤</span>`
+      : `<span class="temp-badge temp-ice">🧊☕</span>`;
+    return `<div class="m-card rounded-2xl overflow-hidden cursor-pointer relative ${!inStock?'out-stock':''}" data-item-id="${item.id}" onclick="${inStock?`openCustomModal('${item.id}')`:''}" >
+      <div class="relative w-full bg-[var(--sur2)]" style="aspect-ratio:1">
+        <img src="${item.imageUrl||'https://placehold.co/200/f5ece3/3c2a21?text=☕'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200/f5ece3/3c2a21?text=☕'" loading="lazy"/>
+        ${item.popular?`<div class="popular-badge">🔥</div>`:''}
+        ${item.discount>0?`<div class="absolute top-2 right-2 bg-[var(--red)] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">-${item.discount}%</div>`:''}
+        ${!inStock?`<div class="out-stock-badge"><span class="text-white text-xs font-bold">${t().outOfStock}</span></div>`:''}
+      </div>
+      <div class="p-3">
+        <div class="flex items-start justify-between gap-1 mb-1">
+          <p class="text-xs font-bold leading-tight flex-1">${lang==='kh'&&item.nameKh?item.nameKh:item.name}</p>
+          ${tempBadge}
+        </div>
+        ${count>0?`<p class="text-[10px] text-[var(--muted)] mb-1">${count} ${t().ordersCount}</p>`:''}
+        <div class="flex items-center justify-between mt-1.5">
+          ${item.discount>0
+            ? `<div><span class="text-[var(--gold)] font-bold text-sm">$${finalPrice.toFixed(2)}</span><span class="text-[var(--muted)] text-[10px] line-through ml-1">$${item.price.toFixed(2)}</span></div>`
+            : `<span class="text-[var(--gold)] font-bold text-sm">$${finalPrice.toFixed(2)}</span>`
+          }
+          ${inStock?`<button class="g-btn w-7 h-7 rounded-full text-lg leading-none flex items-center justify-center shadow-sm" onclick="event.stopPropagation();openCustomModal('${item.id}')">+</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CUSTOMIZE MODAL ──
+let currentModalItem = null;
+let modalSelectedTemp = null;
+let modalSelectedSugar = "100%";
+let modalSelectedIce = "100%";
+let modalSelectedToppings = [];
+let editCartIndex = -1;
+
+window.openCustomModal = function(itemId, cartIdx=-1) {
+  const item = allItems.find(i=>i.id===itemId);
+  if(!item) return;
+  currentModalItem = item;
+  editCartIndex = cartIdx;
+
+  const modal = document.getElementById("customModal");
+  modal.classList.remove("hidden");
+  modal.style.display = "flex";
+
+  document.getElementById("cm-title").textContent = lang==='kh'&&item.nameKh ? item.nameKh : item.name;
+
+  // Temperature setup
+  const temp = item.temperature || 'both';
+  const iceBtn = document.getElementById("temp-ice");
+  const hotBtn = document.getElementById("temp-hot");
+  const frappeBtn = document.getElementById("temp-frappe");
+
+  iceBtn.classList.add("hidden"); hotBtn.classList.add("hidden"); frappeBtn.classList.add("hidden");
+  iceBtn.style.display = "none"; hotBtn.style.display = "none"; frappeBtn.style.display = "none";
+
+  const showTemp = (btn, priceEl, price) => {
+    btn.classList.remove("hidden"); btn.style.display = "flex";
+    document.getElementById(priceEl).textContent = price ? `$${price.toFixed(2)}` : '';
+  };
+
+  if(temp==='ice'||temp==='both') showTemp(iceBtn, 'price-lbl-ice', item.price);
+  if(temp==='hot'||temp==='both') showTemp(hotBtn, 'price-lbl-hot', item.priceHot||item.price);
+  if(temp==='frappe'||temp==='both') showTemp(frappeBtn, 'price-lbl-frappe', item.priceFrappe||item.price);
+
+  // Default temp
+  if(cartIdx >= 0 && cart[cartIdx]) {
+    const ci = cart[cartIdx];
+    setTemp(ci.temperature||'ice');
+    setSugar(ci.sugar||'100%');
+    setIce(ci.ice||'100%');
+    modalSelectedToppings = ci.toppingsData ? [...ci.toppingsData] : [];
+  } else {
+    if(temp==='ice'||temp==='both') setTemp('ice');
+    else if(temp==='hot') setTemp('hot');
+    else if(temp==='frappe') setTemp('frappe');
+    setSugar("100%"); setIce("100%");
+    modalSelectedToppings = [];
+  }
+
+  updateIceSection();
+
+  // Toppings
+  const topList = document.getElementById("cm-top-list");
+  if(!allToppings.length) {
+    topList.innerHTML = `<p class="text-[var(--muted)] text-xs">No toppings available.</p>`;
+  } else {
+    topList.innerHTML = allToppings.map(top => {
+      const selected = modalSelectedToppings.some(t=>t.id===top.id);
+      return `<div class="top-box flex items-center justify-between p-3 rounded-xl border border-[var(--bdr)] cursor-pointer transition ${selected?'active':''}" id="topbox-${top.id}" onclick="toggleTopping('${top.id}')">
+        <div class="flex items-center gap-3">
+          ${top.imageUrl?`<img src="${top.imageUrl}" class="w-9 h-9 rounded-lg object-cover border border-[var(--bdr)]" onerror="this.style.display='none'">`:'<div class="w-9 h-9 rounded-lg bg-[var(--sur2)] flex items-center justify-center text-lg">🧁</div>'}
+          <div>
+            <p class="text-xs font-bold">${lang==='kh'&&top.nameKh?top.nameKh:top.name}</p>
+            <p class="text-[10px] text-[var(--muted)]">+$${top.price.toFixed(2)}</p>
+          </div>
+        </div>
+        <div id="topcheck-${top.id}" class="w-5 h-5 rounded-full border-2 ${selected?'bg-[var(--gold)] border-[var(--gold)]':'border-[var(--bdr)]'} flex items-center justify-center transition">
+          ${selected?'<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>':''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updateModalPrice();
+};
+
+window.closeCustomModal = function() {
+  document.getElementById("customModal").classList.add("hidden");
+  document.getElementById("customModal").style.display = "none";
+  currentModalItem = null; editCartIndex = -1;
+};
+
+window.setTemp = function(temp) {
+  modalSelectedTemp = temp;
+  ['ice','hot','frappe'].forEach(tp => {
+    const btn = document.getElementById(`temp-${tp}`);
+    if(btn) btn.classList.toggle("active", tp===temp);
+  });
+  updateIceSection();
+  updateModalPrice();
+};
+
+function updateIceSection() {
+  const iceSection = document.getElementById("cm-ice-section");
+  if(modalSelectedTemp === 'hot') iceSection.style.display = 'none';
+  else iceSection.style.display = 'block';
+}
+
+window.setSugar = function(val) {
+  modalSelectedSugar = val;
+  ['0','30','50','70','100'].forEach(v => {
+    const btn = document.getElementById(`sug-${v}`);
+    if(btn) btn.classList.toggle("active", v+'%'===val);
   });
 };
 
-// Init
-fetchData();
-setInterval(()=>{ const v=document.getElementById('view-orders'); if(v&&!v.classList.contains('hidden')) renderOrders(); },30000);
+window.setIce = function(val) {
+  modalSelectedIce = val;
+  ['0','50','100'].forEach(v => {
+    const btn = document.getElementById(`ice-${v}`);
+    if(btn) btn.classList.toggle("active", v+'%'===val);
+  });
+};
+
+window.toggleTopping = function(topId) {
+  const top = allToppings.find(tp=>tp.id===topId);
+  if(!top) return;
+  const idx = modalSelectedToppings.findIndex(tp=>tp.id===topId);
+  const box = document.getElementById(`topbox-${topId}`);
+  const check = document.getElementById(`topcheck-${topId}`);
+  if(idx >= 0) {
+    modalSelectedToppings.splice(idx, 1);
+    box.classList.remove("active");
+    check.className = "w-5 h-5 rounded-full border-2 border-[var(--bdr)] flex items-center justify-center transition";
+    check.innerHTML = '';
+  } else {
+    modalSelectedToppings.push(top);
+    box.classList.add("active");
+    check.className = "w-5 h-5 rounded-full border-2 bg-[var(--gold)] border-[var(--gold)] flex items-center justify-center transition";
+    check.innerHTML = '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>';
+  }
+  updateModalPrice();
+};
+
+function getItemPrice(item, temp) {
+  if(!item) return 0;
+  const base = item.price * (1 - (item.discount||0)/100);
+  if(temp==='hot' && item.priceHot) return item.priceHot * (1 - (item.discount||0)/100);
+  if(temp==='frappe' && item.priceFrappe) return item.priceFrappe * (1 - (item.discount||0)/100);
+  return base;
+}
+
+function updateModalPrice() {
+  if(!currentModalItem) return;
+  const base = getItemPrice(currentModalItem, modalSelectedTemp);
+  const toppingTotal = modalSelectedToppings.reduce((s,tp)=>s+tp.price, 0);
+  document.getElementById("cm-price").textContent = `$${(base + toppingTotal).toFixed(2)}`;
+}
+
+window.saveCustomization = function() {
+  if(!currentModalItem) return;
+  const base = getItemPrice(currentModalItem, modalSelectedTemp);
+  const toppingTotal = modalSelectedToppings.reduce((s,tp)=>s+tp.price, 0);
+  const totalPrice = base + toppingTotal;
+  const cartItem = {
+    id: currentModalItem.id,
+    name: lang==='kh'&&currentModalItem.nameKh ? currentModalItem.nameKh : currentModalItem.name,
+    nameEn: currentModalItem.name,
+    imageUrl: currentModalItem.imageUrl,
+    price: totalPrice,
+    basePrice: base,
+    temperature: modalSelectedTemp,
+    sugar: modalSelectedSugar,
+    ice: modalSelectedIce,
+    toppingsData: [...modalSelectedToppings],
+    qty: 1
+  };
+  if(editCartIndex >= 0) {
+    cartItem.qty = cart[editCartIndex].qty;
+    cart[editCartIndex] = cartItem;
+  } else {
+    cart.push(cartItem);
+  }
+  saveCart();
+  renderCart();
+  updateCartBadge();
+  closeCustomModal();
+  showToast(`${cartItem.name} ${t().addedToast}`);
+};
+
+// ── CART REDESIGN ──
+function saveCart() { safeStorage.set("chafe_cart", JSON.stringify(cart)); }
+function loadCart() { try { cart = JSON.parse(safeStorage.get("chafe_cart")||"[]"); } catch(e) { cart=[]; } }
+
+function updateCartBadge() {
+  const total = cart.reduce((s,i)=>s+i.qty, 0);
+  const badge = document.getElementById("cartBadge");
+  badge.textContent = total;
+  if(total > 0) { badge.classList.remove("hidden"); badge.style.display="flex"; badge.classList.add("pop-anim"); setTimeout(()=>badge.classList.remove("pop-anim"),300); }
+  else { badge.classList.add("hidden"); }
+}
+
+function getCartTotal() {
+  const subtotal = cart.reduce((s,i)=>s+(i.price*i.qty), 0);
+  if(!appliedCoupon) return { subtotal, discount: 0, total: subtotal };
+  const discount = subtotal * (appliedCoupon.discount / 100);
+  return { subtotal, discount, total: subtotal - discount };
+}
+
+function renderCart() {
+  const itemsEl = document.getElementById("cartItems");
+  const emptyEl = document.getElementById("cartEmpty");
+  if(!cart.length) {
+    itemsEl.innerHTML = ''; itemsEl.classList.add("hidden"); emptyEl.classList.remove("hidden"); emptyEl.style.display="flex";
+    document.getElementById("placeBtn").disabled = true;
+    document.getElementById("cartTotal").textContent = "$0.00";
+    document.getElementById("cart-subtotal-row").classList.add("hidden");
+    document.getElementById("cart-discount-row").classList.add("hidden");
+    return;
+  }
+  emptyEl.classList.add("hidden"); emptyEl.style.display="none";
+  itemsEl.classList.remove("hidden");
+  document.getElementById("placeBtn").disabled = false;
+
+  itemsEl.innerHTML = cart.map((item, idx) => {
+    const tempIcon = item.temperature==='hot'?'☕ Hot':item.temperature==='frappe'?'🥤 Frappe':'🧊 Iced';
+    
+    let specsHtml = `<span class="px-2 py-1 bg-[var(--sur2)] rounded-md text-[var(--txt)] border border-[var(--bdr)]/60">${tempIcon}</span>`;
+    specsHtml += `<span class="px-2 py-1 bg-[var(--sur2)] rounded-md text-[var(--txt)] border border-[var(--bdr)]/60">Sug: ${item.sugar}</span>`;
+    if(item.temperature!=='hot') specsHtml += `<span class="px-2 py-1 bg-[var(--sur2)] rounded-md text-[var(--txt)] border border-[var(--bdr)]/60">Ice: ${item.ice}</span>`;
+
+    let toppingsHtml = '';
+    if (item.toppingsData && item.toppingsData.length > 0) {
+      const topPills = item.toppingsData.map(tp => {
+        const tName = lang==='kh'&&tp.nameKh ? tp.nameKh : tp.name;
+        return `<span class="px-2 py-1 bg-[var(--gold)]/10 text-[var(--gold)] rounded-md border border-[var(--gold)]/20">+${tName}</span>`;
+      }).join('');
+      toppingsHtml = `<div class="flex flex-wrap gap-1.5 text-[10px] mt-1.5 font-medium pr-4">${topPills}</div>`;
+    }
+
+    return `<div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-2xl p-3 flex gap-3 shadow-sm relative group fade-up">
+      <img src="${item.imageUrl||'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-20 h-20 rounded-xl object-cover border border-[var(--sur2)] flex-shrink-0" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'"/>
+      <div class="flex-1 min-w-0 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-start">
+            <h4 class="text-sm font-bold text-[var(--txt)] leading-tight pr-6 line-clamp-1">${item.name}</h4>
+            <button onclick="removeFromCart(${idx})" class="absolute top-2 right-2 w-6 h-6 flex items-center justify-center text-[var(--muted)] hover:text-[var(--red)] transition-colors rounded-full hover:bg-[var(--red)]/10">×</button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 text-[10px] mt-1.5 font-medium pr-4">
+            ${specsHtml}
+          </div>
+          ${toppingsHtml}
+        </div>
+        <div class="flex items-end justify-between mt-3">
+          <button onclick="openCustomModal('${item.id}', ${idx})" class="text-[10px] font-bold text-[var(--txt)] bg-[var(--sur2)] border border-[var(--bdr)] px-3 py-1.5 rounded-lg shadow-sm hover:border-[var(--gold)] hover:text-[var(--gold)] transition-colors flex items-center gap-1">
+            <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            ${t().customBtn}
+          </button>
+          <div class="flex flex-col items-end gap-1.5">
+             <span class="font-bold text-[15px] text-[var(--gold)] leading-none">$${(item.price*item.qty).toFixed(2)}</span>
+             <div class="flex items-center bg-[var(--sur2)] rounded-full p-0.5 border border-[var(--bdr)]">
+               <button onclick="changeQty(${idx},-1)" class="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold text-[var(--muted)] hover:bg-[var(--sur)] hover:text-[var(--txt)] transition-colors shadow-sm">−</button>
+               <span class="text-xs font-bold w-6 text-center text-[var(--txt)]">${item.qty}</span>
+               <button onclick="changeQty(${idx},1)" class="w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold text-[var(--muted)] hover:bg-[var(--sur)] hover:text-[var(--txt)] transition-colors shadow-sm">+</button>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const {subtotal, discount, total} = getCartTotal();
+  document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
+  if(appliedCoupon) {
+    document.getElementById("cart-subtotal-row").classList.remove("hidden");
+    document.getElementById("cart-discount-row").classList.remove("hidden");
+    document.getElementById("cartSubtotal").textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById("cartDiscountAmt").textContent = `-$${discount.toFixed(2)}`;
+  } else {
+    document.getElementById("cart-subtotal-row").classList.add("hidden");
+    document.getElementById("cart-discount-row").classList.add("hidden");
+  }
+}
+
+window.changeQty = function(idx, delta) {
+  cart[idx].qty = Math.max(1, cart[idx].qty + delta);
+  saveCart(); renderCart(); updateCartBadge();
+};
+window.removeFromCart = function(idx) {
+  cart.splice(idx, 1);
+  saveCart(); renderCart(); updateCartBadge();
+};
+window.clearCart = function() { cart = []; appliedCoupon = null; saveCart(); renderCart(); updateCartBadge(); hideCouponApplied(); };
+
+// ── COUPON ──
+window.applyCoupon = function() {
+  const code = document.getElementById("cartCoupon").value.trim().toUpperCase();
+  if(!code) return;
+  const coupon = dbCoupons.find(c => c.code===code && c.active);
+  if(!coupon) { showToast(t().invalidCoupon); return; }
+  appliedCoupon = coupon;
+  showCouponApplied(code);
+  renderCart();
+  showToast(t().couponApplied);
+};
+window.removeCoupon = function() {
+  appliedCoupon = null;
+  hideCouponApplied();
+  document.getElementById("cartCoupon").value = '';
+  renderCart();
+};
+function showCouponApplied(code) {
+  document.getElementById("coupon-input-box").classList.add("hidden");
+  const box = document.getElementById("applied-coupon-box");
+  box.classList.remove("hidden"); box.style.display="flex";
+  document.getElementById("ac-code").textContent = code + ` (-${appliedCoupon.discount}%)`;
+}
+function hideCouponApplied() {
+  document.getElementById("coupon-input-box").classList.remove("hidden");
+  document.getElementById("applied-coupon-box").classList.add("hidden");
+  document.getElementById("applied-coupon-box").style.display="none";
+}
+
+// ── PANELS ──
+window.openCart = function() {
+  document.getElementById("cartOverlay").classList.remove("hidden");
+  document.getElementById("cartPanel").classList.add("show");
+};
+window.openMyOrders = function() {
+  document.getElementById("cartOverlay").classList.remove("hidden");
+  const panel = document.getElementById("myOrdersPanel");
+  panel.classList.add("show");
+  if(window.innerWidth >= 640) {
+    panel.style.transform = "translateX(0)";
+  } else {
+    panel.style.transform = "translateY(0)";
+  }
+  renderMyOrders();
+  document.getElementById('liveOrderDot').classList.add('hidden');
+};
+window.closePanels = function() {
+  document.getElementById("cartOverlay").classList.add("hidden");
+  document.getElementById("cartPanel").classList.remove("show");
+  const panel = document.getElementById("myOrdersPanel");
+  panel.classList.remove("show");
+  if(window.innerWidth >= 640) {
+    panel.style.transform = "translateX(100%)";
+  } else {
+    panel.style.transform = "translateY(100%)";
+  }
+};
+
+// ── PLACE ORDER (GEOFENCING ADDED) ──
+window.placeOrder = async function() {
+  const tableEl = document.getElementById("cartTable");
+  const table = tableEl.value;
+  if(!table) { tableEl.focus(); showToast("Please select a table!"); return; }
+  if(!cart.length) return;
+
+  // ១. ពិនិត្យមើលសិទ្ធិ GPS
+  if (!navigator.geolocation) {
+      showToast("សូមបើក GPS លើទូរសព្ទរបស់អ្នក!");
+      return;
+  }
+
+  const btn = document.getElementById("placeBtn");
+  btn.disabled = true; 
+  btn.textContent = "Checking location...";
+
+  // ២. ចាប់យកទីតាំង និងគណនា
+  navigator.geolocation.getCurrentPosition(async (position) => {
+      const uLat = position.coords.latitude;
+      const uLon = position.coords.longitude;
+      const dist = getDistance(uLat, uLon, SHOP_LAT, SHOP_LON);
+
+      // ៣. បើនៅឆ្ងាយលើសពី 500 ម៉ែត្រ (0.5 km) - Block ការបញ្ជាទិញ
+      if (dist > 0.5) {
+          document.getElementById("geoModal").classList.remove("hidden");
+          document.getElementById("geoModal").style.display = "flex";
+          
+          const warnMsg = `⚠️ <b>ព្យាយាមកុម្ម៉ង់ពីចម្ងាយ!</b>\n📍 ចម្ងាយ: ${dist.toFixed(2)} km\n🪑 លេខតុ: ${table}\n🌍 ទីតាំង: https://www.google.com/maps?q=${uLat},${uLon}`;
+          fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({chat_id: TG_CHAT, text: warnMsg, parse_mode: "HTML"})
+          });
+
+          btn.disabled = false;
+          btn.textContent = t().place;
+          return;
+      }
+
+      // ៤. បើនៅជិត (ក្រោម 500m) បន្តការបញ្ជាទិញ
+      btn.textContent = "Placing...";
+      const {subtotal, discount, total} = getCartTotal();
+      const noteEl = document.getElementById("cartNote");
+      const order = {
+          tableNumber: table,
+          items: cart.map(i=>({
+              name: i.nameEn || i.name,
+              qty: i.qty,
+              price: i.price,
+              temperature: i.temperature,
+              sugar: i.sugar,
+              ice: i.ice,
+              toppingsData: i.toppingsData || []
+          })),
+          total: total.toFixed(2),
+          subtotal: subtotal.toFixed(2),
+          discountAmt: discount,
+          couponCode: appliedCoupon?.code || null,
+          note: noteEl.value.trim(),
+          status: "pending",
+          createdAt: serverTimestamp()
+      };
+
+      try {
+          if(!db) throw new Error("No DB");
+          const ref = await addDoc(collection(db,"orders"), order);
+          await sendTelegramAlert(order, ref.id);
+          
+          const savedOrder = {...order, id: ref.id, createdAt: new Date().toISOString()};
+          const myOrders = loadMyOrders();
+          myOrders.push(savedOrder);
+          safeStorage.set("chafe_orders", JSON.stringify(myOrders));
+          
+          document.getElementById("conf-id").textContent = `#${ref.id.slice(-8).toUpperCase()}`;
+          showConfirm();
+          
+          cart = []; appliedCoupon = null; noteEl.value = '';
+          hideCouponApplied(); saveCart(); renderCart(); updateCartBadge();
+          closePanels();
+      } catch(e) {
+          showToast("Error placing order. Please try again.");
+      } finally {
+          btn.disabled = false;
+          btn.textContent = t().place;
+      }
+
+  }, (err) => {
+      // ករណី User ចុច Block / មិនឱ្យប្រើទីតាំង
+      showToast("សូម Allow Location ដើម្បីបន្តការកុម្ម៉ង់!");
+      btn.disabled = false;
+      btn.textContent = t().place;
+  });
+};
+
+// ── MY ORDERS ──
+function loadMyOrders() {
+  try { return JSON.parse(safeStorage.get("chafe_orders")||"[]"); } catch(e) { return []; }
+}
+function renderMyOrders() {
+  const list = document.getElementById("myOrdersList");
+  const orders = loadMyOrders().reverse();
+  if(!orders.length) {
+    list.innerHTML = `<div class="text-center py-16 opacity-40"><div class="text-5xl mb-3">📋</div><p class="text-sm">${t().moTitle}</p></div>`;
+    return;
+  }
+  list.innerHTML = orders.map(o => {
+    const tx = t();
+    const statusLabel = tx.status[o.status] || o.status;
+    const statusColor = o.status==='completed'?'text-[var(--green)]':o.status==='cancelled'?'text-[var(--red)]':'text-[#d1a14a]';
+    const itemsStr = (o.items||[]).map(i=>`${i.qty}× ${i.name}`).join(', ');
+    const canCancel = o.status === 'pending';
+    return `<div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-xl p-4 fade-up">
+      <div class="flex justify-between items-start mb-2">
+        <div>
+          <p class="text-xs font-mono text-[var(--muted)]">#${o.id.slice(-8).toUpperCase()}</p>
+          <p class="text-xs text-[var(--muted)]">${tx.tableFor} ${o.tableNumber}</p>
+        </div>
+        <span class="text-xs font-bold ${statusColor}">${statusLabel}</span>
+      </div>
+      <p class="text-xs text-[var(--muted)] truncate mb-2">${itemsStr}</p>
+      <div class="flex justify-between items-center">
+        <span class="text-sm font-bold text-[var(--gold)]">$${Number(o.total).toFixed(2)}</span>
+        ${canCancel?`<button onclick="openCancelModal('${o.id}')" class="r-btn text-[10px] px-3 py-1 rounded-full">${tx.cancelYes}</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CANCEL ──
+window.openCancelModal = function(orderId) {
+  cancelTargetId = orderId;
+  const modal = document.getElementById("cancelModal");
+  modal.classList.remove("hidden"); modal.style.display="flex";
+};
+window.closeCancelModal = function() {
+  cancelTargetId = null;
+  const modal = document.getElementById("cancelModal");
+  modal.classList.add("hidden"); modal.style.display="none";
+  document.getElementById("cancelReason").value = '';
+};
+window.confirmCancel = async function() {
+  if(!cancelTargetId) return;
+  try {
+    if(db) await updateDoc(doc(db,"orders",cancelTargetId), {status:"cancelled"});
+    const myOrders = loadMyOrders();
+    const o = myOrders.find(x=>x.id===cancelTargetId);
+    if(o) o.status = "cancelled";
+    safeStorage.set("chafe_orders", JSON.stringify(myOrders));
+    closeCancelModal();
+    renderMyOrders();
+    showToast(t().cancelToast);
+  } catch(e) { showToast("Error cancelling."); }
+};
+
+// ── MODALS ──
+window.showConfirm = function() {
+  const modal = document.getElementById("confirmModal");
+  modal.classList.remove("hidden"); modal.style.display="flex";
+  document.getElementById("conf-title").textContent = t().confirmTitle;
+  document.getElementById("conf-msg").textContent = t().confirmMsg;
+  document.getElementById("conf-btn").textContent = t().confirmBtn;
+};
+window.closeConfirm = function() {
+  const modal = document.getElementById("confirmModal");
+  modal.classList.add("hidden"); modal.style.display="none";
+};
+
+// ── TOAST ──
+let _toastTimer;
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.textContent = msg;
+  toast.style.opacity = "1";
+  toast.style.transform = "translateX(-50%) translateY(0)";
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(-50%) translateY(16px)";
+  }, 2500);
+}
+
+// ── INIT ──
+loadCart();
+buildTableOptions();
+applyLang();
+updateCartBadge();
+renderCart();
+loadData();
 </script>
 </body>
 </html>

@@ -6,9 +6,19 @@
 <title>Chafé Admin Panel</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<!-- Khmer OS Muol Light -->
+<link href="https://fonts.googleapis.com/css2?family=Khmer&display=swap" rel="stylesheet"/>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap');
+  @font-face {
+    font-family: 'Khmer OS Muol Light';
+    src: url('https://cdn.jsdelivr.net/gh/seanghay/khmer-fonts@main/fonts/KhmerOSmuollight.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/khmer/Khmer-Regular.ttf') format('truetype');
+    font-weight: normal;
+  }
   body{font-family:'Outfit',sans-serif;background-color:#3e2a24;color:#e6e0d8;margin:0;min-height:100vh;overflow-x:hidden;}
   .serif{font-family:'Cormorant Garamond',serif;}
+  .khmer{font-family:'Battambang','Khmer OS Muol Light','Khmer',sans-serif;}
   .btn-primary{background:#d44e43;color:white;transition:background .2s;}
   .btn-primary:hover{background:#b83f36;}
   .btn-success{background:#5db85b;color:white;transition:background .2s;}
@@ -46,6 +56,31 @@
   #liveChartCanvas{width:100%;height:200px;}
   .sound-on{color:#5db85b;}
   .sound-off{color:#d44e43;}
+
+  /* ── Temp Toggle Buttons ── */
+  .temp-toggle-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 10px; cursor: pointer;
+    border: 2px solid transparent; font-weight: 600; font-size: 13px;
+    transition: all .2s; user-select: none;
+  }
+  .temp-toggle-btn.ice { background: #1d4ed822; color: #60a5fa; border-color: #1d4ed844; }
+  .temp-toggle-btn.hot { background: #b91c1c22; color: #f87171; border-color: #b91c1c44; }
+  .temp-toggle-btn.frappe { background: #4f46e522; color: #818cf8; border-color: #4f46e544; }
+  .temp-toggle-btn.ice.active { background: #1d4ed8; color: white; border-color: #1d4ed8; }
+  .temp-toggle-btn.hot.active { background: #b91c1c; color: white; border-color: #b91c1c; }
+  .temp-toggle-btn.frappe.active { background: #4f46e5; color: white; border-color: #4f46e5; }
+  .temp-toggle-btn.ice.disabled { opacity: .35; cursor: not-allowed; }
+  .temp-toggle-btn.hot.disabled { opacity: .35; cursor: not-allowed; }
+  .temp-toggle-btn.frappe.disabled { opacity: .35; cursor: not-allowed; }
+  .price-field-disabled { opacity: .4; pointer-events: none; }
+
+  /* ── Top Items Period Tabs ── */
+  .period-tab { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; cursor: pointer; border: 1px solid #5c453b; color: #a3958f; transition: all .2s; }
+  .period-tab.active { background: #d44e43; color: white; border-color: #d44e43; }
+
+  /* ── Telegram Broadcast ── */
+  #tgBroadcastSection { background: linear-gradient(135deg, #1a2a3a, #0d1a2a); border: 1px solid #1e88e544; border-radius: 16px; padding: 20px; }
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -169,15 +204,59 @@
         <canvas id="liveChartCanvas"></canvas>
       </div>
 
-      <!-- Top Items -->
+      <!-- ═══ TOP ITEMS with period filter ═══ -->
       <div class="bg-[#4e3b32] p-5 md:p-6 rounded-xl border border-[#5c453b] mb-6 shadow-sm">
-        <div class="flex justify-between items-center border-b border-[#5c453b] pb-2 mb-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#5c453b] pb-3 mb-4 gap-3">
           <h3 class="text-sm uppercase tracking-wider text-gray-400 font-bold">🔥 Most Ordered Items</h3>
-          <button onclick="sendTopItemsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition">
-            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send list
-          </button>
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Period tabs -->
+            <div class="flex gap-1">
+              <button onclick="setTopItemsPeriod('today')" id="top-period-today" class="period-tab active">Today</button>
+              <button onclick="setTopItemsPeriod('week')" id="top-period-week" class="period-tab">This Week</button>
+              <button onclick="setTopItemsPeriod('all')" id="top-period-all" class="period-tab">All Time</button>
+            </div>
+            <button onclick="sendTopItemsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition ml-1">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send list
+            </button>
+          </div>
         </div>
+        <div id="topItemsPeriodLabel" class="text-xs text-[#d1a14a] mb-3 font-semibold"></div>
         <div id="topItemsList" class="space-y-2"><p class="text-gray-500 text-sm">Loading...</p></div>
+      </div>
+
+      <!-- ═══ TELEGRAM BROADCAST ═══ -->
+      <div id="tgBroadcastSection" class="mb-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-lg bg-[#1e88e5]/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-[#42a5f5]" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-[#42a5f5] uppercase tracking-wider">Broadcast Message</h3>
+            <p class="text-xs text-gray-500">Send news or staff announcements to Telegram</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-1">
+            <label class="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider font-bold">Type</label>
+            <select id="tgBroadcastType" class="w-full bg-[#1a2a3a] border border-[#1e88e544] rounded-xl px-3 py-2.5 text-sm text-white focus:border-[#42a5f5]">
+              <option value="📢 News">📢 News</option>
+              <option value="👥 Staff Notice">👥 Staff Notice</option>
+              <option value="⚠️ Alert">⚠️ Alert</option>
+              <option value="🎉 Promotion">🎉 Promotion</option>
+              <option value="📋 Update">📋 Update</option>
+            </select>
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-[10px] text-gray-400 mb-1.5 uppercase tracking-wider font-bold">Message</label>
+            <div class="flex gap-2">
+              <textarea id="tgBroadcastMsg" placeholder="Type your message to send to the Telegram group..." rows="2" class="flex-1 bg-[#1a2a3a] border border-[#1e88e544] rounded-xl px-4 py-2.5 text-sm text-white focus:border-[#42a5f5] resize-none placeholder-gray-600"></textarea>
+              <button onclick="sendBroadcastToTelegram()" class="bg-[#1e88e5] hover:bg-[#1976d2] text-white px-5 rounded-xl font-bold text-sm flex flex-col items-center justify-center gap-1 min-w-[80px] transition shadow-lg">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                <span class="text-[10px]">Send</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Period Calculation -->
@@ -266,31 +345,77 @@
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 relative z-10">
           <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (EN)</label><input type="text" id="addName" placeholder="Matcha Latte" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
-          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH)</label><input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
+          <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Name (KH) <span class="khmer text-[#d1a14a]">ភាសាខ្មែរ</span></label><input type="text" id="addNameKh" placeholder="តែបៃតងទឹកដោះគោ" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d] khmer"></div>
           <div class="col-span-12 md:col-span-4"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Category</label><input type="text" id="addCat" placeholder="Coffee, Tea, etc." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
-          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Ice/Base Price ($)</label><input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
-          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Hot Price ($)</label><input type="number" id="addPriceHot" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
-          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Frappe Price ($)</label><input type="number" id="addPriceFrappe" placeholder="Optional" step="0.01" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]"></div>
-          <div class="col-span-12 md:col-span-3"><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Temperature</label>
-            <select id="addTemperature" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8]">
-              <option value="both">🧊☕ Ice & Hot</option>
-              <option value="ice">🧊 Iced Only</option>
-              <option value="hot">☕ Hot Only</option>
-              <option value="frappe">🥤 Frappe Only</option>
-            </select>
+
+          <!-- ═══ Temperature Toggles with Prices ═══ -->
+          <div class="col-span-12">
+            <label class="block text-[10px] text-gray-400 mb-3 uppercase tracking-wider font-bold">Temperature Options & Prices — Toggle to Enable/Disable</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              <!-- ICE -->
+              <div class="bg-[#3a2a24] border border-[#1d4ed844] rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <button type="button" onclick="toggleTempOption('ice')" id="toggle-ice" class="temp-toggle-btn ice active">
+                    <span id="toggle-ice-icon">✓</span>
+                    🧊 Iced
+                  </button>
+                  <span class="text-[10px] text-gray-500" id="toggle-ice-status">Enabled</span>
+                </div>
+                <div id="price-ice-wrap">
+                  <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Ice/Base Price ($)</label>
+                  <input type="number" id="addPrice" placeholder="0.00" step="0.01" class="w-full bg-[#2a1a14] border border-[#5c453b] rounded-xl px-4 py-2.5 text-sm focus:border-[#60a5fa] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+                </div>
+              </div>
+
+              <!-- HOT -->
+              <div class="bg-[#3a2a24] border border-[#b91c1c44] rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <button type="button" onclick="toggleTempOption('hot')" id="toggle-hot" class="temp-toggle-btn hot active">
+                    <span id="toggle-hot-icon">✓</span>
+                    ☕ Hot
+                  </button>
+                  <span class="text-[10px] text-gray-500" id="toggle-hot-status">Enabled</span>
+                </div>
+                <div id="price-hot-wrap">
+                  <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Hot Price ($)</label>
+                  <input type="number" id="addPriceHot" placeholder="0.00" step="0.01" class="w-full bg-[#2a1a14] border border-[#5c453b] rounded-xl px-4 py-2.5 text-sm focus:border-[#f87171] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+                </div>
+              </div>
+
+              <!-- FRAPPE -->
+              <div class="bg-[#3a2a24] border border-[#4f46e544] rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <button type="button" onclick="toggleTempOption('frappe')" id="toggle-frappe" class="temp-toggle-btn frappe active">
+                    <span id="toggle-frappe-icon">✓</span>
+                    🥤 Frappe
+                  </button>
+                  <span class="text-[10px] text-gray-500" id="toggle-frappe-status">Enabled</span>
+                </div>
+                <div id="price-frappe-wrap">
+                  <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Frappe Price ($)</label>
+                  <input type="number" id="addPriceFrappe" placeholder="0.00" step="0.01" class="w-full bg-[#2a1a14] border border-[#5c453b] rounded-xl px-4 py-2.5 text-sm focus:border-[#818cf8] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]">
+                </div>
+              </div>
+
+            </div>
+            <p class="text-[10px] text-gray-500 mt-2">💡 Disabled options won't save a price. Temperature dropdown auto-updates based on your selections.</p>
           </div>
+
           <div class="col-span-12 md:col-span-2 flex items-end pb-0">
             <label class="flex items-center gap-2 cursor-pointer bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 w-full">
               <input type="checkbox" id="addPopular" class="w-4 h-4 accent-[#d44e43]">
               <span class="text-sm text-gray-300">🔥 Popular</span>
             </label>
           </div>
+
           <!-- Image URL Input -->
-          <div class="col-span-12">
+          <div class="col-span-12 md:col-span-10">
             <label class="block text-[10px] text-gray-400 mb-2 uppercase tracking-wider font-bold">Drink Image URL</label>
             <input type="text" id="addImage" placeholder="https://example.com/image.jpg" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm focus:border-[#d44e43] outline-none text-[#e6e0d8] placeholder-[#8c6b5d]" oninput="previewUrlImg(this.value,'addUrlPreview')">
             <img id="addUrlPreview" src="" class="hidden mt-2 w-20 h-20 object-cover rounded-xl border border-[#5c453b]" onerror="this.style.display='none'"/>
           </div>
+
           <div class="col-span-12 flex justify-end mt-2">
             <button onclick="addMenuItem()" class="w-full md:w-auto bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -351,14 +476,11 @@
         <p class="text-xs text-gray-400 mb-5">These slides appear on the ordering page to guide customers.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Step Number</label><input type="number" id="slideStep" placeholder="1" min="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43]"></div>
-          <div>
-            <label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Slide Image URL</label>
-            <input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]">
-          </div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Slide Image URL</label><input type="text" id="slideImage" placeholder="https://..." class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d]"></div>
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (EN)</label><textarea id="slideTitleEn" placeholder="Scan the QR Code" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><textarea id="slideTitleKh" placeholder="ស្កែន QR" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Title (KH)</label><textarea id="slideTitleKh" placeholder="ស្កែន QR" rows="1" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none khmer"></textarea></div>
           <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (EN)</label><textarea id="slideDescEn" placeholder="Use your phone camera..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
-          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (KH)</label><textarea id="slideDescKh" placeholder="ប្រើកាមេរ៉ាទូរស័ព្ទ..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none"></textarea></div>
+          <div><label class="block text-[10px] text-gray-400 mb-1 uppercase tracking-wider font-bold">Description (KH)</label><textarea id="slideDescKh" placeholder="ប្រើកាមេរ៉ាទូរស័ព្ទ..." rows="2" class="w-full bg-[#3a2a24] border border-[#5c453b] rounded-xl px-4 py-3 text-sm outline-none focus:border-[#d44e43] placeholder-[#8c6b5d] resize-none khmer"></textarea></div>
         </div>
         <div class="flex justify-end mt-6">
           <button onclick="addSlide()" class="bg-[#d44e43] hover:bg-[#b83f36] text-white px-8 py-3 rounded-xl font-bold text-sm flex items-center gap-2">
@@ -476,7 +598,7 @@
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">Edit Drink</h3>
     <div class="grid grid-cols-3 gap-4 mb-4">
       <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editName" class="w-full"></div>
-      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full"></div>
+      <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editNameKh" class="w-full khmer"></div>
       <div class="col-span-3 md:col-span-1"><label class="text-xs text-gray-400 mb-1 block">Category</label><input type="text" id="editCat" class="w-full"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Ice Price</label><input type="number" id="editPrice" step="0.01" class="w-full"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Hot Price</label><input type="number" id="editPriceHot" step="0.01" class="w-full"></div>
@@ -511,7 +633,7 @@
     <h3 class="text-xl serif text-[#d44e43] mb-4 font-bold">New Topping</h3>
     <div class="space-y-3 mb-6">
       <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="topName" placeholder="e.g. Boba" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="topNameKh" placeholder="e.g. គុជ" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="topNameKh" placeholder="e.g. គុជ" class="w-full khmer"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="topPrice" placeholder="0.50" step="0.01" class="w-full"></div>
       <div>
         <label class="text-xs text-gray-400 mb-1 block">Photo URL</label>
@@ -532,7 +654,7 @@
     <h3 class="text-xl serif text-[#5db85b] mb-4 font-bold">Edit Topping</h3>
     <div class="space-y-3 mb-6">
       <div><label class="text-xs text-gray-400 mb-1 block">Name (EN)</label><input type="text" id="editTopName" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editTopNameKh" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Name (KH)</label><input type="text" id="editTopNameKh" class="w-full khmer"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Price ($)</label><input type="number" id="editTopPrice" step="0.01" class="w-full"></div>
       <div>
         <label class="text-xs text-gray-400 mb-1 block">Photo URL</label>
@@ -555,9 +677,9 @@
       <div><label class="text-xs text-gray-400 mb-1 block">Step No.</label><input type="number" id="editSlideStep" class="w-full" min="1"></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Image URL</label><input type="text" id="editSlideImage" class="w-full" placeholder="https://..."></div>
       <div><label class="text-xs text-gray-400 mb-1 block">Title (EN)</label><input type="text" id="editSlideTitleEn" class="w-full"></div>
-      <div><label class="text-xs text-gray-400 mb-1 block">Title (KH)</label><input type="text" id="editSlideTitleKh" class="w-full"></div>
+      <div><label class="text-xs text-gray-400 mb-1 block">Title (KH)</label><input type="text" id="editSlideTitleKh" class="w-full khmer"></div>
       <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Description (EN)</label><textarea id="editSlideDescEn" rows="2" class="w-full resize-none"></textarea></div>
-      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Description (KH)</label><textarea id="editSlideDescKh" rows="2" class="w-full resize-none"></textarea></div>
+      <div class="col-span-2"><label class="text-xs text-gray-400 mb-1 block">Description (KH)</label><textarea id="editSlideDescKh" rows="2" class="w-full resize-none khmer"></textarea></div>
     </div>
     <div class="flex gap-3">
       <button onclick="closeEditSlideModal()" class="flex-1 py-2 border border-[#5c453b] rounded text-gray-300 hover:bg-[#3a2a24]">Cancel</button>
@@ -611,6 +733,57 @@ let orderFilter='all';
 let soundEnabled=true;
 let knownOrderIds=new Set();
 let audioCtx=null;
+let topItemsPeriod = 'today'; // 'today' | 'week' | 'all'
+
+// ── TEMP TOGGLES ──
+const tempStates = { ice: true, hot: true, frappe: true };
+
+window.toggleTempOption = function(type) {
+  tempStates[type] = !tempStates[type];
+  const btn = document.getElementById(`toggle-${type}`);
+  const wrap = document.getElementById(`price-${type}-wrap`);
+  const status = document.getElementById(`toggle-${type}-status`);
+  const icon = document.getElementById(`toggle-${type}-icon`);
+  const input = document.getElementById(type === 'ice' ? 'addPrice' : `addPrice${type.charAt(0).toUpperCase()+type.slice(1)}`);
+
+  if(tempStates[type]) {
+    btn.classList.remove('disabled');
+    btn.classList.add('active');
+    wrap.classList.remove('price-field-disabled');
+    status.textContent = 'Enabled';
+    icon.textContent = '✓';
+    if(input) input.disabled = false;
+  } else {
+    btn.classList.add('disabled');
+    btn.classList.remove('active');
+    wrap.classList.add('price-field-disabled');
+    status.textContent = 'Disabled';
+    icon.textContent = '✕';
+    if(input) { input.disabled = true; input.value = ''; }
+  }
+};
+
+function getAddTemperature() {
+  const ice = tempStates.ice, hot = tempStates.hot, frappe = tempStates.frappe;
+  if(ice && hot && frappe) return 'both'; // ice+hot+frappe = "both" (covers all)
+  if(ice && hot) return 'both';
+  if(ice && frappe) return 'frappe'; // prioritize frappe label
+  if(hot && frappe) return 'frappe';
+  if(ice) return 'ice';
+  if(hot) return 'hot';
+  if(frappe) return 'frappe';
+  return 'ice'; // default
+}
+
+// ── TOP ITEMS PERIOD ──
+window.setTopItemsPeriod = function(period) {
+  topItemsPeriod = period;
+  ['today','week','all'].forEach(p => {
+    const btn = document.getElementById(`top-period-${p}`);
+    if(btn) btn.classList.toggle('active', p === period);
+  });
+  renderTopItems();
+};
 
 // ── SOUND ──
 function getAudioCtx() {
@@ -798,26 +971,59 @@ function updateStats() {
   if(badgeMob){if(pending.length>0){badgeMob.textContent=`${pending.length} pending`;badgeMob.classList.remove('hidden');}else badgeMob.classList.add('hidden');}
 }
 
+// ── TOP ITEMS with period filter ──
 function renderTopItems() {
   const counts={};
-  orders.filter(o=>o.status==='completed').forEach(o=>{
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = new Date(todayStart); weekStart.setDate(weekStart.getDate() - 7);
+
+  let filtered = orders.filter(o=>o.status==='completed');
+
+  if(topItemsPeriod === 'today') {
+    filtered = filtered.filter(o=>{
+      if(!o.createdAt) return false;
+      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
+      return d >= todayStart;
+    });
+  } else if(topItemsPeriod === 'week') {
+    filtered = filtered.filter(o=>{
+      if(!o.createdAt) return false;
+      const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt);
+      return d >= weekStart;
+    });
+  }
+
+  filtered.forEach(o=>{
     (o.items||[]).forEach(i=>{
       if(!counts[i.name]) counts[i.name]={name:i.name,qty:0};
       counts[i.name].qty+=i.qty;
     });
   });
-  const sorted=Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,5);
+
+  const sorted=Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,8);
   const el=document.getElementById('topItemsList'); if(!el) return;
-  if(!sorted.length){el.innerHTML='<p class="text-gray-500 text-sm">No completed orders yet.</p>';return;}
+
+  const labelEl = document.getElementById('topItemsPeriodLabel');
+  if(labelEl) {
+    const labels = { today: `📅 ${now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}`, week: '📅 Last 7 days', all: '📅 All time' };
+    labelEl.textContent = labels[topItemsPeriod];
+  }
+
+  if(!sorted.length){el.innerHTML='<p class="text-gray-500 text-sm">No completed orders for this period.</p>';return;}
   const max=sorted[0].qty;
-  el.innerHTML=sorted.map((item,i)=>`
+  el.innerHTML=sorted.map((item,i)=>{
+    const medals = ['🥇','🥈','🥉'];
+    const medal = i < 3 ? medals[i] : `<span class="text-xs text-gray-500 font-bold">${i+1}</span>`;
+    return `
     <div class="flex items-center gap-3">
-      <span class="text-xs text-gray-500 w-4">${i+1}</span>
+      <span class="text-sm w-6 text-center">${medal}</span>
       <div class="flex-1">
         <div class="flex justify-between text-sm mb-1"><span class="font-medium">${item.name}</span><span class="text-[#d44e43] font-bold">${item.qty}×</span></div>
-        <div class="h-1.5 bg-[#3a2a24] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[#d44e43] to-[#d1a14a] rounded-full" style="width:${(item.qty/max*100).toFixed(0)}%"></div></div>
+        <div class="h-1.5 bg-[#3a2a24] rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-[#d44e43] to-[#d1a14a] rounded-full transition-all duration-500" style="width:${(item.qty/max*100).toFixed(0)}%"></div></div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 window.calculateFilteredStats = function() {
@@ -867,17 +1073,41 @@ async function sendTG(msg) {
   try { await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:'HTML'})}); showToast('Sent to Telegram!'); }
   catch(e){ showToast('Error sending',true); }
 }
+
+// ── TELEGRAM BROADCAST ──
+window.sendBroadcastToTelegram = async function() {
+  const type = document.getElementById('tgBroadcastType').value;
+  const msg = document.getElementById('tgBroadcastMsg').value.trim();
+  if(!msg) { showToast('Please enter a message',true); return; }
+  const time = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const fullMsg = `${type}\n\n${msg}\n\n<i>— Sent by Admin · ${time}</i>`;
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:fullMsg,parse_mode:'HTML'})});
+    showToast('Message sent to Telegram! 📤');
+    document.getElementById('tgBroadcastMsg').value = '';
+  } catch(e){ showToast('Error sending',true); }
+};
+
 window.sendTotalStatsToTelegram = function() {
   const s=id=>document.getElementById(id)?.textContent||'';
   sendTG(`📊 <b>All-Time Overview</b>\n\n📦 <b>Total Orders:</b> ${s('stat-all')}\n⏳ <b>Pending:</b> ${s('stat-pending')}\n✓ <b>Completed:</b> ${s('stat-completed')}\n💵 <b>Total Revenue:</b> ${s('stat-rev')}`);
 };
+
 window.sendTopItemsToTelegram = function() {
   const counts={};
-  orders.filter(o=>o.status==='completed').forEach(o=>{(o.items||[]).forEach(i=>{if(!counts[i.name])counts[i.name]={name:i.name,qty:0};counts[i.name].qty+=i.qty;});});
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = new Date(todayStart); weekStart.setDate(weekStart.getDate() - 7);
+  let filtered = orders.filter(o=>o.status==='completed');
+  if(topItemsPeriod === 'today') filtered = filtered.filter(o=>{ if(!o.createdAt) return false; const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt); return d >= todayStart; });
+  else if(topItemsPeriod === 'week') filtered = filtered.filter(o=>{ if(!o.createdAt) return false; const d = o.createdAt.toDate ? o.createdAt.toDate() : new Date(o.createdAt); return d >= weekStart; });
+  filtered.forEach(o=>{(o.items||[]).forEach(i=>{if(!counts[i.name])counts[i.name]={name:i.name,qty:0};counts[i.name].qty+=i.qty;});});
   const sorted=Object.values(counts).sort((a,b)=>b.qty-a.qty).slice(0,10);
-  if(!sorted.length) return showToast('No completed orders',true);
-  sendTG(`🔥 <b>Top Ordered Items</b>\n\n${sorted.map((item,i)=>`${i+1}. ${item.name} - <b>${item.qty}</b>`).join('\n')}`);
+  if(!sorted.length) return showToast('No completed orders for this period',true);
+  const periodLabels = {today:'Today',week:'This Week',all:'All Time'};
+  sendTG(`🔥 <b>Top Ordered Items — ${periodLabels[topItemsPeriod]}</b>\n\n${sorted.map((item,i)=>`${i+1}. ${item.name} - <b>${item.qty}</b>`).join('\n')}`);
 };
+
 window.sendFilteredStatsToTelegram = function() {
   const s=id=>document.getElementById(id)?.textContent||'';
   const startDate=document.getElementById('statStartDate')?.value;
@@ -1038,17 +1268,35 @@ window.saveEditOrder = async function() {
 window.addMenuItem = async function() {
   const name=document.getElementById('addName').value.trim();
   const nameKh=document.getElementById('addNameKh').value.trim();
-  const price=parseFloat(document.getElementById('addPrice').value);
-  const priceHot=parseFloat(document.getElementById('addPriceHot').value)||null;
-  const priceFrappe=parseFloat(document.getElementById('addPriceFrappe').value)||null;
   const cat=document.getElementById('addCat').value.trim();
-  const temperature=document.getElementById('addTemperature').value;
   const popular=document.getElementById('addPopular').checked;
-  if(!name||isNaN(price)){ showToast('Name and Price required',true); return; }
+
+  // Gather prices only from enabled toggles
+  const price = tempStates.ice ? parseFloat(document.getElementById('addPrice').value) : null;
+  const priceHot = tempStates.hot ? parseFloat(document.getElementById('addPriceHot').value) : null;
+  const priceFrappe = tempStates.frappe ? parseFloat(document.getElementById('addPriceFrappe').value) : null;
+
+  if(!name){ showToast('Name is required',true); return; }
+
+  // At least one temp must be enabled with a price
+  const hasValidPrice = (tempStates.ice && !isNaN(price)) || (tempStates.hot && !isNaN(priceHot)) || (tempStates.frappe && !isNaN(priceFrappe));
+  if(!hasValidPrice){ showToast('At least one enabled option needs a price',true); return; }
+
+  // Base price is whichever is first enabled
+  const basePrice = tempStates.ice && !isNaN(price) ? price : (tempStates.hot && !isNaN(priceHot) ? priceHot : priceFrappe);
+  const temperature = getAddTemperature();
+
   const imgUrl=document.getElementById('addImage')?.value.trim()||'';
   try {
-    await addDoc(collection(db,'menu'),{name,nameKh,price,priceHot,priceFrappe,category:cat||'Other',imageUrl:imgUrl,discount:0,inStock:true,temperature,popular});
-    ['addName','addNameKh','addPrice','addPriceHot','addPriceFrappe','addCat','addImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    await addDoc(collection(db,'menu'),{
+      name,nameKh,
+      price: basePrice,
+      priceHot: tempStates.hot && !isNaN(priceHot) ? priceHot : null,
+      priceFrappe: tempStates.frappe && !isNaN(priceFrappe) ? priceFrappe : null,
+      category:cat||'Other',imageUrl:imgUrl,discount:0,inStock:true,temperature,popular
+    });
+    ['addName','addNameKh','addCat','addImage'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['addPrice','addPriceHot','addPriceFrappe'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     document.getElementById('addPopular').checked=false;
     previewUrlImg('','addUrlPreview');
     showToast('Item added!');
@@ -1111,7 +1359,7 @@ function renderMenuTable() {
     return `<tr class="border-b border-[#5c453b] hover:bg-[#554137] transition">
       <td class="p-4 flex items-center gap-3">
         <img src="${m.imageUrl||'https://placehold.co/100/f5ece3/3c2a21?text=☕'}" class="w-10 h-10 rounded shadow object-cover border border-[#5c453b]" onerror="this.src='https://placehold.co/100/f5ece3/3c2a21?text=☕'">
-        <div><div class="font-medium">${m.name}</div><div class="text-xs text-gray-400">${m.nameKh||''}</div></div>
+        <div><div class="font-medium">${m.name}</div><div class="text-xs text-gray-400 khmer">${m.nameKh||''}</div></div>
       </td>
       <td class="p-4"><span class="bg-[#3a2a24] border border-[#5c453b] px-2 py-1 rounded text-xs">${m.category}</span></td>
       <td class="p-4">${getTempLabel(m.temperature||'both')}</td>
@@ -1173,7 +1421,7 @@ function renderToppings() {
       <div class="p-4 flex justify-between items-start">
         <div class="flex-1 min-w-0 mr-2">
           <p class="font-bold text-sm truncate">${tp.name}</p>
-          <p class="text-[10px] text-gray-400 mb-1 truncate">${tp.nameKh||''}</p>
+          <p class="text-[10px] text-gray-400 mb-1 truncate khmer">${tp.nameKh||''}</p>
           <p class="text-[#5db85b] font-semibold text-sm">+$${Number(tp.price).toFixed(2)}</p>
         </div>
         <div class="flex gap-1 flex-shrink-0 items-center">
@@ -1230,7 +1478,7 @@ function renderSlideshowList() {
             <span class="w-6 h-6 rounded-full bg-[#d44e43] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">${slide.step||'?'}</span>
             <p class="font-bold text-sm truncate">${slide.title||'Untitled'}</p>
           </div>
-          ${slide.titleKh?`<p class="text-xs text-gray-400 mb-1 truncate">${slide.titleKh}</p>`:''}
+          ${slide.titleKh?`<p class="text-xs text-gray-400 mb-1 truncate khmer">${slide.titleKh}</p>`:''}
           ${slide.description?`<p class="text-xs text-gray-500 line-clamp-2">${slide.description}</p>`:''}
         </div>
         <div class="flex gap-1 flex-shrink-0">

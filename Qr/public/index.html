@@ -322,18 +322,6 @@ select option{background:var(--sur);}
   </div>
 </div>
 
-<!-- GEOFENCE ALERT MODAL -->
-<div id="geoModal" class="fixed inset-0 z-[999] bg-[#3c2a21]/80 items-center justify-center hidden" style="backdrop-filter:blur(8px)">
-  <div class="bg-[var(--sur)] border border-[var(--bdr)] rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl text-center">
-    <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-      <svg class="w-8 h-8 text-[var(--red)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-    </div>
-    <h3 class="serif text-2xl text-[var(--gold)] mb-2">ជិតដល់ហាងហើយ!</h3>
-    <p class="text-[var(--muted)] text-sm mb-6">សូមអភ័យទោស! លោកអ្នកអាចកុម្ម៉ង់បាន លុះត្រាតែស្ថិតនៅក្នុងចម្ងាយ <b>500 ម៉ែត្រ</b> ជុំវិញហាង Chafé ប៉ុណ្ណោះ។</p>
-    <button onclick="document.getElementById('geoModal').classList.add('hidden'); document.getElementById('geoModal').style.display='none';" class="g-btn w-full py-3 rounded-2xl text-sm">យល់ព្រម</button>
-  </div>
-</div>
-
 <!-- SOCIAL BAR -->
 <div id="socialBar" class="hidden-bar"></div>
 
@@ -343,10 +331,6 @@ select option{background:var(--sur);}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// ====== កំណត់ទីតាំងហាងរបស់អ្នកនៅទីនេះ ======
-const SHOP_LAT = 13.354445; // ទីតាំងពិតប្រាកដរបស់ Chafé Wat Bo
-const SHOP_LON = 103.859035; // ទីតាំងពិតប្រាកដរបស់ Chafé Wat Bo
 
 const safeStorage = {
   get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
@@ -380,18 +364,6 @@ async function sendTelegramAlert(order, orderId) {
     const msg = `🛍️ <b>New Order!</b>\n\n🪑 Table: <b>${order.tableNumber}</b>\n🆔 #${orderId.slice(-8).toUpperCase()}${noteText}\n<b>Items:</b>\n${itemLines}${discountLine}\n\n💰 Total: <b>$${Number(order.total).toFixed(2)}</b>\n🕐 ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}`;
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text:msg,parse_mode:"HTML"})});
   } catch(e) {}
-}
-
-// ── Geofence Helper ──
-function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Earth radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; 
 }
 
 // ── I18N ──
@@ -1120,99 +1092,53 @@ window.closePanels = function() {
   }
 };
 
-// ── PLACE ORDER (GEOFENCING ADDED) ──
+// ── PLACE ORDER ──
 window.placeOrder = async function() {
   const tableEl = document.getElementById("cartTable");
   const table = tableEl.value;
   if(!table) { tableEl.focus(); showToast("Please select a table!"); return; }
   if(!cart.length) return;
-
-  // ១. ពិនិត្យមើលសិទ្ធិ GPS
-  if (!navigator.geolocation) {
-      showToast("សូមបើក GPS លើទូរសព្ទរបស់អ្នក!");
-      return;
-  }
-
+  const {subtotal, discount, total} = getCartTotal();
+  const noteEl = document.getElementById("cartNote");
+  const order = {
+    tableNumber: table,
+    items: cart.map(i=>({
+      name: i.nameEn || i.name,
+      qty: i.qty,
+      price: i.price,
+      temperature: i.temperature,
+      sugar: i.sugar,
+      ice: i.ice,
+      toppingsData: i.toppingsData || []
+    })),
+    total: total.toFixed(2),
+    subtotal: subtotal.toFixed(2),
+    discountAmt: discount,
+    couponCode: appliedCoupon?.code || null,
+    note: noteEl.value.trim(),
+    status: "pending",
+    createdAt: serverTimestamp()
+  };
   const btn = document.getElementById("placeBtn");
-  btn.disabled = true; 
-  btn.textContent = "Checking location...";
-
-  // ២. ចាប់យកទីតាំង និងគណនា
-  navigator.geolocation.getCurrentPosition(async (position) => {
-      const uLat = position.coords.latitude;
-      const uLon = position.coords.longitude;
-      const dist = getDistance(uLat, uLon, SHOP_LAT, SHOP_LON);
-
-      // ៣. បើនៅឆ្ងាយលើសពី 500 ម៉ែត្រ (0.5 km) - Block ការបញ្ជាទិញ
-      if (dist > 0.5) {
-          document.getElementById("geoModal").classList.remove("hidden");
-          document.getElementById("geoModal").style.display = "flex";
-          
-          const warnMsg = `⚠️ <b>ព្យាយាមកុម្ម៉ង់ពីចម្ងាយ!</b>\n📍 ចម្ងាយ: ${dist.toFixed(2)} km\n🪑 លេខតុ: ${table}\n🌍 ទីតាំង: https://www.google.com/maps?q=${uLat},${uLon}`;
-          fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-              method: "POST",
-              headers: {"Content-Type": "application/json"},
-              body: JSON.stringify({chat_id: TG_CHAT, text: warnMsg, parse_mode: "HTML"})
-          });
-
-          btn.disabled = false;
-          btn.textContent = t().place;
-          return;
-      }
-
-      // ៤. បើនៅជិត (ក្រោម 500m) បន្តការបញ្ជាទិញ
-      btn.textContent = "Placing...";
-      const {subtotal, discount, total} = getCartTotal();
-      const noteEl = document.getElementById("cartNote");
-      const order = {
-          tableNumber: table,
-          items: cart.map(i=>({
-              name: i.nameEn || i.name,
-              qty: i.qty,
-              price: i.price,
-              temperature: i.temperature,
-              sugar: i.sugar,
-              ice: i.ice,
-              toppingsData: i.toppingsData || []
-          })),
-          total: total.toFixed(2),
-          subtotal: subtotal.toFixed(2),
-          discountAmt: discount,
-          couponCode: appliedCoupon?.code || null,
-          note: noteEl.value.trim(),
-          status: "pending",
-          createdAt: serverTimestamp()
-      };
-
-      try {
-          if(!db) throw new Error("No DB");
-          const ref = await addDoc(collection(db,"orders"), order);
-          await sendTelegramAlert(order, ref.id);
-          
-          const savedOrder = {...order, id: ref.id, createdAt: new Date().toISOString()};
-          const myOrders = loadMyOrders();
-          myOrders.push(savedOrder);
-          safeStorage.set("chafe_orders", JSON.stringify(myOrders));
-          
-          document.getElementById("conf-id").textContent = `#${ref.id.slice(-8).toUpperCase()}`;
-          showConfirm();
-          
-          cart = []; appliedCoupon = null; noteEl.value = '';
-          hideCouponApplied(); saveCart(); renderCart(); updateCartBadge();
-          closePanels();
-      } catch(e) {
-          showToast("Error placing order. Please try again.");
-      } finally {
-          btn.disabled = false;
-          btn.textContent = t().place;
-      }
-
-  }, (err) => {
-      // ករណី User ចុច Block / មិនឱ្យប្រើទីតាំង
-      showToast("សូម Allow Location ដើម្បីបន្តការកុម្ម៉ង់!");
-      btn.disabled = false;
-      btn.textContent = t().place;
-  });
+  btn.disabled = true; btn.textContent = "Placing...";
+  try {
+    if(!db) throw new Error("No DB");
+    const ref = await addDoc(collection(db,"orders"), order);
+    await sendTelegramAlert(order, ref.id);
+    const savedOrder = {...order, id: ref.id, createdAt: new Date().toISOString()};
+    const myOrders = loadMyOrders();
+    myOrders.push(savedOrder);
+    safeStorage.set("chafe_orders", JSON.stringify(myOrders));
+    document.getElementById("conf-id").textContent = `#${ref.id.slice(-8).toUpperCase()}`;
+    showConfirm();
+    cart = []; appliedCoupon = null; noteEl.value = '';
+    hideCouponApplied(); saveCart(); renderCart(); updateCartBadge();
+    closePanels();
+  } catch(e) {
+    showToast("Error placing order. Please try again.");
+  } finally {
+    btn.disabled = false; btn.textContent = t().place;
+  }
 };
 
 // ── MY ORDERS ──

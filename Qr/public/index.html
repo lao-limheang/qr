@@ -345,9 +345,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ====== កំណត់ទីតាំងហាងរបស់អ្នកនៅទីនេះ ======
-const SHOP_LAT = 11.5564; // Latitude (ឧទាហរណ៍: ដូរទៅតាមទីតាំងពិតប្រាកដ)
-const SHOP_LON = 104.9282; // Longitude (ឧទាហរណ៍: ដូរទៅតាមទីតាំងពិតប្រាកដ)
-// ============================================
+const SHOP_LAT = 13.354445; // ទីតាំងពិតប្រាកដរបស់ Chafé Wat Bo
+const SHOP_LON = 103.859035; // ទីតាំងពិតប្រាកដរបស់ Chafé Wat Bo
 
 const safeStorage = {
   get: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },

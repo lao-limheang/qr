@@ -425,7 +425,6 @@ window.setLang = function(l) {
   document.getElementById("langLabel").textContent = l==="kh"?"KH":"EN";
   document.getElementById("langDropdown").classList.add("hidden");
   applyLang();
-  buildTableOptions();
   if(slides.length > 0) renderSlideshow();
 };
 
@@ -465,12 +464,26 @@ function applyLang() {
 function buildTableOptions() {
   const sel = document.getElementById("cartTable");
   sel.innerHTML = `<option value="" disabled selected>—</option>`;
-  for(let i=1;i<=20;i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
+  
   const urlTable = getUrlTable();
-  if(urlTable) { sel.value = urlTable; safeStorage.set("chafe_table", urlTable); }
-  else { const saved = safeStorage.get("chafe_table"); if(saved) sel.value = saved; }
+  let tableToUse = urlTable;
+
+  if(!tableToUse) {
+      tableToUse = safeStorage.get("chafe_table");
+  }
+
+  // If a table number exists, lock it so customers cannot change it.
+  if(tableToUse) {
+      sel.innerHTML += `<option value="${tableToUse}">${tableToUse}</option>`;
+      sel.value = tableToUse;
+      safeStorage.set("chafe_table", tableToUse);
+      sel.disabled = true; // Lock dropdown
+      sel.classList.add("opacity-60", "cursor-not-allowed"); // Apply styling to indicate it is locked
+  } else {
+      // Fallback: If no table number exists yet, let them choose.
+      for(let i=1;i<=30;i++) sel.innerHTML += `<option value="${i}">${i}</option>`;
+  }
 }
-document.getElementById("cartTable").addEventListener("change", e => safeStorage.set("chafe_table", e.target.value));
 
 // ── STATE ──
 let allItems=[], currentItems=[], currentCat="All", cart=[], allToppings=[], slides=[], currentSlide=0;

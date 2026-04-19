@@ -82,6 +82,21 @@
 
   /* ── EDIT ORDER MODAL STYLES ── */
   .edit-order-item-row{background:#3a2a24;border:1px solid #5c453b;border-radius:10px;padding:12px 14px;}
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    body * { visibility: hidden; }
+    #print-receipt, #print-receipt * { visibility: visible; }
+    #print-receipt {
+      position: absolute; left: 0; top: 0; width: 100%; max-width: 80mm;
+      padding: 0; margin: 0; color: #000 !important; background: #fff !important;
+      font-family: 'Courier New', Courier, monospace; font-size: 12px;
+    }
+    @page { margin: 0; }
+  }
+  .receipt-center { text-align: center; }
+  .receipt-line { border-bottom: 1px dashed #000; margin: 8px 0; }
+  .receipt-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
 </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -210,7 +225,7 @@
               <button onclick="setTopItemsPeriod('all')" id="top-period-all" class="period-tab">All Time</button>
             </div>
             <button onclick="sendTopItemsToTelegram()" class="text-[#1e88e5] hover:text-[#42a5f5] flex items-center gap-1 text-[10px] font-bold transition ml-1">
-              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Send list
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg Send list
             </button>
           </div>
         </div>
@@ -892,6 +907,52 @@
 <!-- Toast -->
 <div id="toast" class="fixed bottom-6 left-1/2 bg-[#5db85b] text-white px-5 py-2.5 rounded shadow-xl opacity-0 transition-opacity pointer-events-none transform -translate-x-1/2 font-medium z-[9999]">Success!</div>
 
+<!-- PRINT RECEIPT TEMPLATE (Hidden from normal view) -->
+<div id="print-receipt" class="hidden">
+  <div class="receipt-center">
+    <h2 style="font-size: 18px; margin-bottom: 4px; font-weight: bold;">Chafé Cambodia</h2>
+    <p style="margin: 0;">Wat Bo Rd, Krong Siem Reap</p>
+    <p style="margin: 0;">Tel: 012 345 678</p>
+    <div class="receipt-line"></div>
+    <h3 style="margin: 4px 0; font-size: 16px; text-transform: uppercase;">Receipt</h3>
+  </div>
+  
+  <p style="margin: 4px 0;">Order #: <span id="pr-order-id" style="font-weight: bold;"></span></p>
+  <p style="margin: 4px 0;">Date: <span id="pr-date"></span></p>
+  <p style="margin: 4px 0;">Table: <span id="pr-table" style="font-weight: bold; font-size: 14px;"></span></p>
+  
+  <div class="receipt-line"></div>
+  
+  <!-- Headers -->
+  <div class="receipt-item" style="font-weight: bold;">
+    <span style="flex: 3;">Item</span>
+    <span style="flex: 1; text-align: center;">Qty</span>
+    <span style="flex: 1.5; text-align: right;">Amount</span>
+  </div>
+  
+  <!-- Items Container -->
+  <div id="pr-items"></div>
+  
+  <div class="receipt-line"></div>
+  
+  <!-- Totals -->
+  <div id="pr-discount-row" class="receipt-item hidden">
+    <span>Discount</span>
+    <span id="pr-discount-amt" style="text-align: right;">-$0.00</span>
+  </div>
+  
+  <div class="receipt-item" style="font-weight: bold; font-size: 15px; margin-top: 8px;">
+    <span>TOTAL</span>
+    <span id="pr-total" style="text-align: right;">$0.00</span>
+  </div>
+  
+  <div class="receipt-line"></div>
+  <div class="receipt-center" style="margin-top: 12px; margin-bottom: 24px;">
+    <p style="margin: 0; font-size: 11px;">Thank you for your order!</p>
+    <p style="margin: 0; font-size: 11px;">Please come again.</p>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -932,6 +993,74 @@ let adminCancelledIds = new Set();
 
 // ── CREATE ORDER STATE ──
 let coItems = []; // [{name, price, qty, temperature, sugar, ice}]
+
+// ── PRINT INVOICE ──
+window.printInvoice = function(orderId) {
+  const orderData = orders.find(x => x.id === orderId);
+  if (!orderData) return showToast("Order not found", true);
+
+  // 1. Fill basic details
+  document.getElementById('pr-order-id').textContent = orderId.slice(-6).toUpperCase();
+  
+  const d = orderData.createdAt ? (orderData.createdAt.toDate ? orderData.createdAt.toDate() : new Date(orderData.createdAt)) : new Date();
+  const dateStr = d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+  document.getElementById('pr-date').textContent = dateStr;
+  
+  document.getElementById('pr-table').textContent = orderData.tableNumber || 'N/A';
+  
+  // 2. Fill Items
+  const itemsContainer = document.getElementById('pr-items');
+  let itemsHtml = '';
+  
+  if (orderData.items && orderData.items.length > 0) {
+    orderData.items.forEach(item => {
+      // Name and Temperature
+      const tempPrefix = item.temperature === 'hot' ? '(H)' : item.temperature === 'frappe' ? '(F)' : '(I)';
+      itemsHtml += `
+        <div class="receipt-item" style="margin-top: 4px;">
+          <span style="flex: 3; word-break: break-all; font-weight: bold;">${item.name} ${tempPrefix}</span>
+          <span style="flex: 1; text-align: center; font-weight: bold;">${item.qty}</span>
+          <span style="flex: 1.5; text-align: right; font-weight: bold;">$${(item.price * item.qty).toFixed(2)}</span>
+        </div>
+      `;
+      
+      // Options (Sugar, Ice, Toppings)
+      let options = [];
+      if(item.sugar && item.sugar !== '100%') options.push(`Sug: ${item.sugar}`);
+      if(item.ice && item.ice !== '100%' && item.temperature !== 'hot') options.push(`Ice: ${item.ice}`);
+      if(item.toppingsData && item.toppingsData.length > 0) {
+         const topNames = item.toppingsData.map(t => t.nameKh ? t.nameKh : t.name).join(', ');
+         options.push(`+ ${topNames}`);
+      }
+      
+      if(options.length > 0) {
+        itemsHtml += `<div style="font-size: 11px; color: #333; margin-left: 8px; margin-bottom: 2px;">- ${options.join(' | ')}</div>`;
+      }
+    });
+  }
+  
+  itemsContainer.innerHTML = itemsHtml;
+  
+  // 3. Fill Totals
+  if(orderData.discountAmt > 0) {
+    document.getElementById('pr-discount-row').classList.remove('hidden');
+    document.getElementById('pr-discount-amt').textContent = `-$${Number(orderData.discountAmt).toFixed(2)}`;
+  } else {
+    document.getElementById('pr-discount-row').classList.add('hidden');
+  }
+  
+  document.getElementById('pr-total').textContent = `$${Number(orderData.total).toFixed(2)}`;
+  
+  // 4. Show, Print, then Hide
+  const printSection = document.getElementById('print-receipt');
+  printSection.classList.remove('hidden');
+  
+  // Trigger browser print
+  window.print();
+  
+  // Hide again after printing is complete or cancelled
+  printSection.classList.add('hidden');
+};
 
 // ── TEMP TOGGLES ──
 const tempStates = { ice: true, hot: true, frappe: true };
@@ -1279,6 +1408,7 @@ function renderOrders() {
               ?`<button onclick="quickStatus('${o.id}','completed')" class="bg-[#5db85b] hover:bg-[#4cae4c] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">✓ Complete</button>
                  <button onclick="quickStatus('${o.id}','cancelled')" class="bg-[#d44e43]/30 hover:bg-[#d44e43] text-[#d44e43] hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-[#d44e43]/50 transition">✗ Cancel</button>`
               :`<button onclick="openEditOrderModal('${o.id}')" class="bg-[#5c453b] hover:bg-[#6b5040] text-gray-300 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit Status</button>`}
+              <button onclick="printInvoice('${o.id}')" title="Print Invoice" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>Print</button>
           </div>
         </div>
         ${o.status==='pending'&&!o.adminCreated
@@ -1320,6 +1450,7 @@ window.renderHistory = function() {
       <td class="p-4 font-bold ${sc} uppercase text-xs">${o.status}</td>
       <td class="p-4">${sourceBadge}</td>
       <td class="p-4 text-right flex items-center justify-end gap-3 h-full pt-4">
+        <button onclick="printInvoice('${o.id}')" title="Print Receipt" class="text-gray-400 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg></button>
         <button onclick="sendSingleOrderToTelegram('${o.id}')" title="Send to Telegram" class="text-blue-400 hover:text-blue-300 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg></button>
         <button onclick="openEditFullOrderModal('${o.id}')" title="Edit Order" class="text-[#5db85b] hover:text-green-400 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
         <button onclick="deleteOrderHistory('${o.id}')" title="Delete" class="text-gray-400 hover:text-[#d44e43] transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
